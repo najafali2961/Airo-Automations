@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "b3d505e50570bf8f44099086aec839a4"
-application_url = "https://automation.omni-sync.com/"
+application_url = "https://automation.omni-sync.com"
 embedded = true
 name = "Airo Automations"
 handle = "airo-automations-1"
