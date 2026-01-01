@@ -12,7 +12,7 @@ import {
     CalloutCard,
 } from "@shopify/polaris";
 
-export default function Dashboard({ shop, stats, executions, n8nUrl }) {
+export default function Dashboard({ shop, stats, executions, n8nUrl, n8nWorkflows }) {
     // Prepare DataTable rows
     const rows = executions.map((exec) => [
         <Badge
@@ -90,6 +90,26 @@ export default function Dashboard({ shop, stats, executions, n8nUrl }) {
                 </Layout.Section>
 
                 {/* Executions Table */}
+                <Layout.Section>
+                    <LegacyCard title="Cloud Workflows (N8N)" actions={[{ content: 'Refresh', onAction: () => router.reload() }]}>
+                       {n8nWorkflows && n8nWorkflows.length > 0 ? (
+                           <DataTable
+                               columnContentTypes={['text', 'text', 'text']}
+                               headings={['Name', 'Status', 'ID']}
+                               rows={n8nWorkflows.map(wf => [
+                                   wf.name,
+                                   <Badge tone={wf.active ? 'success' : 'subdued'}>{wf.active ? 'Active' : 'Inactive'}</Badge>,
+                                   wf.id
+                               ])}
+                           />
+                       ) : (
+                           <LegacyCard.Section>
+                               <Text tone="subdued">No cloud workflows found or not connected.</Text>
+                           </LegacyCard.Section>
+                       )}
+                    </LegacyCard>
+                </Layout.Section>
+
                 <Layout.Section>
                     <LegacyCard title="Recent Activity">
                         {executions.length === 0 ? (

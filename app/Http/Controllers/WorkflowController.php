@@ -26,8 +26,18 @@ class WorkflowController extends Controller
         $shop = Auth::user();
         $workflows = $shop->workflows()->orderBy('updated_at', 'desc')->get();
 
+        // Fetch N8N Workflows for listing
+        $n8nWorkflows = [];
+        try {
+            $response = $this->n8nService->listWorkflows();
+            $n8nWorkflows = $response['data'] ?? [];
+        } catch (\Exception $e) {
+            // Log silent error
+        }
+
         return Inertia::render('Workflows/Index', [
-            'workflows' => $workflows
+            'workflows' => $workflows,
+            'n8nWorkflows' => $n8nWorkflows
         ]);
     }
 

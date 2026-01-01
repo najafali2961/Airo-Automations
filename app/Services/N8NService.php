@@ -74,43 +74,51 @@ class N8NService
     /**
      * Get all available node types from N8N.
      */
+    /**
+     * Get all available node types from N8N.
+     */
     public function getNodeTypes()
     {
-        // Remove /api/v1 from the base URL to get the root instance URL
+        // Try the internal REST API which returns all node definitions
+        // This is the endpoint the n8n frontend uses
         $rootUrl = str_replace('/api/v1', '', $this->baseUrl);
         $rootUrl = rtrim($rootUrl, '/');
-        $url = $rootUrl . '/types/nodes.json';
         
-        \Illuminate\Support\Facades\Log::info("N8NService: Fetching node types from {$url}");
-        
-        try {
-            // We use the same client but override the baseUrl for this request
-            // Note: types/nodes.json might not need API key or might need it. Sending it doesn't hurt usually.
-            $response = $this->client()->get($url);
-            
-            if ($response->successful()) {
-                $data = $response->json();
-                $count = count($data ?? []);
-                \Illuminate\Support\Facades\Log::info("N8NService: Successfully fetched {$count} node types.");
-                return $data;
-            } else {
-                \Illuminate\Support\Facades\Log::error("N8NService: Failed to fetch node types.", [
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]);
-                
-                \Illuminate\Support\Facades\Log::error("N8NService: Failed to fetch node types from info endpoint.", [
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]);
+        // Try /rest/node-types (older versions) or /rest/nodes (newer)
+        $endpoints = [
+             '/rest/node-types',
+             '/rest/nodes',
+             '/api/v1/node-types' // Just in case
+        ];
 
-                // Fallback: Harvest from existing workflows (Public API safe)
-                return $this->harvestNodesFromWorkflows();
-            }
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("N8NService: Exception fetching node types, trying fallback.", ['message' => $e->getMessage()]);
-            return $this->harvestNodesFromWorkflows();
+        foreach ($endpoints as $endpoint) {
+             $url = $rootUrl . $endpoint;
+             \Illuminate\Support\Facades\Log::info("N8NService: Attempting to fetch node types from {$url}");
+             
+             try {
+                // Internal API often uses the same Auth or cookie, but API Key often works for /rest
+                $response = Http::withHeaders([
+                    'X-N8N-API-KEY' => $this->apiKey,
+                ])->get($url);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    
+                    // The structure might be { data: [...] } or just [...]
+                    $nodes = $data['data'] ?? $data;
+                    
+                    if (is_array($nodes) && count($nodes) > 0) {
+                         \Illuminate\Support\Facades\Log::info("N8NService: Successfully fetched " . count($nodes) . " node types from {$endpoint}");
+                         return $nodes;
+                    }
+                }
+             } catch (\Exception $e) {
+                 continue;
+             }
         }
+        
+        // Fallback: Harvest from existing workflows (Public API safe)
+        return $this->harvestNodesFromWorkflows();
     }
 
     /**

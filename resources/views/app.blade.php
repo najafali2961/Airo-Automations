@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
     <meta name="shopify-api-key" content="{{ env('SHOPIFY_API_KEY') }}" />
     @viteReactRefresh
-    @vite('resources/js/app.jsx')
+    @vite(['resources/css/app.css', 'resources/js/app.jsx'])
     @inertiaHead
 </head>
 

@@ -11,7 +11,7 @@ import {
 } from "@shopify/polaris";
 import { Head, Link, router } from "@inertiajs/react";
 
-export default function Index({ workflows }) {
+export default function Index({ workflows, n8nWorkflows }) {
     const rows = workflows.map((wf) => [
         <Text fontWeight="bold" as="span">
             <Link onClick={() => router.visit(`/workflows/${wf.id}`)}>
@@ -52,6 +52,15 @@ export default function Index({ workflows }) {
         </div>,
     ]);
 
+    const n8nRows = (n8nWorkflows || []).map((wf) => [
+        <Text fontWeight="bold">{wf.name}</Text>,
+        <Badge tone={wf.active ? "success" : "subdued"}>
+            {wf.active ? "Active" : "Inactive"}
+        </Badge>,
+        wf.id,
+        new Date(wf.createdAt || wf.updatedAt).toLocaleDateString(),
+    ]);
+
     return (
         <Page
             title="Workflows"
@@ -64,7 +73,7 @@ export default function Index({ workflows }) {
 
             <Layout>
                 <Layout.Section>
-                    <LegacyCard>
+                    <LegacyCard title="Local Automation Workflows">
                         {workflows.length === 0 ? (
                             <EmptyState
                                 heading="Create your first workflow"
@@ -98,6 +107,33 @@ export default function Index({ workflows }) {
                                 ]}
                                 rows={rows}
                             />
+                        )}
+                    </LegacyCard>
+                </Layout.Section>
+
+                {/* Cloud Workflows Section */}
+                 <Layout.Section>
+                    <LegacyCard title="N8N Cloud Workflows (Synced)">
+                         {(n8nWorkflows && n8nWorkflows.length > 0) ? (
+                            <DataTable
+                                columnContentTypes={[
+                                    "text",
+                                    "text",
+                                    "text",
+                                    "text",
+                                ]}
+                                headings={[
+                                    "Name",
+                                    "Status",
+                                    "ID",
+                                    "Last Updated",
+                                ]}
+                                rows={n8nRows}
+                            />
+                        ) : (
+                             <LegacyCard.Section>
+                                <Text tone="subdued">No upstream N8N workflows found.</Text>
+                            </LegacyCard.Section>
                         )}
                     </LegacyCard>
                 </Layout.Section>
