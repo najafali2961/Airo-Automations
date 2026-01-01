@@ -5,6 +5,8 @@ import {
     TextField,
     Select,
     Text,
+    Box,
+    BlockStack
 } from "@shopify/polaris";
 
 export default function ConfigPanel({ node, onUpdate }) {
@@ -24,11 +26,11 @@ export default function ConfigPanel({ node, onUpdate }) {
 
     if (!node) {
         return (
-            <div className="w-80 border-l border-gray-200 bg-white p-4 h-full">
+            <Box padding="400" background="bg-surface" minHeight="100%">
                 <Text tone="subdued" as="p">
                     Select a node to configure
                 </Text>
-            </div>
+            </Box>
         );
     }
 
@@ -177,16 +179,20 @@ export default function ConfigPanel({ node, onUpdate }) {
     };
 
     return (
-        <div className="w-80 border-l border-gray-200 bg-white p-4 h-full overflow-y-auto">
-            <div className="mb-4 pb-4 border-b border-gray-200">
-                <Text variant="headingMd" as="h3">
-                    {node.data?.label || node.type}
-                </Text>
-                <Text variant="bodySm" tone="subdued">
-                    {node.data?.type || node.type}
-                </Text>
-            </div>
-            {renderConfigFields()}
-        </div>
+        <Box padding="400" minHeight="100%" background="bg-surface">
+            <BlockStack gap="400">
+                <Box borderBlockEndWidth="025" borderColor="border" paddingBlockEnd="400">
+                    <BlockStack gap="100">
+                        <Text variant="headingMd" as="h3">
+                            {node.data?.label || node.type}
+                        </Text>
+                        <Text variant="bodySm" tone="subdued">
+                            {node.data?.type || node.type}
+                        </Text>
+                    </BlockStack>
+                </Box>
+                {renderConfigFields()}
+            </BlockStack>
+        </Box>
     );
 }

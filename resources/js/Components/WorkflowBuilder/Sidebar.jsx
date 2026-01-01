@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Icon, Spinner, Text, TextField } from "@shopify/polaris";
+import { Icon, Spinner, Text, TextField, Box, BlockStack, InlineStack } from "@shopify/polaris";
 import { SearchIcon } from "@shopify/polaris-icons";
 import axios from "axios";
 
@@ -138,85 +138,92 @@ export default function Sidebar() {
 
     if (loading)
         return (
-            <div className="flex items-center justify-center h-full">
-                <Spinner size="large" accessibilityLabel="Loading nodes" />
-            </div>
+            <Box padding="400" minHeight="100%">
+                <BlockStack align="center" inlineAlign="center">
+                    <Spinner size="large" accessibilityLabel="Loading nodes" />
+                </BlockStack>
+            </Box>
         );
 
     return (
-        <div className="flex flex-col h-full bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-20">
+        <BlockStack gap="0" align="start" blockAlign="stretch">
             {/* Header */}
-            <div className="p-4 border-b border-gray-100 bg-white">
-                <Text variant="headingMd" as="h2">
-                    Nodes
-                </Text>
-                <div className="mt-3">
+            <Box padding="300" borderBlockEndWidth="025" borderColor="border" background="bg-surface">
+                <BlockStack gap="200">
+                    <Text variant="headingSm" as="h2">Nodes</Text>
                     <TextField
-                        prefix={<Icon source={SearchIcon} color="base" />}
+                        prefix={<Icon source={SearchIcon} />}
                         value={searchTerm}
                         onChange={setSearchTerm}
-                        placeholder="Search actions (e.g. 'Create Order')"
+                        placeholder="Search actions..."
                         autoComplete="off"
                         clearButton
                         onClearButtonClick={() => setSearchTerm("")}
                     />
-                </div>
-            </div>
+                </BlockStack>
+            </Box>
 
             {/* Node List */}
-            <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar">
-                {displayItems.length === 0 && (
-                    <div className="text-center p-8 text-gray-500">
-                        <Text tone="subdued">No matching nodes found.</Text>
-                    </div>
-                )}
-                
-                {displayItems.map((item) => (
-                    <div
-                        key={item.id}
-                        className="group flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg cursor-grab active:cursor-grabbing hover:border-blue-500 hover:shadow-sm transition-all duration-200 select-none"
-                        draggable
-                        onDragStart={(e) => onDragStart(e, item)}
-                    >
-                        {/* Icon */}
-                        <div className={`w-8 h-8 flex-none flex items-center justify-center rounded-md border ${item.type === 'trigger' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-slate-50 border-slate-100 text-slate-600'}`}>
-                            {item.iconUrl ? (
-                                <img src={item.iconUrl} alt="" className="w-5 h-5 object-contain" />
-                            ) : (
-                                <span className="font-bold text-[10px] leading-none uppercase">{item.displayName.substring(0, 2)}</span>
-                            )}
+            <Box padding="200" style={{ flex: 1, overflowY: 'auto' }}>
+                <BlockStack gap="200">
+                    {displayItems.length === 0 && (
+                        <Box padding="400">
+                            <Text tone="subdued" alignment="center">No matching nodes found.</Text>
+                        </Box>
+                    )}
+                    
+                    {displayItems.map((item) => (
+                        <div
+                            key={item.id}
+                            draggable
+                            onDragStart={(e) => onDragStart(e, item)}
+                            style={{ cursor: 'grab' }}
+                        >
+                            <Box
+                                padding="300"
+                                background="bg-surface"
+                                borderRadius="200"
+                                borderStyle="solid"
+                                borderWidth="025"
+                                borderColor="border"
+                                shadow="100" // active: shadow-300 via CSS/state if needed, but simple is ok
+                            >
+                                <InlineStack gap="300" align="start" blockAlign="center" wrap={false}>
+                                    {/* Icon */}
+                                    <Box 
+                                        minWidth="32px" 
+                                        minHeight="32px" 
+                                        background={item.type === 'trigger' ? 'bg-surface-success' : 'bg-surface-info'} 
+                                        borderRadius="100"
+                                        padding="100"
+                                        borderColor="border"
+                                        borderWidth="0125" // faint border
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                                            {item.iconUrl ? (
+                                                <img src={item.iconUrl} alt="" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                                            ) : (
+                                                <Text variant="bodyXs" fontWeight="bold" as="span">{item.displayName.substring(0, 2).toUpperCase()}</Text>
+                                            )}
+                                        </div>
+                                    </Box>
+                                    
+                                    {/* Text */}
+                                    <div style={{ flex: 1, overflow: 'hidden' }}>
+                                        <BlockStack gap="050">
+                                            <Text variant="bodySm" fontWeight="medium" truncate>{item.displayName}</Text>
+                                            <Text variant="bodyXs" tone="subdued" truncate>{item.type.toUpperCase()}</Text>
+                                        </BlockStack>
+                                    </div>
+                                    
+                                    {/* Add Icon Hint */}
+                                    {/* Polaris doesn't have easy hover-only visibility without CSS, simplified to just be clean */}
+                                </InlineStack>
+                            </Box>
                         </div>
-                        
-                        {/* Text */}
-                        <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm text-gray-700 truncate group-hover:text-blue-700">
-                                {item.displayName}
-                            </div>
-                            <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">
-                                {item.type}
-                            </div>
-                        </div>
-                        
-                        {/* Add Button (Visual Hint) */}
-                        <div className="opacity-0 group-hover:opacity-100 text-blue-600">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                        </div>
-                    </div>
-                ))}
-            </div>
-            
-            <style>{`
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 6px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background-color: rgba(156, 163, 175, 0.5);
-                    border-radius: 20px;
-                }
-            `}</style>
-        </div>
+                    ))}
+                </BlockStack>
+            </Box>
+        </BlockStack>
     );
 }

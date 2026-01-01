@@ -130,32 +130,27 @@ const InnerBuilder = ({
 
     return (
         <div
-            className="flex h-full w-full bg-gray-50"
-            style={{ width: "100%", height: "100%" }}
+            className="w-full h-full bg-gray-50 relative"
+            ref={reactFlowWrapper}
+            style={{ width: "100%", height: "100%", position: "relative" }}
         >
-            <div
-                className="flex-grow h-full relative"
-                ref={reactFlowWrapper}
-                style={{ width: "100%", height: "100%" }}
+            <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onNodeClick={onNodeClick}
+                onPaneClick={onPaneClick}
+                onDrop={onDrop}
+                onDragOver={onDragOver}
+                nodeTypes={nodeTypes}
+                fitView
             >
-                <ReactFlow
-                    nodes={nodes}
-                    edges={edges}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
-                    onNodeClick={onNodeClick}
-                    onPaneClick={onPaneClick}
-                    onDrop={onDrop}
-                    onDragOver={onDragOver}
-                    nodeTypes={nodeTypes}
-                    fitView
-                >
-                    <Controls />
-                    <MiniMap />
-                    <Background variant="dots" gap={12} size={1} />
-                </ReactFlow>
-            </div>
+                <Controls />
+                <MiniMap />
+                <Background variant="dots" gap={12} size={1} />
+            </ReactFlow>
         </div>
     );
 };

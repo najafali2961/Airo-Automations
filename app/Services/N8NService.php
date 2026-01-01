@@ -80,36 +80,33 @@ class N8NService
     public function getNodeTypes()
     {
         // Try the internal REST API which returns all node definitions
-        // This is the endpoint the n8n frontend uses
         $rootUrl = str_replace('/api/v1', '', $this->baseUrl);
         $rootUrl = rtrim($rootUrl, '/');
         
-        // Try /rest/node-types (older versions) or /rest/nodes (newer)
         $endpoints = [
+             '/api/v1/node-types', // Verify public first (usually shallow)
              '/rest/node-types',
              '/rest/nodes',
-             '/api/v1/node-types' // Just in case
         ];
+
+        $nodes = [];
 
         foreach ($endpoints as $endpoint) {
              $url = $rootUrl . $endpoint;
-             \Illuminate\Support\Facades\Log::info("N8NService: Attempting to fetch node types from {$url}");
+             // \Illuminate\Support\Facades\Log::info("N8NService: Attempting to fetch node types from {$url}");
              
              try {
-                // Internal API often uses the same Auth or cookie, but API Key often works for /rest
                 $response = Http::withHeaders([
                     'X-N8N-API-KEY' => $this->apiKey,
                 ])->get($url);
 
                 if ($response->successful()) {
                     $data = $response->json();
+                    $fetched = $data['data'] ?? $data; // Handle { data: [...] }
                     
-                    // The structure might be { data: [...] } or just [...]
-                    $nodes = $data['data'] ?? $data;
-                    
-                    if (is_array($nodes) && count($nodes) > 0) {
-                         \Illuminate\Support\Facades\Log::info("N8NService: Successfully fetched " . count($nodes) . " node types from {$endpoint}");
-                         return $nodes;
+                    if (is_array($fetched) && count($fetched) > 0) {
+                         $nodes = $fetched;
+                         break; // Found them
                     }
                 }
              } catch (\Exception $e) {
@@ -117,8 +114,34 @@ class N8NService
              }
         }
         
-        // Fallback: Harvest from existing workflows (Public API safe)
-        return $this->harvestNodesFromWorkflows();
+        // Fallback: Harvest from existing workflows if public API failed to give even names
+        if (empty($nodes)) {
+            $nodes = $this->harvestNodesFromWorkflows();
+        }
+
+        // ENRICHMENT STEP: Merge with Static Definitions
+        // This is necessary because some N8N endpoints don't return full 'properties' for granular actions
+        $definitions = \App\Services\N8N\NodeDefinitions::getDefinitions();
+        
+        foreach ($nodes as &$node) {
+            $name = $node['name'] ?? null;
+            if ($name && isset($definitions[$name])) {
+                // Merge static definition
+                // If the fetched node has no properties, uses static. 
+                // If it has properties, we prioritize static to guarantee our granular app logic works? 
+                // Or merge? Let's just overlay properties if missing.
+                if (empty($node['properties'])) {
+                    $node['properties'] = $definitions[$name]['properties'];
+                }
+                
+                // Also merge group if missing
+                if (empty($node['group']) && isset($definitions[$name]['group'])) {
+                     $node['group'] = $definitions[$name]['group'];
+                }
+            }
+        }
+
+        return $nodes;
     }
 
     /**

@@ -1,5 +1,13 @@
 import React, { useState, useRef } from "react";
-import { Page, Layout } from "@shopify/polaris";
+import { 
+    Page, 
+    Layout, 
+    BlockStack, 
+    InlineStack, 
+    Box, 
+    Text, 
+    Button 
+} from "@shopify/polaris";
 import { Head, router } from "@inertiajs/react";
 import Sidebar from "../Components/WorkflowBuilder/Sidebar";
 import Builder from "../Components/WorkflowBuilder/Canvas";
@@ -46,52 +54,91 @@ export default function WorkflowEditor({ shop, workflow }) {
     };
 
     return (
-        <div className="h-screen flex flex-col bg-gray-50" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ height: '100vh', overflow: 'hidden', backgroundColor: '#f6f6f7' }}>
             <Head title="Workflow Editor" />
             
-            {/* Top Toolbar */}
-            <div className="flex-none bg-white border-b border-gray-200 shadow-sm z-10">
-                <Toolbar
-                    title={workflowName}
-                    onSave={handleSave}
-                    isSaving={saving}
-                />
-            </div>
+            <BlockStack gap="0">
+                {/* Top Toolbar */}
+                <Box 
+                    background="bg-surface" 
+                    borderBlockEndWidth="025" 
+                    borderColor="border" 
+                    padding="300"
+                >
+                    <Toolbar
+                        title={workflowName}
+                        onSave={handleSave}
+                        isSaving={saving}
+                    />
+                </Box>
 
-            {/* Main Workspace */}
-            <div className="flex-1 flex overflow-hidden" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-                
-                {/* Sidebar */}
-                <div className="flex-none w-64 bg-white border-r border-gray-200 z-10" style={{ width: '16rem', zIndex: 10 }}>
-                    <Sidebar />
-                </div>
+                {/* Main Workspace */}
+                <Box style={{ height: 'calc(100vh - 65px)', position: 'relative' }}>
+                    <div style={{ display: 'flex', height: '100%', alignItems: 'stretch', width: '100%' }}>
+                        
+                        {/* Sidebar */}
+                        <Box 
+                            borderInlineEndWidth="025" 
+                            borderColor="border" 
+                            background="bg-surface"
+                            minWidth="280px"
+                            maxWidth="280px"
+                            style={{ height: '100%', overflowY: 'auto' }}
+                        >
+                            <Sidebar />
+                        </Box>
 
-                {/* Canvas Area */}
-                <div className="flex-1 relative bg-gray-50" style={{ flex: 1, position: 'relative' }}>
-                    <div className="absolute inset-0" style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}>
-                         <Builder
-                            ref={builderRef}
-                            initialNodes={initialNodes}
-                            initialEdges={initialEdges}
-                            onNodeSelect={setSelectedNode}
-                        />
+                        {/* Canvas Area */}
+                        <Box 
+                            background="bg-surface-secondary" 
+                            padding="400"
+                            style={{ flex: 1, height: '100%', position: 'relative', overflow: 'hidden' }}
+                        >
+                            <div style={{ 
+                                height: '100%', 
+                                width: '100%', 
+                                position: 'relative', 
+                                backgroundColor: 'var(--p-color-bg-surface)', 
+                                borderRadius: 'var(--p-border-radius-300)', 
+                                boxShadow: 'var(--p-shadow-100)',
+                                border: '1px solid var(--p-color-border)',
+                                overflow: 'hidden'
+                            }}>
+                                <div style={{ position: 'absolute', inset: 0 }}>
+                                    <Builder
+                                        ref={builderRef}
+                                        initialNodes={initialNodes}
+                                        initialEdges={initialEdges}
+                                        onNodeSelect={setSelectedNode}
+                                    />
+                                </div>
+                            </div>
+                        </Box>
+
+                        {/* Config Panel */}
+                        {selectedNode && (
+                             <Box 
+                                borderInlineStartWidth="025" 
+                                borderColor="border" 
+                                background="bg-surface"
+                                minWidth="320px"
+                                maxWidth="320px"
+                                shadow="300"
+                                style={{ height: '100%', overflowY: 'auto', zIndex: 10 }}
+                            >
+                                <ConfigPanel
+                                    node={selectedNode}
+                                    onUpdate={(id, config) => {
+                                        if (builderRef.current) {
+                                            builderRef.current.updateNode(id, config);
+                                        }
+                                    }}
+                                />
+                            </Box>
+                        )}
                     </div>
-                </div>
-
-                {/* Config Panel (Right Side) */}
-                {selectedNode && (
-                    <div className="flex-none w-80 bg-white border-l border-gray-200 overflow-y-auto shadow-lg z-20 transition-all duration-300">
-                        <ConfigPanel
-                            node={selectedNode}
-                            onUpdate={(id, config) => {
-                                if (builderRef.current) {
-                                    builderRef.current.updateNode(id, config);
-                                }
-                            }}
-                        />
-                    </div>
-                )}
-            </div>
+                </Box>
+            </BlockStack>
         </div>
     );
 }
