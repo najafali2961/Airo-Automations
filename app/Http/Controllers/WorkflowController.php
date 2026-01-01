@@ -191,4 +191,47 @@ class WorkflowController extends Controller
 
         return back()->with('success', 'Workflow deactivated.');
     }
+
+    /**
+     * Get all N8N node types
+     */
+    public function nodeTypes()
+    {
+        \Illuminate\Support\Facades\Log::info("WorkflowController: Received request for node types.");
+        try {
+            $types = $this->n8nService->getNodeTypes();
+            \Illuminate\Support\Facades\Log::info("WorkflowController: Returning " . count($types) . " types to frontend.");
+            return response()->json($types);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to fetch node types", ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Failed to fetch node types'], 500);
+        }
+    }
+    }
+
+    /**
+     * Test N8N Connection explicitly.
+     */
+    public function testConnection()
+    {
+        try {
+            $types = $this->n8nService->getNodeTypes();
+            $count = count($types ?? []);
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => "Successfully connected to N8N.",
+                'node_count' => $count,
+                'first_node' => $count > 0 ? $types[0] : null,
+                'n8n_url' => $this->n8nService->getBaseUrl()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to connect to N8N.',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    }
 }

@@ -15,6 +15,7 @@ import {
     Controls,
     Background,
     MiniMap,
+    useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -35,87 +36,134 @@ const initialNodesDefault = [
 let id = 1;
 const getId = () => `node_${id++}`;
 
-const Builder = forwardRef(
-    ({ initialNodes, initialEdges, onNodeSelect }, ref) => {
-        const reactFlowWrapper = useRef(null);
-        const [nodes, setNodes, onNodesChange] = useNodesState(
-            initialNodes || initialNodesDefault
-        );
-        const [edges, setEdges, onEdgesChange] = useEdgesState(
-            initialEdges || []
-        );
-        const [selectedNode, setSelectedNode] = useState(null);
+const InnerBuilder = ({
+    initialNodes,
+    initialEdges,
+    onNodeSelect,
+    forwardedRef,
+}) => {
+    const reactFlowWrapper = useRef(null);
+    const { screenToFlowPosition } = useReactFlow();
 
-        useImperativeHandle(ref, () => ({
-            getFlow: () => ({ nodes, edges }),
-            updateNode: (id, data) => {
-                setNodes((nds) =>
-                    nds.map((node) => {
-                        if (node.id === id) {
-                            // Merge data deeply or shallowly? Shallow merge of 'data' prop is usually enough
-                            // N8N properties are usually in data.parameters or similar.
-                            return { ...node, data: { ...node.data, ...data } };
-                        }
-                        return node;
-                    })
-                );
-            },
-        }));
-        const nodeTypes = useMemo(
-            () => ({
-                trigger: TriggerNode,
-                action: ActionNode,
-                condition: ConditionNode,
-                // Keep backward compatibility if needed, or map old types
-                shopifyTrigger: TriggerNode,
-            }),
-            []
-        );
+    const [nodes, setNodes, onNodesChange] = useNodesState(
+        initialNodes || initialNodesDefault
+    );
+    const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges || []);
+    const [selectedNode, setSelectedNode] = useState(null);
 
-        const onConnect = useCallback(
-            (params) => setEdges((eds) => addEdge(params, eds)),
-            []
-        );
+    useImperativeHandle(forwardedRef, () => ({
+        getFlow: () => ({ nodes, edges }),
+        updateNode: (id, data) => {
+            setNodes((nds) =>
+                nds.map((node) => {
+                    if (node.id === id) {
+                        return { ...node, data: { ...node.data, ...data } };
+                    }
+                    return node;
+                })
+            );
+        },
+    }));
 
-        const onNodeClick = (event, node) => {
-            setSelectedNode(node);
-            if (onNodeSelect) onNodeSelect(node);
-        };
+    const nodeTypes = useMemo(
+        () => ({
+            trigger: TriggerNode,
+            action: ActionNode,
+            condition: ConditionNode,
+            shopifyTrigger: TriggerNode,
+        }),
+        []
+    );
 
-        const onPaneClick = () => {
-            setSelectedNode(null);
-            if (onNodeSelect) onNodeSelect(null);
-        };
+    const onConnect = useCallback(
+        (params) => setEdges((eds) => addEdge(params, eds)),
+        []
+    );
 
-        return (
+    const onNodeClick = (event, node) => {
+        setSelectedNode(node);
+        if (onNodeSelect) onNodeSelect(node);
+    };
+
+    const onPaneClick = () => {
+        setSelectedNode(null);
+        if (onNodeSelect) onNodeSelect(null);
+    };
+
+    const onDragOver = useCallback((event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+    }, []);
+
+    const onDrop = useCallback(
+        (event) => {
+            event.preventDefault();
+
+            const type = event.dataTransfer.getData("application/reactflow");
+            const label = event.dataTransfer.getData(
+                "application/reactflow/label"
+            );
+            const n8nType = event.dataTransfer.getData(
+                "application/reactflow/n8nType"
+            );
+
+            if (typeof type === "undefined" || !type) {
+                return;
+            }
+
+            const position = screenToFlowPosition({
+                x: event.clientX,
+                y: event.clientY,
+            });
+
+            const newNode = {
+                id: getId(),
+                type,
+                position,
+                data: { label: label, n8nType: n8nType },
+            };
+
+            setNodes((nds) => nds.concat(newNode));
+        },
+        [screenToFlowPosition, setNodes]
+    );
+
+    return (
+        <div
+            className="flex h-full w-full bg-gray-50"
+            style={{ width: "100%", height: "100%" }}
+        >
             <div
-                className="flex h-full w-full bg-gray-50"
+                className="flex-grow h-full relative"
+                ref={reactFlowWrapper}
                 style={{ width: "100%", height: "100%" }}
             >
-                <div
-                    className="flex-grow h-full relative"
-                    ref={reactFlowWrapper}
-                    style={{ width: "100%", height: "100%" }}
+                <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    onNodeClick={onNodeClick}
+                    onPaneClick={onPaneClick}
+                    onDrop={onDrop}
+                    onDragOver={onDragOver}
+                    nodeTypes={nodeTypes}
+                    fitView
                 >
-                    <ReactFlow
-                        nodes={nodes}
-                        edges={edges}
-                        onNodesChange={onNodesChange}
-                        onEdgesChange={onEdgesChange}
-                        onConnect={onConnect}
-                        onNodeClick={onNodeClick}
-                        onPaneClick={onPaneClick}
-                        nodeTypes={nodeTypes}
-                        fitView
-                    >
-                        <Controls />
-                        <MiniMap />
-                        <Background variant="dots" gap={12} size={1} />
-                    </ReactFlow>
-                </div>
+                    <Controls />
+                    <MiniMap />
+                    <Background variant="dots" gap={12} size={1} />
+                </ReactFlow>
             </div>
-        );
-    }
-);
+        </div>
+    );
+};
+
+const Builder = forwardRef((props, ref) => (
+    <ReactFlowProvider>
+        <InnerBuilder {...props} forwardedRef={ref} />
+    </ReactFlowProvider>
+));
 
 export default Builder;

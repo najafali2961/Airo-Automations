@@ -14,9 +14,14 @@ Route::middleware(['verify.shopify'])->group(function () {
     Route::delete('/workflows/{id}', [WorkflowController::class, 'destroy'])->name('workflows.destroy');
     
     // New Workflow API routes
+    Route::get('/workflows/node-types', [WorkflowController::class, 'nodeTypes'])->name('workflows.node-types');
     Route::get('/workflows/{id}/executions', [WorkflowController::class, 'executions'])->name('workflows.executions');
     Route::post('/workflows/{id}/activate', [WorkflowController::class, 'activate'])->name('workflows.activate');
     Route::post('/workflows/{id}/deactivate', [WorkflowController::class, 'deactivate'])->name('workflows.deactivate');
 });
 
+Route::get('/test-n8n', [WorkflowController::class, 'testConnection']);
 Route::post('/webhook/{type}', [WebhookController::class, 'handle'])->name('webhook');
+
+
+Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);

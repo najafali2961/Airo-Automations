@@ -12,7 +12,13 @@ class N8NService
 
     public function __construct()
     {
-        $this->baseUrl = config('services.n8n.url', env('N8N_URL', 'https://primary-production-d49a.up.railway.app/api/v1'));
+        $url = config('services.n8n.url', env('N8N_URL'));
+        if (!$url) {
+            $baseUrl = env('N8N_BASE_URL', 'https://primary-production-d49a.up.railway.app');
+            $url = rtrim($baseUrl, '/') . '/api/v1';
+        }
+        
+        $this->baseUrl = $url;
         $this->apiKey = config('services.n8n.api_key', env('N8N_API_KEY'));
     }
 
@@ -63,5 +69,38 @@ class N8NService
     public function getExecution(string $id)
     {
         return $this->client()->get("/executions/{$id}")->json();
+    }
+
+    /**
+     * Get all available node types from N8N.
+     */
+    public function getNodeTypes()
+    {
+        $url = '/node-types';
+        \Illuminate\Support\Facades\Log::info("N8NService: Fetching node types from {$this->baseUrl}{$url}");
+        
+        try {
+            $response = $this->client()->get($url);
+            
+            if ($response->successful()) {
+                $data = $response->json();
+                $count = count($data ?? []);
+                \Illuminate\Support\Facades\Log::info("N8NService: Successfully fetched {$count} node types.");
+                return $data;
+            } else {
+                \Illuminate\Support\Facades\Log::error("N8NService: Failed to fetch node types.", [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+                return [];
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("N8NService: Exception fetching node types", ['message' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+    public function getBaseUrl() 
+    {
+        return $this->baseUrl;
     }
 }
