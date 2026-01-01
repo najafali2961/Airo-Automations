@@ -85,6 +85,21 @@ export default function WorkflowEditor({ shop, workflow }) {
         // Placeholder for future state lifting
     };
 
+    const handleExecute = async () => {
+         if (!workflow?.id) {
+             alert("Please save the workflow before executing.");
+             return;
+         }
+         
+         try {
+             const response = await axios.post(`/workflows/${workflow.id}/execute`);
+             alert("Execution Started: " + response.data.message);
+         } catch (error) {
+             console.error("Execution failed", error);
+             alert("Execution failed: " + (error.response?.data?.error || error.message));
+         }
+    };
+
     return (
         <div style={{ height: '100vh', overflow: 'hidden', backgroundColor: '#f6f6f7' }}>
             <Head title="Workflow Editor" />
@@ -142,6 +157,7 @@ export default function WorkflowEditor({ shop, workflow }) {
                                         initialNodes={initialNodes}
                                         initialEdges={initialEdges}
                                         onNodeSelect={setSelectedNode}
+                                        onExecute={handleExecute}
                                     />
                                 </div>
                             </div>

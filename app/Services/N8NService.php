@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Facades\Log;
 
 class N8NService
 {
@@ -22,91 +23,182 @@ class N8NService
         $this->apiKey = config('services.n8n.api_key', env('N8N_API_KEY'));
     }
 
-    protected function client(): PendingRequest
+    public function client(): PendingRequest
     {
         return Http::withHeaders([
             'X-N8N-API-KEY' => $this->apiKey,
         ])->baseUrl($this->baseUrl);
     }
 
-    /**
-     * List all workflows.
-     * Optionally filter by tags or other parameters supported by N8N.
-     */
+    // --- WORKFLOWS ---
+
     public function listWorkflows(array $filters = [])
     {
         return $this->client()->get('/workflows', $filters)->json();
     }
 
-    /**
-     * Get a single workflow by ID.
-     */
-    public function getWorkflow(string $id)
+    public function createWorkflow(array $data)
     {
-        return $this->client()->get("/workflows/{$id}")->json();
+        return $this->client()->post('/workflows', $data)->json();
     }
 
-    /**
-     * Activate or Deactivate a workflow.
-     */
-    public function activateWorkflow(string $id, bool $active = true)
+    public function getWorkflow(string $id, array $params = [])
     {
-        return $this->client()->post("/workflows/{$id}/" . ($active ? 'activate' : 'deactivate'))->json();
+        return $this->client()->get("/workflows/{$id}", $params)->json();
     }
 
-    /**
-     * Get executions.
-     * Can filter by workflowId, etc.
-     */
+    public function updateWorkflow(string $id, array $data)
+    {
+        return $this->client()->put("/workflows/{$id}", $data)->json();
+    }
+
+    public function deleteWorkflow(string $id)
+    {
+        return $this->client()->delete("/workflows/{$id}")->json();
+    }
+
+    public function activateWorkflow(string $id)
+    {
+        return $this->client()->post("/workflows/{$id}/activate")->json();
+    }
+
+    public function deactivateWorkflow(string $id)
+    {
+        return $this->client()->post("/workflows/{$id}/deactivate")->json();
+    }
+
+    // --- EXECUTIONS ---
+
     public function getExecutions(array $filters = [])
     {
         return $this->client()->get('/executions', $filters)->json();
     }
 
-    /**
-     * Get a single execution detail.
-     */
-    public function getExecution(string $id)
+    public function getExecution(string $id, array $params = [])
     {
-        return $this->client()->get("/executions/{$id}")->json();
+        return $this->client()->get("/executions/{$id}", $params)->json();
     }
 
-    /**
-     * Get all available node types from N8N.
-     */
-    /**
-     * Get all available node types from N8N.
-     */
+    public function deleteExecution(string $id)
+    {
+        return $this->client()->delete("/executions/{$id}")->json();
+    }
+
+    public function retryExecution(string $id, array $data = [])
+    {
+        return $this->client()->post("/executions/{$id}/retry", $data)->json();
+    }
+
+    // --- CREDENTIALS ---
+
+    public function listCredentials(array $filters = [])
+    {
+        return $this->client()->get('/credentials', $filters)->json('data') ?? [];
+    }
+
+    public function createCredential(array $data)
+    {
+        return $this->client()->post('/credentials', $data)->json();
+    }
+
+    public function deleteCredential(string $id)
+    {
+        return $this->client()->delete("/credentials/{$id}")->json();
+    }
+
+    public function getCredentialSchema(string $typeName)
+    {
+        return $this->client()->get("/credentials/schema/{$typeName}")->json();
+    }
+
+    // --- TAGS ---
+
+    public function listTags(array $filters = [])
+    {
+        return $this->client()->get('/tags', $filters)->json();
+    }
+
+    public function createTag(array $data)
+    {
+        return $this->client()->post('/tags', $data)->json();
+    }
+
+    public function getTag(string $id)
+    {
+        return $this->client()->get("/tags/{$id}")->json();
+    }
+
+    public function updateTag(string $id, array $data)
+    {
+        return $this->client()->put("/tags/{$id}", $data)->json();
+    }
+
+    public function deleteTag(string $id)
+    {
+        return $this->client()->delete("/tags/{$id}")->json();
+    }
+
+    // --- VARIABLES ---
+
+    public function listVariables(array $filters = [])
+    {
+        return $this->client()->get('/variables', $filters)->json();
+    }
+
+    public function createVariable(array $data)
+    {
+        return $this->client()->post('/variables', $data)->json();
+    }
+
+    public function updateVariable(string $id, array $data)
+    {
+        return $this->client()->put("/variables/{$id}", $data)->json();
+    }
+
+    public function deleteVariable(string $id)
+    {
+        return $this->client()->delete("/variables/{$id}")->json();
+    }
+
+    // --- NODE TYPES DISCOVERY ---
+
     public function getNodeTypes()
     {
-        // Try the internal REST API which returns all node definitions
         $rootUrl = str_replace('/api/v1', '', $this->baseUrl);
         $rootUrl = rtrim($rootUrl, '/');
         
+        Log::info("N8NService: Starting comprehensive node discovery.");
+
+        // 1. Get Official Catalog from GitHub (Full coverage)
+        $catalog = $this->getCatalogFromGitHub();
+        $nodesMap = [];
+        foreach ($catalog as $node) {
+            $nodesMap[$node['name']] = $node;
+        }
+
+        // 2. Enrich with live nodes from n8n internal API if accessible
         $endpoints = [
-             '/api/v1/node-types', // Verify public first (usually shallow)
              '/rest/node-types',
              '/rest/nodes',
         ];
 
-        $nodes = [];
-
         foreach ($endpoints as $endpoint) {
-             $url = $rootUrl . $endpoint;
-             // \Illuminate\Support\Facades\Log::info("N8NService: Attempting to fetch node types from {$url}");
-             
              try {
-                $response = Http::withHeaders([
-                    'X-N8N-API-KEY' => $this->apiKey,
-                ])->get($url);
-
+                $response = Http::withHeaders(['X-N8N-API-KEY' => $this->apiKey])->get($rootUrl . $endpoint);
+                
                 if ($response->successful()) {
-                    $data = $response->json();
-                    $fetched = $data['data'] ?? $data; // Handle { data: [...] }
-                    
-                    if (is_array($fetched) && count($fetched) > 0) {
-                         $nodes = $fetched;
-                         break; // Found them
+                    $liveNodes = $response->json('data') ?? $response->json();
+                    if (is_array($liveNodes) && !empty($liveNodes)) {
+                         Log::info("N8NService: Merging " . count($liveNodes) . " live nodes.");
+                         foreach ($liveNodes as $node) {
+                             $name = $node['name'] ?? null;
+                             if ($name) {
+                                 // Prioritize live data but keep catalog info if live is sparse
+                                 $nodesMap[$name] = array_merge($nodesMap[$name] ?? [], $node);
+                             }
+                         }
+                         // If we got live nodes, we return the merge
+                         return array_values($nodesMap);
                     }
                 }
              } catch (\Exception $e) {
@@ -114,137 +206,92 @@ class N8NService
              }
         }
         
-        // Fallback: Harvest from existing workflows if public API failed to give even names
-        if (empty($nodes)) {
-            $nodes = $this->harvestNodesFromWorkflows();
+        // 3. Last Fallback: Harvest from existing workflows for custom/community nodes
+        $harvested = $this->harvestNodesFromWorkflows();
+        foreach ($harvested as $node) {
+            $name = $node['name'] ?? null;
+            if ($name && !isset($nodesMap[$name])) {
+                $nodesMap[$name] = $node;
+            }
         }
 
-        // ENRICHMENT STEP: Merge with Static Definitions
-        // This is necessary because some N8N endpoints don't return full 'properties' for granular actions
-        $definitions = \App\Services\N8N\NodeDefinitions::getDefinitions();
-        
-        foreach ($nodes as &$node) {
-            $name = $node['name'] ?? null;
-            if ($name && isset($definitions[$name])) {
-                // Merge static definition
-                // If the fetched node has no properties, uses static. 
-                // If it has properties, we prioritize static to guarantee our granular app logic works? 
-                // Or merge? Let's just overlay properties if missing.
-                if (empty($node['properties'])) {
-                    $node['properties'] = $definitions[$name]['properties'];
+        return array_values($nodesMap);
+    }
+
+    protected function getCatalogFromGitHub()
+    {
+        return cache()->remember('n8n_node_catalog', 86400, function () {
+            try {
+                Log::info("N8NService: Syncing node catalog from GitHub...");
+                $url = "https://api.github.com/repos/n8n-io/n8n/contents/packages/nodes-base/nodes";
+                $response = Http::withHeaders([
+                    'User-Agent' => 'Laravel-N8N-App'
+                ])->get($url);
+
+                if ($response->successful()) {
+                    $dirs = $response->json();
+                    $catalog = [];
+                    foreach ($dirs as $dir) {
+                        if ($dir['type'] === 'dir') {
+                            $rawName = $dir['name'];
+                            $internalName = 'n8n-nodes-base.' . lcfirst($rawName);
+                            
+                            $catalog[] = [
+                                'name' => $internalName,
+                                'displayName' => $this->formatNodeName($internalName),
+                                'group' => str_contains($rawName, 'Trigger') ? ['trigger', 'catalog'] : ['catalog'],
+                                'description' => "Official n8n node: {$rawName}"
+                            ];
+                        }
+                    }
+                    Log::info("N8NService: Catalog sync complete. Found " . count($catalog) . " nodes.");
+                    return $catalog;
                 }
-                
-                // Also merge group if missing
-                if (empty($node['group']) && isset($definitions[$name]['group'])) {
-                     $node['group'] = $definitions[$name]['group'];
+            } catch (\Exception $e) {
+                Log::error("N8NService: GitHub sync failed", ['error' => $e->getMessage()]);
+            }
+            return [];
+        });
+    }
+
+    protected function harvestNodesFromWorkflows()
+    {
+        $nodes = [];
+        $knownTypes = [];
+
+        try {
+            $response = $this->listWorkflows();
+            $workflows = $response['data'] ?? [];
+            Log::info("N8NService: Harvesting nodes from " . count($workflows) . " workflows.");
+
+            foreach ($workflows as $workflow) {
+                $wfNodes = $workflow['nodes'] ?? [];
+                foreach ($wfNodes as $node) {
+                    $type = $node['type'] ?? null;
+                    if ($type && !isset($knownTypes[$type])) {
+                        $knownTypes[$type] = true;
+                        $nodes[] = [
+                            'name' => $type,
+                            'displayName' => $this->formatNodeName($type),
+                            'group' => ['harvested']
+                        ];
+                        Log::debug("N8NService: Harvested new node type: {$type}");
+                    }
                 }
             }
+            Log::info("N8NService: Total unique nodes harvested: " . count($nodes));
+        } catch (\Exception $e) {
+            Log::error("N8NService: Failed to harvest nodes", ['error' => $e->getMessage()]);
         }
 
         return $nodes;
     }
 
-    /**
-     * Harvest unique node types from existing workflows and merge with standard library.
-     */
-    private function harvestNodesFromWorkflows()
+    protected function formatNodeName(string $type)
     {
-        \Illuminate\Support\Facades\Log::info("N8NService: Gathering node types (Standard + Harvested)...");
-        
-        $knownTypes = [];
-        $nodes = [];
-
-        // 1. Load Standard Library first
-        $standardNodes = \App\Services\N8N\StandardNodes::get();
-        foreach ($standardNodes as $node) {
-            $knownTypes[$node['name']] = true;
-            $nodes[] = $node;
-        }
-
-        try {
-            // 2. Harvest from API (to find custom or installed community nodes)
-            $response = $this->client()->get('/workflows');
-            
-            if ($response->successful()) {
-                $workflows = $response->json('data') ?? [];
-                $harvestedCount = 0;
-
-                foreach ($workflows as $workflow) {
-                    $wfNodes = $workflow['nodes'] ?? [];
-                    foreach ($wfNodes as $node) {
-                        $type = $node['type'] ?? null;
-                        if ($type && !isset($knownTypes[$type])) {
-                            $knownTypes[$type] = true;
-                            $nodes[] = [
-                                'name' => $type,
-                                'displayName' => $node['typeVersion'] > 1 ? $node['name'] : $this->formatNodeName($type),
-                                'group' => ['harvested'],
-                                'response_type' => 'harvested'
-                            ];
-                            $harvestedCount++;
-                        }
-                    }
-                }
-                 \Illuminate\Support\Facades\Log::info("N8NService: Added {$harvestedCount} custom/harvested nodes from existing workflows.");
-            } else {
-                 \Illuminate\Support\Facades\Log::warning("N8NService: Could not harvest workflows (Status {$response->status()}). Using standard library only.");
-            }
-
-            $count = count($nodes);
-            \Illuminate\Support\Facades\Log::info("N8NService: Returning total {$count} node types.");
-            
-            // Sort alphabetically by displayName for better UI
-            usort($nodes, function ($a, $b) {
-                return strcmp($a['displayName'], $b['displayName']);
-            });
-
-            return $nodes;
-
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("N8NService: Exception during node harvesting", ['error' => $e->getMessage()]);
-            // Still return standard nodes even if harvest fails
-            return $nodes; 
-        }
-    }
-
-    private function formatNodeName($type)
-    {
-        // Simple formatter: n8n-nodes-base.httpRequest -> Http Request
         $parts = explode('.', $type);
         $name = end($parts);
         return ucwords(preg_replace('/(?<!^)[A-Z]/', ' $0', $name));
-    }
-
-    /**
-     * Get all available credentials.
-     */
-    public function getCredentials()
-    {
-        // Try internal API first
-         $rootUrl = str_replace('/api/v1', '', $this->baseUrl);
-         $rootUrl = rtrim($rootUrl, '/');
-         
-         $endpoints = [
-             '/api/v1/credentials', // Public API
-             '/rest/credentials',   // Internal
-         ];
-
-         foreach ($endpoints as $endpoint) {
-             try {
-                $response = Http::withHeaders([
-                    'X-N8N-API-KEY' => $this->apiKey,
-                ])->get($rootUrl . $endpoint);
-
-                if ($response->successful()) {
-                    $data = $response->json();
-                    return $data['data'] ?? $data;
-                }
-             } catch (\Exception $e) {
-                 \Illuminate\Support\Facades\Log::error("N8NService: Failed to fetch credentials from $endpoint", ['error' => $e->getMessage()]);
-                 continue;
-             }
-         }
-         return [];
     }
 
     public function getBaseUrl() 

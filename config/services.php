@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'n8n' => [
+        'url' => env('N8N_URL', env('N8N_BASE_URL') ? rtrim(env('N8N_BASE_URL'), '/') . '/api/v1' : null),
+        'api_key' => env('N8N_API_KEY'),
+    ],
+
 ];

@@ -58,9 +58,11 @@ export default function ConfigPanel({ node, nodeTypes, credentials = [], onUpdat
     useEffect(() => {
          if (nodeDefinition?.credentials) {
              console.log("ConfigPanel: Node requires credentials", nodeDefinition.credentials);
-             console.log("ConfigPanel: Available credentials", credentials);
          }
     }, [nodeDefinition, credentials]);
+
+    // Fetch Credential Schema if we were to build a new one (Future)
+    // For now, we just list existing credentials.
 
     if (!node) {
         return (
@@ -192,6 +194,10 @@ export default function ConfigPanel({ node, nodeTypes, credentials = [], onUpdat
                                 onChange={handleCredentialChange}
                                 helpText="Select the authentication to use for this node."
                              />
+                             {/* Create New Credential Button or Form? 
+                                 For now, just selection. 
+                                 Future: Add "New" button that fetches schema.
+                             */}
                              <Divider />
                         </Box>
                     )}
