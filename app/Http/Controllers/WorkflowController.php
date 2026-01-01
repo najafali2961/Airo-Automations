@@ -207,11 +207,9 @@ class WorkflowController extends Controller
             return response()->json(['error' => 'Failed to fetch node types'], 500);
         }
     }
-    }
+    
 
-    /**
-     * Test N8N Connection explicitly.
-     */
+    
     public function testConnection()
     {
         try {
