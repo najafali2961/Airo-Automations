@@ -215,6 +215,38 @@ class N8NService
         return ucwords(preg_replace('/(?<!^)[A-Z]/', ' $0', $name));
     }
 
+    /**
+     * Get all available credentials.
+     */
+    public function getCredentials()
+    {
+        // Try internal API first
+         $rootUrl = str_replace('/api/v1', '', $this->baseUrl);
+         $rootUrl = rtrim($rootUrl, '/');
+         
+         $endpoints = [
+             '/api/v1/credentials', // Public API
+             '/rest/credentials',   // Internal
+         ];
+
+         foreach ($endpoints as $endpoint) {
+             try {
+                $response = Http::withHeaders([
+                    'X-N8N-API-KEY' => $this->apiKey,
+                ])->get($rootUrl . $endpoint);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    return $data['data'] ?? $data;
+                }
+             } catch (\Exception $e) {
+                 \Illuminate\Support\Facades\Log::error("N8NService: Failed to fetch credentials from $endpoint", ['error' => $e->getMessage()]);
+                 continue;
+             }
+         }
+         return [];
+    }
+
     public function getBaseUrl() 
     {
         return $this->baseUrl;

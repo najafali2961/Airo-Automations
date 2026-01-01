@@ -8,8 +8,12 @@ class NodeDefinitions
     {
         return [
             'n8n-nodes-base.shopify' => [
+                'credentials' => [
+                    ['name' => 'shopifyApi', 'required' => true],
+                ],
                 'properties' => [
                     [
+                        'displayName' => 'Resource',
                         'name' => 'resource',
                         'type' => 'options',
                         'options' => [
@@ -17,9 +21,11 @@ class NodeDefinitions
                             ['name' => 'Product', 'value' => 'product'],
                             ['name' => 'Customer', 'value' => 'customer'],
                             ['name' => 'Inventory', 'value' => 'inventoryLine'],
-                        ]
+                        ],
+                        'default' => 'order',
                     ],
                     [
+                        'displayName' => 'Operation',
                         'name' => 'operation',
                         'type' => 'options',
                         'displayOptions' => ['show' => ['resource' => ['order']]],
@@ -29,9 +35,11 @@ class NodeDefinitions
                             ['name' => 'Get', 'value' => 'get'],
                             ['name' => 'Get Many', 'value' => 'getAll'],
                             ['name' => 'Cancel', 'value' => 'cancel'],
-                        ]
+                        ],
+                        'default' => 'create',
                     ],
                     [
+                        'displayName' => 'Operation',
                         'name' => 'operation',
                         'type' => 'options',
                         'displayOptions' => ['show' => ['resource' => ['product']]],
@@ -41,9 +49,77 @@ class NodeDefinitions
                             ['name' => 'Get', 'value' => 'get'],
                             ['name' => 'Get Many', 'value' => 'getAll'],
                             ['name' => 'Delete', 'value' => 'delete'],
-                        ]
+                        ],
+                        'default' => 'create',
                     ],
+                    // -- Product: Create Fields --
+                    [
+                        'displayName' => 'Title',
+                        'name' => 'title',
+                        'type' => 'string',
+                        'default' => '',
+                        'placeholder' => 'e.g. Awesome T-Shirt',
+                        'displayOptions' => [
+                            'show' => [
+                                'resource' => ['product'],
+                                'operation' => ['create'],
+                            ],
+                        ],
+                    ],
+                    [
+                        'displayName' => 'Body HTML',
+                        'name' => 'body_html',
+                        'type' => 'string',
+                        'typeOptions' => ['rows' => 4],
+                        'default' => '',
+                        'displayOptions' => [
+                            'show' => [
+                                'resource' => ['product'],
+                                'operation' => ['create', 'update'],
+                            ],
+                        ],
+                    ],
+                    [
+                        'displayName' => 'Vendor',
+                        'name' => 'vendor',
+                        'type' => 'string',
+                        'default' => '',
+                        'displayOptions' => [
+                            'show' => [
+                                'resource' => ['product'],
+                                'operation' => ['create', 'update'],
+                            ],
+                        ],
+                    ],
+                    [
+                        'displayName' => 'Product Type',
+                        'name' => 'product_type',
+                        'type' => 'string',
+                        'default' => '',
+                        'displayOptions' => [
+                            'show' => [
+                                'resource' => ['product'],
+                                'operation' => ['create', 'update'],
+                            ],
+                        ],
+                    ],
+                    [
+                        'displayName' => 'Tags',
+                        'name' => 'tags',
+                        'type' => 'string',
+                        'default' => '',
+                        'placeholder' => 'tag1, tag2',
+                        'displayOptions' => [
+                            'show' => [
+                                'resource' => ['product'],
+                                'operation' => ['create', 'update'],
+                            ],
+                        ],
+                    ],
+                    // -- End Product Create Fields --
+
                      [
+                        'displayName' => 'Operation',
                         'name' => 'operation',
                         'type' => 'options',
                         'displayOptions' => ['show' => ['resource' => ['customer']]],
@@ -52,7 +128,8 @@ class NodeDefinitions
                             ['name' => 'Update', 'value' => 'update'],
                             ['name' => 'Get', 'value' => 'get'],
                             ['name' => 'Get Many', 'value' => 'getAll'],
-                        ]
+                        ],
+                        'default' => 'create',
                     ]
                 ]
             ],
@@ -116,6 +193,9 @@ class NodeDefinitions
                  ]
             ],
             'n8n-nodes-base.shopifyTrigger' => [
+                 'credentials' => [
+                    ['name' => 'shopifyApi', 'required' => true],
+                 ],
                  'group' => ['trigger'],
                  'properties' => [
                      [

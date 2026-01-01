@@ -50,9 +50,7 @@ createInertiaApp({
         createRoot(el).render(
             <AppProvider i18n={enTranslations} config={config}>
                 <NavMenu>
-                    <a href="/" rel="home" onClick={() => router.visit("/")}>
-                        Dashboard
-                    </a>
+                 
                 </NavMenu>
                 <App {...props} />
             </AppProvider>

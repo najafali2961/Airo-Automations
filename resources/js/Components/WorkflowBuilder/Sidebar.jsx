@@ -3,32 +3,12 @@ import { Icon, Spinner, Text, TextField, Box, BlockStack, InlineStack } from "@s
 import { SearchIcon } from "@shopify/polaris-icons";
 import axios from "axios";
 
-export default function Sidebar() {
-    const [nodeTypes, setNodeTypes] = useState([]); // Raw n8n node types
+export default function Sidebar({ nodeTypes = [], loading = false }) {
     const [displayItems, setDisplayItems] = useState([]); // Processed items for display
-    const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
 
-    useEffect(() => {
-        const fetchNodes = async () => {
-            try {
-                const response = await axios.get("/workflows/node-types");
-                let data = response.data;
-                if (data && data.data) data = data.data;
+    // removed internal fetch
 
-                if (Array.isArray(data)) {
-                    setNodeTypes(data);
-                } else {
-                    console.error("Received invalid node data:", data);
-                }
-            } catch (error) {
-                console.error("Failed to load node types", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchNodes();
-    }, []);
 
     // Effect to process and filter nodes based on search
     useEffect(() => {
@@ -146,7 +126,7 @@ export default function Sidebar() {
         );
 
     return (
-        <BlockStack gap="0" align="start" blockAlign="stretch">
+        <BlockStack gap="0" align="start">
             {/* Header */}
             <Box padding="300" borderBlockEndWidth="025" borderColor="border" background="bg-surface">
                 <BlockStack gap="200">

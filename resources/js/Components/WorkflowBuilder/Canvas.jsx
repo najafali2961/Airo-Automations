@@ -106,9 +106,19 @@ const InnerBuilder = ({
             const n8nType = event.dataTransfer.getData(
                 "application/reactflow/n8nType"
             );
+            const defaultsStr = event.dataTransfer.getData(
+                "application/reactflow/defaults"
+            );
 
             if (typeof type === "undefined" || !type) {
                 return;
+            }
+
+            let defaults = {};
+            try {
+                if (defaultsStr) defaults = JSON.parse(defaultsStr);
+            } catch (e) {
+                console.error("Failed to parse node defaults", e);
             }
 
             const position = screenToFlowPosition({
@@ -120,7 +130,12 @@ const InnerBuilder = ({
                 id: getId(),
                 type,
                 position,
-                data: { label: label, n8nType: n8nType },
+                data: { 
+                    label: label, 
+                    n8nType: n8nType,
+                    parameters: defaults, // New atomic structure
+                    config: defaults      // Legacy compat
+                },
             };
 
             setNodes((nds) => nds.concat(newNode));

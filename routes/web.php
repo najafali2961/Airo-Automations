@@ -11,6 +11,7 @@ Route::middleware(['verify.shopify'])->group(function () {
     Route::get('/workflows', [WorkflowController::class, 'index'])->name('workflows.index');
     Route::post('/workflows/save', [WorkflowController::class, 'save'])->name('workflows.save');
     // New Workflow API routes (MUST COME BEFORE GREEDY ROUTES)
+    Route::get('/workflows/credentials', [WorkflowController::class, 'credentials'])->name('workflows.credentials');
     Route::get('/workflows/node-types', [WorkflowController::class, 'nodeTypes'])->name('workflows.node-types');
     Route::get('/workflows/{id}/executions', [WorkflowController::class, 'executions'])->name('workflows.executions');
     Route::post('/workflows/{id}/activate', [WorkflowController::class, 'activate'])->name('workflows.activate');

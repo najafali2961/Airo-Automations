@@ -217,6 +217,16 @@ class WorkflowController extends Controller
             return response()->json(['error' => 'Failed to fetch node types'], 500);
         }
     }
+
+    public function credentials()
+    {
+        try {
+            $creds = $this->n8nService->getCredentials();
+            return response()->json($creds);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch credentials'], 500);
+        }
+    }
     
 
     

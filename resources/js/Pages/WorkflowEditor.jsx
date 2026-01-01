@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { 
     Page, 
     Layout, 
@@ -6,9 +6,11 @@ import {
     InlineStack, 
     Box, 
     Text, 
-    Button 
+    Button,
+    Banner
 } from "@shopify/polaris";
 import { Head, router } from "@inertiajs/react";
+import axios from "axios";
 import Sidebar from "../Components/WorkflowBuilder/Sidebar";
 import Builder from "../Components/WorkflowBuilder/Canvas";
 import Toolbar from "../Components/WorkflowBuilder/Toolbar";
@@ -20,11 +22,41 @@ export default function WorkflowEditor({ shop, workflow }) {
     const [workflowName, setWorkflowName] = useState(
         workflow?.name || "New Workflow"
     );
+    const [nodeTypes, setNodeTypes] = useState([]);
+    const [credentials, setCredentials] = useState([]);
+    const [loadingTypes, setLoadingTypes] = useState(true);
     const builderRef = useRef(null);
 
     // Initial state from DB or Default
     const initialNodes = workflow?.ui_data?.nodes;
     const initialEdges = workflow?.ui_data?.edges;
+
+    useEffect(() => {
+        const fetchData = async () => {
+             try {
+                const [typesRes, credsRes] = await Promise.all([
+                    axios.get("/workflows/node-types"),
+                    axios.get("/workflows/credentials")
+                ]);
+
+                // Node Types
+                let typesData = typesRes.data;
+                if (typesData && typesData.data) typesData = typesData.data; 
+                setNodeTypes(Array.isArray(typesData) ? typesData : []);
+
+                // Credentials
+                let credsData = credsRes.data;
+                if (credsData && credsData.data) credsData = credsData.data;
+                setCredentials(Array.isArray(credsData) ? credsData : []);
+
+             } catch (e) {
+                 console.error("Failed to fetch editor data", e);
+             } finally {
+                 setLoadingTypes(false);
+             }
+        };
+        fetchData();
+    }, []);
 
     const handleSave = () => {
         setSaving(true);
@@ -85,7 +117,7 @@ export default function WorkflowEditor({ shop, workflow }) {
                             maxWidth="280px"
                             style={{ height: '100%', overflowY: 'auto' }}
                         >
-                            <Sidebar />
+                            <Sidebar nodeTypes={nodeTypes} loading={loadingTypes} />
                         </Box>
 
                         {/* Canvas Area */}
@@ -128,6 +160,8 @@ export default function WorkflowEditor({ shop, workflow }) {
                             >
                                 <ConfigPanel
                                     node={selectedNode}
+                                    nodeTypes={nodeTypes}
+                                    credentials={credentials}
                                     onUpdate={(id, config) => {
                                         if (builderRef.current) {
                                             builderRef.current.updateNode(id, config);
