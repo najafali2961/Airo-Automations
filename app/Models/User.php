@@ -53,6 +53,14 @@ class User extends Authenticatable implements IShopModel
     ];
 
     /**
+     * Get workflows
+     */
+    public function workflows()
+    {
+        return $this->hasMany(Workflow::class, 'shop_id');
+    }
+
+    /**
      * Get barcode printer settings
      */
     public function barcodePrinterSettings()

@@ -16,9 +16,12 @@
     },
     "dependencies": {
         "@inertiajs/react": "^2.3.4",
+        "@shopify/app-bridge": "^3.7.11",
         "@shopify/app-bridge-react": "^4.2.8",
         "@shopify/polaris": "^13.9.5",
         "@vitejs/plugin-react": "^5.1.2",
+        "@xyflow/react": "^12.10.0",
+        "date-fns": "^4.1.0",
         "react": "^19.2.3",
         "react-dom": "^19.2.3"
     }

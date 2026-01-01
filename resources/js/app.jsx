@@ -1,6 +1,11 @@
 import { createInertiaApp } from "@inertiajs/react";
 import { createRoot } from "react-dom/client";
+import { router } from "@inertiajs/react";
 import { AppProvider } from "@shopify/polaris";
+import { NavMenu } from "@shopify/app-bridge-react";
+import { createApp } from "@shopify/app-bridge";
+import { getSessionToken } from "@shopify/app-bridge/utilities";
+import axios from "axios";
 import enTranslations from "@shopify/polaris/locales/en.json";
 import "@shopify/polaris/build/esm/styles.css";
 
@@ -10,8 +15,45 @@ createInertiaApp({
         return pages[`./Pages/${name}.jsx`];
     },
     setup({ el, App, props }) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const host = urlParams.get("host");
+        const apiKey = document.querySelector(
+            'meta[name="shopify-api-key"]'
+        )?.content;
+
+        if (host && apiKey) {
+            const app = createApp({
+                apiKey: apiKey,
+                host: host,
+            });
+
+            // Intercept axios requests to add session token
+            window.axios = axios; // Make global for other components using window.axios
+            axios.interceptors.request.use(
+                async function (config) {
+                    const token = await getSessionToken(app);
+                    config.headers.Authorization = `Bearer ${token}`;
+                    return config;
+                },
+                function (error) {
+                    return Promise.reject(error);
+                }
+            );
+        }
+
+        const config = {
+            apiKey: apiKey,
+            host: host,
+            forceRedirect: true,
+        };
+
         createRoot(el).render(
-            <AppProvider i18n={enTranslations}>
+            <AppProvider i18n={enTranslations} config={config}>
+                <NavMenu>
+                    <a href="/" rel="home" onClick={() => router.visit("/")}>
+                        Dashboard
+                    </a>
+                </NavMenu>
                 <App {...props} />
             </AppProvider>
         );

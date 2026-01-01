@@ -1,5 +1,5 @@
 import React from "react";
-import { Head } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import {
     Page,
     Layout,
@@ -38,9 +38,8 @@ export default function Dashboard({ shop, stats, executions, n8nUrl }) {
             title="Automation Dashboard"
             subtitle={`Welcome back, ${shop.name}`}
             primaryAction={{
-                content: "Open Workflow Editor",
-                url: n8nUrl,
-                external: true,
+                content: "Manage Workflows",
+                onAction: () => router.visit("/workflows"),
             }}
         >
             <Head title="Automation Dashboard" />
@@ -79,9 +78,8 @@ export default function Dashboard({ shop, stats, executions, n8nUrl }) {
                         title="Automation Builder"
                         illustration="https://cdn.shopify.com/s/assets/admin/checkout/settings-customizecart-705f57c725ac05be5a34ec20c05b94298cb8afd10aac7bd9c7ad02030f48cfa0.svg"
                         primaryAction={{
-                            content: "Open Workflow Editor",
-                            url: n8nUrl,
-                            external: true,
+                            content: "Manage Workflows",
+                            onAction: () => router.visit("/workflows"),
                         }}
                     >
                         <p>
