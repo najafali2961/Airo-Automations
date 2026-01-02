@@ -51,7 +51,13 @@ const InnerBuilder = ({
     const handleNodesChange = useCallback(
         (changes) => {
             onNodesChange(changes);
-            if (onFlowChange) onFlowChange();
+            // Ignore dimension changes which happen on mount/resize
+            const isSignificant = changes.some(
+                (c) => c.type !== "dimensions" && c.type !== "select"
+            );
+            if (isSignificant && onFlowChange) {
+                onFlowChange();
+            }
         },
         [onFlowChange]
     );
@@ -59,7 +65,10 @@ const InnerBuilder = ({
     const handleEdgesChange = useCallback(
         (changes) => {
             onEdgesChange(changes);
-            if (onFlowChange) onFlowChange();
+            const isSignificant = changes.some((c) => c.type !== "select");
+            if (isSignificant && onFlowChange) {
+                onFlowChange();
+            }
         },
         [onFlowChange]
     );
@@ -74,6 +83,10 @@ const InnerBuilder = ({
 
     useImperativeHandle(forwardedRef, () => ({
         getFlow: () => ({ nodes, edges }),
+        setFlow: (newNodes, newEdges) => {
+            setNodes(newNodes);
+            setEdges(newEdges);
+        },
         updateNode: (id, data) => {
             setNodes((nds) =>
                 nds.map((node) => {
@@ -158,6 +171,7 @@ const InnerBuilder = ({
             };
 
             setNodes((nds) => nds.concat(newNode));
+            if (onFlowChange) onFlowChange();
         },
         [screenToFlowPosition, setNodes]
     );

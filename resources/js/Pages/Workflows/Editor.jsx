@@ -5,25 +5,16 @@ import React, {
     useMemo,
     useCallback,
 } from "react";
-import {
-    Page,
-    Layout,
-    BlockStack,
-    Box,
-    Text,
-    Button,
-    Card,
-} from "@shopify/polaris";
+import { Page } from "@shopify/polaris";
 import { Head, router } from "@inertiajs/react";
 import { SaveBar, useAppBridge } from "@shopify/app-bridge-react";
 import axios from "axios";
+
 import Sidebar from "../../Components/WorkflowBuilder/Sidebar";
 import Builder from "../../Components/WorkflowBuilder/Canvas";
-import Toolbar from "../../Components/WorkflowBuilder/Toolbar";
 import ConfigPanel from "../../Components/WorkflowBuilder/ConfigPanel";
 
 export default function WorkflowEditor({ shop, flow }) {
-    // Note: Controller passes 'flow', we were using 'workflow' prop name. Adjusted to 'flow'.
     const shopify = useAppBridge();
     const [saving, setSaving] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
@@ -31,19 +22,18 @@ export default function WorkflowEditor({ shop, flow }) {
     const [workflowName, setWorkflowName] = useState(
         flow?.name || "New Workflow"
     );
-    const [loadingTypes, setLoadingTypes] = useState(false);
     const builderRef = useRef(null);
 
     // Transform DB nodes/edges to React Flow format
     const initialNodes = useMemo(() => {
         if (!flow?.nodes) return [];
         return flow.nodes.map((n) => ({
-            id: String(n.id), // Ensure string
+            id: String(n.id),
             type: n.type,
             position: { x: n.position_x || 0, y: n.position_y || 0 },
             data: {
                 label: n.label,
-                settings: n.settings, // Database JSON cast
+                settings: n.settings,
             },
         }));
     }, [flow]);
@@ -73,9 +63,9 @@ export default function WorkflowEditor({ shop, flow }) {
 
                 if (response.data.success) {
                     setSaving(false);
-                    setIsDirty(false);
+                    setIsDirty(false); // This will trigger hide
                     shopify.toast.show("Workflow saved");
-                    // Optionally update local flow state or URL if it was a new creation
+
                     if (!flow?.id && response.data.flow?.id) {
                         router.visit(`/workflows/${response.data.flow.id}`, {
                             replace: true,
@@ -85,17 +75,17 @@ export default function WorkflowEditor({ shop, flow }) {
             } catch (error) {
                 console.error("Save failed", error);
                 setSaving(false);
-                shopify.toast.show("Failed to save", {
-                    isError: true,
-                });
+                shopify.toast.show("Failed to save", { isError: true });
             }
         }
     };
 
     const handleDiscard = () => {
-        if (confirm("Discard unsaved changes?")) {
-            router.reload();
+        // Silently discard changes and revert to initial state
+        if (builderRef.current) {
+            builderRef.current.setFlow(initialNodes, initialEdges);
         }
+        setIsDirty(false);
     };
 
     const handleExecute = async () => {
@@ -115,9 +105,54 @@ export default function WorkflowEditor({ shop, flow }) {
         }
     };
 
+    // Show/hide SaveBar based on isDirty
+    useEffect(() => {
+        if (!shopify?.saveBar) {
+            console.warn("App Bridge saveBar not available");
+            return;
+        }
+
+        if (isDirty) {
+            shopify.saveBar.show("my-workflow-save-bar");
+        } else {
+            shopify.saveBar.hide("my-workflow-save-bar");
+        }
+    }, [isDirty, shopify]);
+
     const handleFlowChange = useCallback(() => {
+        console.log("Flow changed, setting dirty to true");
         setIsDirty(true);
     }, []);
+
+    // Block navigation if there are unsaved changes
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = ""; // Standard for browsers
+            }
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        // Intercept Inertia visits
+        const removeInertiaListener = router.on("before", (event) => {
+            if (isDirty) {
+                if (
+                    !confirm(
+                        "You have unsaved changes. Are you sure you want to leave?"
+                    )
+                ) {
+                    event.preventDefault();
+                }
+            }
+        });
+
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+            removeInertiaListener();
+        };
+    }, [isDirty]);
 
     return (
         <div
@@ -130,16 +165,17 @@ export default function WorkflowEditor({ shop, flow }) {
         >
             <Head title="Workflow Editor" />
 
-            {isDirty && (
-                <SaveBar id="my-save-bar">
-                    <button
-                        variant="primary"
-                        onClick={handleSave}
-                        disabled={saving}
-                    />
-                    <button onClick={handleDiscard} />
-                </SaveBar>
-            )}
+            {/* Always render SaveBar — visibility controlled via App Bridge */}
+            <SaveBar id="my-workflow-save-bar">
+                <button
+                    variant="primary"
+                    onClick={handleSave}
+                    disabled={saving}
+                >
+                    Save
+                </button>
+                <button onClick={handleDiscard}>Discard</button>
+            </SaveBar>
 
             <div style={{ flex: "0 0 auto" }}>
                 <Page
@@ -153,10 +189,10 @@ export default function WorkflowEditor({ shop, flow }) {
                         {
                             content: "Run Test",
                             onAction: handleExecute,
-                            disabled: isDirty,
+                            disabled: isDirty || saving,
                         },
                     ]}
-                ></Page>
+                />
             </div>
 
             <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
@@ -173,7 +209,7 @@ export default function WorkflowEditor({ shop, flow }) {
                             overflowY: "auto",
                         }}
                     >
-                        <Sidebar loading={loadingTypes} />
+                        <Sidebar />
                     </div>
 
                     {/* Canvas */}
