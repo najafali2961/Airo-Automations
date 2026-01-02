@@ -5,17 +5,18 @@ import React, {
     useMemo,
     forwardRef,
     useImperativeHandle,
+    useEffect,
 } from "react";
 import {
     ReactFlow,
-    ReactFlowProvider,
     addEdge,
     useNodesState,
     useEdgesState,
     Controls,
     Background,
-    MiniMap,
     useReactFlow,
+    ReactFlowProvider,
+    MiniMap,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -23,6 +24,7 @@ import ConfigPanel from "./ConfigPanel";
 import TriggerNode from "./Nodes/TriggerNode";
 import ActionNode from "./Nodes/ActionNode";
 import ConditionNode from "./Nodes/ConditionNode";
+import CustomEdge from "./CustomEdge";
 
 const initialNodesDefault = [
     {
@@ -34,7 +36,7 @@ const initialNodesDefault = [
 ];
 
 let id = 1;
-const getId = () => `node_${id++}`;
+const getId = () => `node_${Date.now()}_${id++}`;
 
 const InnerBuilder = ({
     initialNodes,
@@ -42,16 +44,21 @@ const InnerBuilder = ({
     onNodeSelect,
     onExecute,
     onFlowChange,
+    onAddConnectorClick,
     forwardedRef,
 }) => {
     const reactFlowWrapper = useRef(null);
     const { screenToFlowPosition } = useReactFlow();
 
+    const [nodes, setNodes, onNodesChange] = useNodesState(
+        initialNodes || initialNodesDefault
+    );
+    const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges || []);
+
     // Custom change handlers to track dirty state
     const handleNodesChange = useCallback(
         (changes) => {
             onNodesChange(changes);
-            // Ignore dimension changes which happen on mount/resize
             const isSignificant = changes.some(
                 (c) => c.type !== "dimensions" && c.type !== "select"
             );
@@ -59,7 +66,7 @@ const InnerBuilder = ({
                 onFlowChange();
             }
         },
-        [onFlowChange]
+        [onFlowChange, onNodesChange]
     );
 
     const handleEdgesChange = useCallback(
@@ -70,22 +77,42 @@ const InnerBuilder = ({
                 onFlowChange();
             }
         },
-        [onFlowChange]
+        [onFlowChange, onEdgesChange]
     );
 
-    // Also trigger on updateNode, onConnect, onDrop
-
-    const [nodes, setNodes, onNodesChange] = useNodesState(
-        initialNodes || initialNodesDefault
+    const prepareEdge = useCallback(
+        (edge) => ({
+            ...edge,
+            type: "custom",
+            data: { ...edge.data, onAdd: onAddConnectorClick },
+        }),
+        [onAddConnectorClick]
     );
-    const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges || []);
-    const [selectedNode, setSelectedNode] = useState(null);
+
+    useEffect(() => {
+        if (initialNodes) setNodes(initialNodes);
+        if (initialEdges) {
+            setEdges(initialEdges.map((e) => prepareEdge(e)));
+        }
+    }, [initialNodes, initialEdges, prepareEdge, setNodes, setEdges]);
+
+    const onConnect = useCallback(
+        (params) => {
+            const newEdge = prepareEdge({
+                ...params,
+                id: `e${params.source}-${params.target}`,
+            });
+            setEdges((eds) => addEdge(newEdge, eds));
+            if (onFlowChange) onFlowChange();
+        },
+        [setEdges, onFlowChange, prepareEdge]
+    );
 
     useImperativeHandle(forwardedRef, () => ({
         getFlow: () => ({ nodes, edges }),
         setFlow: (newNodes, newEdges) => {
             setNodes(newNodes);
-            setEdges(newEdges);
+            setEdges(newEdges.map((e) => prepareEdge(e)));
         },
         updateNode: (id, data) => {
             setNodes((nds) =>
@@ -97,9 +124,57 @@ const InnerBuilder = ({
                 })
             );
         },
+        insertNodeBetween: (nodeDef, context) => {
+            const { edgeId, source, target } = context;
+            const sourceNode = nodes.find((n) => n.id === source);
+            const targetNode = nodes.find((n) => n.id === target);
+
+            if (!sourceNode || !targetNode) return;
+
+            const newNodeId = getId();
+            // Simple positioning: halfway + slight offset to avoid strict overlap if layout is weird
+            const position = {
+                x: (sourceNode.position.x + targetNode.position.x) / 2,
+                y: (sourceNode.position.y + targetNode.position.y) / 2,
+            };
+
+            const newNode = {
+                id: newNodeId,
+                type: nodeDef.type,
+                position,
+                data: {
+                    label: nodeDef.label,
+                    settings: nodeDef.settings || {},
+                    n8nType: nodeDef.n8nType,
+                },
+            };
+
+            // Remove old edge
+            setEdges((eds) => eds.filter((e) => e.id !== edgeId));
+
+            // Add new node
+            setNodes((nds) => nds.concat(newNode));
+
+            // Add two new edges
+            const edge1 = prepareEdge({
+                id: `e${source}-${newNodeId}`,
+                source: source,
+                target: newNodeId,
+                label: "then",
+            });
+
+            const edge2 = prepareEdge({
+                id: `e${newNodeId}-${target}`,
+                source: newNodeId,
+                target: target,
+                label: "then",
+            });
+
+            setEdges((eds) => [...eds, edge1, edge2]);
+            if (onFlowChange) onFlowChange();
+        },
     }));
 
-    // ... (existing code for nodeTypes, onConnect, etc.)
     const nodeTypes = useMemo(
         () => ({
             trigger: TriggerNode,
@@ -110,25 +185,12 @@ const InnerBuilder = ({
         []
     );
 
-    const onConnect = useCallback(
-        (params) => setEdges((eds) => addEdge(params, eds)),
+    const edgeTypes = useMemo(
+        () => ({
+            custom: CustomEdge,
+        }),
         []
     );
-
-    const onNodeClick = (event, node) => {
-        setSelectedNode(node);
-        if (onNodeSelect) onNodeSelect(node);
-    };
-
-    const onPaneClick = () => {
-        setSelectedNode(null);
-        if (onNodeSelect) onNodeSelect(null);
-    };
-
-    const onDragOver = useCallback((event) => {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = "move";
-    }, []);
 
     const onDrop = useCallback(
         (event) => {
@@ -173,8 +235,24 @@ const InnerBuilder = ({
             setNodes((nds) => nds.concat(newNode));
             if (onFlowChange) onFlowChange();
         },
-        [screenToFlowPosition, setNodes]
+        [screenToFlowPosition, setNodes, onFlowChange]
     );
+
+    const onDragOver = useCallback((event) => {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+    }, []);
+
+    const onNodeClick = useCallback(
+        (_, node) => {
+            if (onNodeSelect) onNodeSelect(node);
+        },
+        [onNodeSelect]
+    );
+
+    const onPaneClick = useCallback(() => {
+        if (onNodeSelect) onNodeSelect(null);
+    }, [onNodeSelect]);
 
     return (
         <div
@@ -187,48 +265,22 @@ const InnerBuilder = ({
                 edges={edges}
                 onNodesChange={handleNodesChange}
                 onEdgesChange={handleEdgesChange}
-                onConnect={(params) => {
-                    onConnect(params);
-                    if (onFlowChange) onFlowChange();
+                onConnect={onConnect}
+                onInit={(instance) => {
+                    // Fit view initially if needed
+                    instance.fitView();
                 }}
-                onNodeClick={onNodeClick}
-                onPaneClick={onPaneClick}
                 onDrop={onDrop}
                 onDragOver={onDragOver}
+                edgeTypes={edgeTypes}
                 nodeTypes={nodeTypes}
+                onNodeClick={onNodeClick}
+                onPaneClick={onPaneClick}
                 fitView
             >
+                <Background variant="dots" gap={12} size={1} />
                 <Controls />
                 <MiniMap />
-                <Background variant="dots" gap={12} size={1} />
-                <div
-                    style={{
-                        position: "absolute",
-                        bottom: 20,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        zIndex: 10,
-                        display: "flex",
-                        gap: "10px",
-                    }}
-                >
-                    <button
-                        className="Polaris-Button Polaris-Button--primary"
-                        onClick={onExecute}
-                        style={{
-                            padding: "8px 16px",
-                            backgroundColor: "#ff6d2d",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            cursor: "pointer",
-                            fontWeight: "bold",
-                            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                        }}
-                    >
-                        Execute Workflow
-                    </button>
-                </div>
             </ReactFlow>
         </div>
     );

@@ -15,11 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
+         // CSRF disabled for all routes (your previous config)
         $middleware->validateCsrfTokens(except: [
-            'workflows/save',
-            'workflows/*/execute',
-            'workflows/*/activate',
-            'workflows/*/deactivate',
+            '*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

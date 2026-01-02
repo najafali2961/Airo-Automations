@@ -77,16 +77,12 @@ export default function Sidebar({ definitions }) {
                 borderWidth="025"
             >
                 <InlineStack gap="300" align="start" blockAlign="center">
-                    <Box
-                        background={node.color || "bg-fill-info"}
-                        borderRadius="100"
-                        padding="050"
-                    >
+                    <div style={{ color: node.color || "#5c5f62" }}>
                         <Icon
                             source={node.icon || ArrowRightIcon}
-                            tone="base"
+                            tone="inherit"
                         />
-                    </Box>
+                    </div>
                     <BlockStack gap="050">
                         <Text fontWeight="bold" variant="bodySm">
                             {node.label}

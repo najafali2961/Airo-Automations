@@ -45,7 +45,8 @@ export default function Dashboard({
             primaryAction={{
                 content: "New Workflow",
                 icon: PlusIcon,
-                onAction: () => router.visit("/workflows"),
+                onAction: () =>
+                    router.visit("/workflows" + window.location.search),
             }}
         >
             <Head title="Dashboard" />
@@ -104,7 +105,12 @@ export default function Dashboard({
                                     </Text>
                                     <Button
                                         variant="plain"
-                                        url="/workflows"
+                                        onClick={() =>
+                                            router.visit(
+                                                "/workflows" +
+                                                    window.location.search
+                                            )
+                                        }
                                         icon={ArrowRightIcon}
                                     >
                                         View All
@@ -189,7 +195,15 @@ export default function Dashboard({
                                     <Text variant="headingMd" as="h3">
                                         Active Flows
                                     </Text>
-                                    <Button variant="plain" url="/workflows">
+                                    <Button
+                                        variant="plain"
+                                        onClick={() =>
+                                            router.visit(
+                                                "/workflows" +
+                                                    window.location.search
+                                            )
+                                        }
+                                    >
                                         Manage
                                     </Button>
                                 </InlineStack>
@@ -205,7 +219,9 @@ export default function Dashboard({
                                                 className="p-3 rounded-lg bg-gray-50 border border-gray-100 flex justify-between items-center group hover:bg-gray-100 transition-colors cursor-pointer"
                                                 onClick={() =>
                                                     router.visit(
-                                                        `/workflows/${flow.id}`
+                                                        `/workflows/${flow.id}` +
+                                                            window.location
+                                                                .search
                                                     )
                                                 }
                                             >
@@ -239,7 +255,12 @@ export default function Dashboard({
                                     fullWidth
                                     variant="primary"
                                     icon={PlusIcon}
-                                    onClick={() => router.visit("/workflows")}
+                                    onClick={() =>
+                                        router.visit(
+                                            "/workflows" +
+                                                window.location.search
+                                        )
+                                    }
                                 >
                                     Create Flow
                                 </Button>

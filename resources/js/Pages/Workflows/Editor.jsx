@@ -5,7 +5,14 @@ import React, {
     useMemo,
     useCallback,
 } from "react";
-import { Page } from "@shopify/polaris";
+import {
+    Page,
+    BlockStack,
+    InlineStack,
+    Button,
+    Modal,
+    Text,
+} from "@shopify/polaris";
 import { Head, router } from "@inertiajs/react";
 import { SaveBar, useAppBridge } from "@shopify/app-bridge-react";
 import axios from "axios";
@@ -13,6 +20,7 @@ import axios from "axios";
 import Sidebar from "../../Components/WorkflowBuilder/Sidebar";
 import Builder from "../../Components/WorkflowBuilder/Canvas";
 import ConfigPanel from "../../Components/WorkflowBuilder/ConfigPanel";
+import NodeSelector from "../../Components/WorkflowBuilder/NodeSelector";
 
 export default function WorkflowEditor({ shop, flow, definitions }) {
     const shopify = useAppBridge();
@@ -23,6 +31,12 @@ export default function WorkflowEditor({ shop, flow, definitions }) {
         flow?.name || "New Workflow"
     );
     const builderRef = useRef(null);
+
+    // New state for interactions
+    const [insertContext, setInsertContext] = useState(null);
+    const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+    const [isEditingName, setIsEditingName] = useState(false);
+    const nameInputRef = useRef(null);
 
     // Transform DB nodes/edges to React Flow format
     const initialNodes = useMemo(() => {
@@ -63,13 +77,18 @@ export default function WorkflowEditor({ shop, flow, definitions }) {
 
                 if (response.data.success) {
                     setSaving(false);
+                    isDirtyRef.current = false; // Immediate update for navigation guard
                     setIsDirty(false); // This will trigger hide
                     shopify.toast.show("Workflow saved");
 
                     if (!flow?.id && response.data.flow?.id) {
-                        router.visit(`/workflows/${response.data.flow.id}`, {
-                            replace: true,
-                        });
+                        router.visit(
+                            `/workflows/${response.data.flow.id}` +
+                                window.location.search,
+                            {
+                                replace: true,
+                            }
+                        );
                     }
                 }
             } catch (error) {
@@ -88,6 +107,26 @@ export default function WorkflowEditor({ shop, flow, definitions }) {
         setIsDirty(false);
     };
 
+    const handleAddStep = useCallback((edgeId, sourceNodeId, targetNodeId) => {
+        setInsertContext({
+            edgeId,
+            source: sourceNodeId,
+            target: targetNodeId,
+        });
+        setIsSelectorOpen(true);
+    }, []);
+
+    const handleNodeSelect = useCallback(
+        (nodeDef) => {
+            if (builderRef.current && insertContext) {
+                builderRef.current.insertNodeBetween(nodeDef, insertContext);
+                setIsDirty(true); // Mark as dirty after inserting a node
+                setIsSelectorOpen(false); // Close the selector after selection
+            }
+        },
+        [insertContext]
+    );
+
     const handleExecute = async () => {
         if (!flow?.id || isDirty) {
             shopify.toast.show("Please save changes before executing", {
@@ -105,6 +144,15 @@ export default function WorkflowEditor({ shop, flow, definitions }) {
         }
     };
 
+    // Use ref to track dirty state for event listeners to avoid closure staleness
+    const isDirtyRef = useRef(false);
+    useEffect(() => {
+        isDirtyRef.current = isDirty;
+    }, [isDirty]);
+
+    const [showExitModal, setShowExitModal] = useState(false);
+    const [pendingUrl, setPendingUrl] = useState(null);
+
     // Show/hide SaveBar based on isDirty
     useEffect(() => {
         if (!shopify?.saveBar) {
@@ -120,39 +168,39 @@ export default function WorkflowEditor({ shop, flow, definitions }) {
     }, [isDirty, shopify]);
 
     const handleFlowChange = useCallback(() => {
-        console.log("Flow changed, setting dirty to true");
         setIsDirty(true);
     }, []);
 
-    // Block navigation if there are unsaved changes
+    // Intercept Inertia visits preventing navigation if unsaved
     useEffect(() => {
-        const handleBeforeUnload = (e) => {
-            if (isDirty) {
-                e.preventDefault();
-                e.returnValue = ""; // Standard for browsers
-            }
-        };
-
-        window.addEventListener("beforeunload", handleBeforeUnload);
-
-        // Intercept Inertia visits
         const removeInertiaListener = router.on("before", (event) => {
-            if (isDirty) {
-                if (
-                    !confirm(
-                        "You have unsaved changes. Are you sure you want to leave?"
-                    )
-                ) {
-                    event.preventDefault();
-                }
+            if (isDirtyRef.current) {
+                event.preventDefault();
+                setPendingUrl(event.detail.visit.url);
+                setShowExitModal(true);
             }
         });
 
         return () => {
-            window.removeEventListener("beforeunload", handleBeforeUnload);
             removeInertiaListener();
         };
-    }, [isDirty]);
+    }, []);
+
+    const confirmExit = () => {
+        isDirtyRef.current = false; // Prevent check loop
+        setIsDirty(false);
+        setShowExitModal(false);
+        if (pendingUrl) {
+            router.visit(pendingUrl);
+        }
+    };
+
+    // Auto-focus name input when editing starts
+    useEffect(() => {
+        if (isEditingName && nameInputRef.current) {
+            nameInputRef.current.focus();
+        }
+    }, [isEditingName]);
 
     return (
         <div
@@ -177,90 +225,155 @@ export default function WorkflowEditor({ shop, flow, definitions }) {
                 <button onClick={handleDiscard}>Discard</button>
             </SaveBar>
 
-            <div style={{ flex: "0 0 auto" }}>
-                <Page
-                    fullWidth
-                    backAction={{
-                        content: "Workflows",
-                        onAction: () => router.visit("/workflows"),
-                    }}
-                    title={workflowName}
-                    secondaryActions={[
-                        {
-                            content: "Run Test",
-                            onAction: handleExecute,
-                            disabled: isDirty || saving,
-                        },
-                    ]}
-                />
+            <Modal
+                open={showExitModal}
+                onClose={() => setShowExitModal(false)}
+                title="Unsaved Changes"
+                primaryAction={{
+                    content: "Leave",
+                    onAction: confirmExit,
+                    destructive: true,
+                }}
+                secondaryActions={[
+                    {
+                        content: "Stay",
+                        onAction: () => setShowExitModal(false),
+                    },
+                ]}
+            >
+                <Modal.Section>
+                    <Text>
+                        You have unsaved changes. If you leave now, your changes
+                        will be lost.
+                    </Text>
+                </Modal.Section>
+            </Modal>
+
+            <NodeSelector
+                open={isSelectorOpen}
+                onClose={() => setIsSelectorOpen(false)}
+                definitions={definitions}
+                onSelect={handleNodeSelect}
+            />
+
+            <div
+                style={{
+                    flex: "0 0 auto",
+                    borderBottom: "1px solid #e1e3e5",
+                    background: "white",
+                    padding: "1rem",
+                }}
+            >
+                <BlockStack gap="400">
+                    <InlineStack align="space-between" blockAlign="center">
+                        <div className="flex items-center gap-2">
+                            {isEditingName ? (
+                                <input
+                                    ref={nameInputRef}
+                                    type="text"
+                                    value={workflowName}
+                                    onChange={(e) =>
+                                        setWorkflowName(e.target.value)
+                                    }
+                                    onBlur={() => setIsEditingName(false)}
+                                    onKeyDown={(e) =>
+                                        e.key === "Enter" &&
+                                        setIsEditingName(false)
+                                    }
+                                    className="text-xl font-bold border rounded px-2 py-1"
+                                />
+                            ) : (
+                                <div
+                                    onClick={() => setIsEditingName(true)}
+                                    className="text-xl font-bold cursor-pointer hover:bg-gray-50 px-2 py-1 rounded flex items-center gap-2 group"
+                                >
+                                    {workflowName}
+                                    <span className="opacity-0 group-hover:opacity-100 text-gray-400 text-sm">
+                                        ✎
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex gap-2">
+                            <Button
+                                onClick={() =>
+                                    router.visit(
+                                        "/workflows" + window.location.search
+                                    )
+                                }
+                            >
+                                Back to App
+                            </Button>
+                            <Button
+                                variant="primary"
+                                onClick={handleExecute}
+                                disabled={isDirty || saving}
+                            >
+                                Run Test
+                            </Button>
+                        </div>
+                    </InlineStack>
+                </BlockStack>
             </div>
 
-            <div style={{ flex: 1, overflow: "hidden", position: "relative" }}>
+            {/* Main Content Area */}
+            <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
+                {/* Sidebar */}
                 <div
-                    style={{ position: "absolute", inset: 0, display: "flex" }}
+                    style={{
+                        width: "280px",
+                        background: "white",
+                        borderRight: "1px solid #e1e3e5",
+                        display: "flex",
+                        flexDirection: "column",
+                        overflowY: "auto",
+                    }}
                 >
-                    {/* Sidebar */}
-                    <div
-                        style={{
-                            width: "280px",
-                            height: "100%",
-                            borderRight: "1px solid #e1e3e5",
-                            background: "white",
-                            overflowY: "auto",
-                        }}
-                    >
-                        <Sidebar definitions={definitions} />
-                    </div>
-
-                    {/* Canvas */}
-                    <div
-                        style={{
-                            flex: 1,
-                            height: "100%",
-                            position: "relative",
-                            background: "#f1f2f3",
-                        }}
-                    >
-                        <div style={{ position: "absolute", inset: 0 }}>
-                            <Builder
-                                ref={builderRef}
-                                initialNodes={initialNodes}
-                                initialEdges={initialEdges}
-                                onNodeSelect={setSelectedNode}
-                                onExecute={handleExecute}
-                                onFlowChange={handleFlowChange}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Config Panel */}
-                    {selectedNode && (
-                        <div
-                            style={{
-                                width: "320px",
-                                height: "100%",
-                                borderLeft: "1px solid #e1e3e5",
-                                background: "white",
-                                overflowY: "auto",
-                                boxShadow: "-2px 0 8px rgba(0,0,0,0.05)",
-                                zIndex: 10,
-                            }}
-                        >
-                            <ConfigPanel
-                                node={selectedNode}
-                                onUpdate={(id, config) => {
-                                    if (builderRef.current) {
-                                        builderRef.current.updateNode(
-                                            id,
-                                            config
-                                        );
-                                        setIsDirty(true);
-                                    }
-                                }}
-                            />
-                        </div>
-                    )}
+                    <Sidebar definitions={definitions} />
                 </div>
+
+                {/* Canvas */}
+                <div
+                    style={{
+                        flex: 1,
+                        position: "relative",
+                        background: "#f1f2f3",
+                    }}
+                >
+                    <Builder
+                        ref={builderRef}
+                        initialNodes={initialNodes}
+                        initialEdges={initialEdges}
+                        onNodeSelect={setSelectedNode}
+                        onFlowChange={handleFlowChange}
+                        onAddConnectorClick={handleAddStep}
+                    />
+                </div>
+
+                {/* Config Panel */}
+                {selectedNode && (
+                    <div
+                        style={{
+                            width: "350px",
+                            background: "white",
+                            borderLeft: "1px solid #e1e3e5",
+                            overflowY: "auto",
+                            boxShadow: "-2px 0 5px rgba(0,0,0,0.05)",
+                            zIndex: 10,
+                        }}
+                    >
+                        <ConfigPanel
+                            node={selectedNode}
+                            onChange={(id, data) => {
+                                if (builderRef.current) {
+                                    builderRef.current.updateNode(id, data);
+                                    setIsDirty(true);
+                                }
+                            }}
+                            onClose={() => setSelectedNode(null)}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );
