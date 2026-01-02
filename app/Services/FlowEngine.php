@@ -63,12 +63,18 @@ class FlowEngine
 
     protected function log($nodeId, $level, $message, $data = null)
     {
-        $this->execution->logs()->create([
-            'node_id' => $nodeId,
-            'level' => $level,
-            'message' => $message,
-            'data' => $data
-        ]);
+        try {
+            Log::info("Attempting to log: {$message}", ['node_id' => $nodeId, 'execution_id' => $this->execution->id]);
+            $this->execution->logs()->create([
+                'node_id' => $nodeId,
+                'level' => $level,
+                'message' => $message,
+                'data' => $data
+            ]);
+            Log::info("Log created successfully.");
+        } catch (\Exception $e) {
+            Log::error("CRITICAL: Failed to create ExecutionLog: " . $e->getMessage());
+        }
     }
 
     protected function runNode(Node $node, array $data)

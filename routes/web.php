@@ -5,6 +5,21 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FlowController;
 
 Route::middleware(['verify.shopify'])->group(function () {
+    Route::get('/force-migrate', function () {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            return response()->json([
+                'status' => 'success',
+                'output' => \Illuminate\Support\Facades\Artisan::output()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    });
+
     Route::get('/', [DashboardController::class, 'index'])->name('home');
     Route::get('/workflows', [FlowController::class, 'index'])->name('workflows.index');
     Route::post('/workflows/save', [FlowController::class, 'save'])->name('workflows.save');

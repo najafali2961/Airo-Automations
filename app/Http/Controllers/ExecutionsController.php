@@ -38,6 +38,11 @@ class ExecutionsController extends Controller
             ->whereHas('flow', fn($q) => $q->where('shop_id', $shop->id))
             ->findOrFail($id);
 
+        \Illuminate\Support\Facades\Log::info("Viewing Execution #{$id}", [
+            'logs_count' => $execution->logs->count(),
+            'first_log' => $execution->logs->first()
+        ]);
+
         return Inertia::render('Executions/Show', [
             'execution' => $execution
         ]);
