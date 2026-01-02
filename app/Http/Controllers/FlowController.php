@@ -142,4 +142,21 @@ class FlowController extends Controller
         $flow->delete();
         return redirect()->route('workflows.index');
     }
+
+    public function toggleActive(Request $request, $id) {
+        $flow = auth()->user()->flows()->findOrFail($id);
+        $flow->update(['active' => !$flow->active]);
+        
+        $message = $flow->active ? 'Workflow activated' : 'Workflow deactivated';
+        
+        if ($request->header('X-Inertia')) {
+            return redirect()->back()->with('success', $message);
+        }
+
+        return response()->json([
+            'success' => true, 
+            'active' => (bool)$flow->active,
+            'message' => $message
+        ]);
+    }
 }

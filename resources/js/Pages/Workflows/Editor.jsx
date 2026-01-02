@@ -144,6 +144,28 @@ export default function WorkflowEditor({ shop, flow, definitions }) {
         }
     };
 
+    const handleToggleActive = () => {
+        if (!flow?.id) return;
+
+        router.post(
+            `/workflows/${flow.id}/toggle-active`,
+            {},
+            {
+                preserveState: true,
+                onSuccess: (page) => {
+                    const message =
+                        page.props.flash?.success || "Status updated";
+                    shopify.toast.show(message);
+                },
+                onError: () => {
+                    shopify.toast.show("Failed to change status", {
+                        isError: true,
+                    });
+                },
+            }
+        );
+    };
+
     // Use ref to track dirty state for event listeners to avoid closure staleness
     const isDirtyRef = useRef(false);
     useEffect(() => {
@@ -295,6 +317,13 @@ export default function WorkflowEditor({ shop, flow, definitions }) {
                             )}
                         </div>
                         <div className="flex gap-2">
+                            <Button
+                                onClick={handleToggleActive}
+                                tone={flow?.active ? "critical" : "success"}
+                                disabled={!flow?.id || isDirty}
+                            >
+                                {flow?.active ? "Deactivate" : "Activate"}
+                            </Button>
                             <Button
                                 onClick={() =>
                                     router.visit(

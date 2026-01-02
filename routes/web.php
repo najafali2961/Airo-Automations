@@ -11,6 +11,7 @@ Route::middleware(['verify.shopify'])->group(function () {
     Route::get('/workflows/create', [FlowController::class, 'editor'])->name('workflows.create');
     Route::delete('/workflows/{id}', [FlowController::class, 'destroy'])->name('workflows.destroy');
     Route::get('/workflows/{id}', [FlowController::class, 'editor'])->name('editor');
+    Route::post('/workflows/{id}/toggle-active', [FlowController::class, 'toggleActive'])->name('workflows.toggle-active');
 });
 
 Route::middleware(['verify.shopify'])->group(function () {

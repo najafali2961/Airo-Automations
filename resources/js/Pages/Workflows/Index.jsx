@@ -22,8 +22,10 @@ import {
 } from "@shopify/polaris";
 import { Head, Link, router } from "@inertiajs/react";
 import { PlusIcon, EditIcon, DeleteIcon } from "@shopify/polaris-icons";
+import { useAppBridge } from "@shopify/app-bridge-react";
 
 export default function Index({ flows = [] }) {
+    const shopify = useAppBridge();
     const [flowToDelete, setFlowToDelete] = useState(null);
     const { mode, setMode } = useSetIndexFiltersMode();
     const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -244,6 +246,21 @@ export default function Index({ flows = [] }) {
         </Badge>
     );
 
+    const handleToggleActive = (id) => {
+        router.post(
+            `/workflows/${id}/toggle-active`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: (page) => {
+                    const message =
+                        page.props.flash?.success || "Status updated";
+                    shopify.toast.show(message);
+                },
+            }
+        );
+    };
+
     const rowMarkup = sortedFlows.map((flow, index) => (
         <IndexTable.Row
             id={flow.id}
@@ -269,7 +286,15 @@ export default function Index({ flows = [] }) {
                 {new Date(flow.updated_at).toLocaleDateString()}
             </IndexTable.Cell>
             <IndexTable.Cell>
-                <InlineStack gap="200">
+                <InlineStack gap="200" wrap={false}>
+                    <Button
+                        size="slim"
+                        onClick={() => handleToggleActive(flow.id)}
+                        variant="secondary"
+                        tone={flow.active ? "critical" : "success"}
+                    >
+                        {flow.active ? "Pause" : "Activate"}
+                    </Button>
                     <Button
                         size="slim"
                         icon={EditIcon}
