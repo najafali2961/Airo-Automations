@@ -393,7 +393,7 @@ export default function WorkflowEditor({ shop, flow, definitions }) {
                     >
                         <ConfigPanel
                             node={selectedNode}
-                            onChange={(id, data) => {
+                            onUpdate={(id, data) => {
                                 if (builderRef.current) {
                                     builderRef.current.updateNode(id, data);
                                     setIsDirty(true);

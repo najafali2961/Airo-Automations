@@ -16,15 +16,15 @@ api_version = "2025-10"
   # Product webhooks for automation triggers
   [[webhooks.subscriptions]]
   topics = [ "products/create" ]
-  uri = "/webhook/products-create"
+  uri = "/webhooks/shopify-automation"
 
   [[webhooks.subscriptions]]
   topics = [ "products/update" ]
-  uri = "/webhook/products-update"
+  uri = "/webhooks/shopify-automation"
 
   [[webhooks.subscriptions]]
   topics = [ "products/delete" ]
-  uri = "/webhook/products-delete"
+  uri = "/webhooks/shopify-automation"
 
 [access.admin]
 direct_api_mode = "online"

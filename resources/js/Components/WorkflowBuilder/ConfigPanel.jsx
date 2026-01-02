@@ -23,7 +23,7 @@ export default function ConfigPanel({ node, onUpdate }) {
         setSettings(newSettings);
         // Helper to update displayed label if needed
         let newLabel = node.data.label;
-        if (node.type === "trigger" && key === "event") newLabel = value;
+        if (node.type === "trigger" && key === "topic") newLabel = value;
 
         onUpdate(node.id, {
             settings: newSettings,
@@ -100,8 +100,8 @@ const TriggerSettings = ({ settings, onChange }) => (
             { label: "Customer Created", value: "customers/create" },
             { label: "Fulfillment Created", value: "fulfillments/create" },
         ]}
-        value={settings.event}
-        onChange={(val) => onChange("event", val)}
+        value={settings.topic}
+        onChange={(val) => onChange("topic", val)}
     />
 );
 

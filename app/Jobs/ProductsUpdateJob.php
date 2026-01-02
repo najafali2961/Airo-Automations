@@ -80,10 +80,10 @@ class ProductsUpdateJob implements ShouldQueue
             return;
         }
 
-        // Dispatch flow execution jobs
+        // Dispatch RunFlowJob for each matching flow
         foreach ($flows as $flow) {
-            RunFlowJob::dispatch($flow, $this->data, $topic, uniqid('webhook_'));
-            Log::info("Dispatched Flow {$flow->id} for {$topic}");
+            RunFlowJob::dispatch($flow, (array)$this->data, $topic, (string)($this->data->id ?? uniqid()));
+            Log::info("Dispatched Flow ID: {$flow->id} for topic: {$topic}");
         }
     }
 }

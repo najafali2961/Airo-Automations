@@ -20,7 +20,7 @@ export default memo(({ data, selected }) => {
             </div>
             <div className="p-3">
                 <Text variant="bodySm" tone="subdued">
-                    {data.config?.triggerType || "Select event..."}
+                    {data.settings?.topic || "Select event..."}
                 </Text>
             </div>
             <Handle

@@ -66,7 +66,7 @@ class WebhookController extends Controller
 
         // 4. Dispatch Jobs
         foreach ($flows as $flow) {
-            RunFlowJob::dispatch($flow, $payload, $topic, $eventId);
+            RunFlowJob::dispatch($flow, (array)$payload, $topic, (string)$eventId);
             Log::info("Dispatched Flow {$flow->id} for event $eventId");
         }
 

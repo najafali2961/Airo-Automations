@@ -24,7 +24,7 @@ export default memo(({ data, selected }) => {
             </div>
             <div className="p-3">
                 <Text variant="bodySm" tone="subdued">
-                    {data.type || "Configure..."}
+                    {data.settings?.action || "Configure..."}
                 </Text>
             </div>
             <Handle

@@ -387,23 +387,23 @@ return [
     'webhooks' => [
         [
             'topic' => 'PRODUCTS_CREATE',
-            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhook/products-create'
+            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhooks/shopify-automation'
         ],
         [
             'topic' => 'PRODUCTS_UPDATE',
-            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhook/products-update'
+            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhooks/shopify-automation'
         ],
         [
             'topic' => 'PRODUCTS_DELETE',
-            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhook/products-delete'
+            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhooks/shopify-automation'
         ],
         [
             'topic' => 'ORDERS_CREATE',
-            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhook/orders-create'
+            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhooks/shopify-automation'
         ],
         [
             'topic' => 'ORDERS_UPDATED',
-            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhook/orders-updated'
+            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhooks/shopify-automation'
         ],
         /*
             To map a webhook to a specific class instead of the default WebhookController:

@@ -22,10 +22,10 @@ class RunFlowJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(Flow $flow, array $payload, string $topic, string $externalEventId)
+    public function __construct(Flow $flow, $payload, string $topic, string $externalEventId)
     {
         $this->flow = $flow;
-        $this->payload = $payload;
+        $this->payload = (array)$payload;
         $this->topic = $topic;
         $this->externalEventId = $externalEventId;
     }

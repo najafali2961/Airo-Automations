@@ -227,8 +227,7 @@ const InnerBuilder = ({
                 data: {
                     label: label,
                     n8nType: n8nType,
-                    parameters: defaults,
-                    config: defaults,
+                    settings: defaults,
                 },
             };
 
