@@ -13,17 +13,18 @@ dev_store_url = "teststore-10010101001010716.myshopify.com"
 [webhooks]
 api_version = "2025-10"
 
+  # Product webhooks for automation triggers
   [[webhooks.subscriptions]]
-  uri = "/webhook/customers-redact"
-  compliance_topics = [ "customers/redact" ]
+  topics = [ "products/create" ]
+  uri = "/webhook/products-create"
 
   [[webhooks.subscriptions]]
-  uri = "/webhook/customers-data-request"
-  compliance_topics = [ "customers/data_request" ]
+  topics = [ "products/update" ]
+  uri = "/webhook/products-update"
 
   [[webhooks.subscriptions]]
-  uri = "/webhook/shop-redact"
-  compliance_topics = [ "shop/redact" ]
+  topics = [ "products/delete" ]
+  uri = "/webhook/products-delete"
 
 [access.admin]
 direct_api_mode = "online"

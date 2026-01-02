@@ -386,31 +386,31 @@ return [
 
     'webhooks' => [
         [
+            'topic' => 'PRODUCTS_CREATE',
+            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhook/products-create'
+        ],
+        [
             'topic' => 'PRODUCTS_UPDATE',
-            'address' => 'https://bulkapp.omni-sync.com/webhook/products-update'
+            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhook/products-update'
         ],
         [
             'topic' => 'PRODUCTS_DELETE',
-            'address' => 'https://bulkapp.omni-sync.com/webhook/products-delete'
+            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhook/products-delete'
         ],
         [
-            'topic' => 'PRODUCTS_CREATE',
-            'address' => 'https://bulkapp.omni-sync.com/webhook/products-create'
-        ]
+            'topic' => 'ORDERS_CREATE',
+            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhook/orders-create'
+        ],
+        [
+            'topic' => 'ORDERS_UPDATED',
+            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhook/orders-updated'
+        ],
         /*
+            To map a webhook to a specific class instead of the default WebhookController:
             [
-                'topic' => env('SHOPIFY_WEBHOOK_1_TOPIC', 'ORDERS_CREATE'),
-                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://example.com/webhook/orders-create')
-            ], [
-                'topic' => env('SHOPIFY_WEBHOOK_2_TOPIC', 'APP_PURCHASES_ONE_TIME_UPDATE'),
-                'address' => env('SHOPIFY_WEBHOOK_2_ADDRESS', 'https://example.com/webhook/purchase'),
-            ]
-            // In certain situations you may wish to map the webhook to a specific class
-            // To do this, change the array to an associative array with a 'class' key
-            'orders-create' => [
-                'topic' => env('SHOPIFY_WEBHOOK_3_TOPIC', 'ORDERS_PAID'),
-                'address' => env('SHOPIFY_WEBHOOK_3_ADDRESS', 'https://example.com/webhook/orders-create'),
-                'class' => \App\Shopify\Actions\ExampleAppJob::class
+                'topic' => 'ORDERS_PAID',
+                'address' => env('APP_URL') . '/webhook/orders-paid',
+                'class' => \App\Jobs\MyCustomWebhookJob::class
             ],
         */
     ],

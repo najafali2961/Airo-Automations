@@ -13,4 +13,12 @@ Route::middleware(['verify.shopify'])->group(function () {
     Route::get('/workflows/{id}', [FlowController::class, 'editor'])->name('editor');
 });
 
+Route::middleware(['verify.shopify'])->group(function () {
+    Route::get('/product-creator', [\App\Http\Controllers\ProductCreationController::class, 'index'])->name('product.creator');
+    Route::post('/product/create', [\App\Http\Controllers\ProductCreationController::class, 'create'])->name('product.create');
+    Route::get('/product/poll/{jobId}', [\App\Http\Controllers\ProductCreationController::class, 'poll'])->name('product.poll');
+});
+
+Route::post('/webhooks/shopify-automation', [\App\Http\Controllers\WebhookController::class, 'handle'])->name('webhooks.handle');
+
 Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);

@@ -22,42 +22,43 @@ class FlowController extends Controller
          
          if ($id && !$flow) abort(404);
 
-         // Load Definitions
-         $webhooks = config('shopify-app.webhooks');
-         $shopifyTriggers = collect($webhooks)->map(function($webhook) {
-             return [
-                 'type' => 'trigger',
-                 'n8nType' => 'shopifyTrigger', // Mark as Shopify specific
-                 'label' => ucwords(strtolower(str_replace('_', ' ', $webhook['topic']))),
-                 'description' => "Triggers when " . strtolower(str_replace('_', ' ', $webhook['topic'])),
-                 'settings' => ['topic' => $webhook['topic']],
-                 'group' => 'Shopify'
-             ];
-         })->values();
+         // Load Definitions from Config
+         $eventConfig = config('shopify_events');
 
-         $shopifyActions = [
-             [
-                 'type' => 'action',
-                 'n8nType' => 'shopifyAction',
-                 'label' => 'Create Product',
-                 'settings' => ['resource' => 'Product', 'operation' => 'create'],
-                 'group' => 'Shopify'
-             ],
-             [
-                 'type' => 'action',
-                 'n8nType' => 'shopifyAction',
-                 'label' => 'Update Product',
-                 'settings' => ['resource' => 'Product', 'operation' => 'update'],
-                 'group' => 'Shopify'
-             ],
-             [
-                 'type' => 'action',
-                 'n8nType' => 'shopifyAction',
-                 'label' => 'Add Tags to Customer',
-                 'settings' => ['resource' => 'Customer', 'operation' => 'add_tags'],
-                 'group' => 'Shopify'
-             ]
-         ];
+         $shopifyTriggers = [];
+         if (isset($eventConfig['triggers'])) {
+             foreach ($eventConfig['triggers'] as $category) {
+                 foreach ($category['list'] as $trigger) {
+                     $shopifyTriggers[] = [
+                         'type' => 'trigger',
+                         'n8nType' => 'shopifyTrigger',
+                         'label' => $trigger['label'],
+                         'description' => $trigger['description'] ?? '',
+                         'settings' => ['topic' => $trigger['value']],
+                         'group' => $category['category']
+                     ];
+                 }
+             }
+         }
+
+         $shopifyActions = [];
+         if (isset($eventConfig['actions'])) {
+             foreach ($eventConfig['actions'] as $category) {
+                 foreach ($category['list'] as $action) {
+                     $shopifyActions[] = [
+                         'type' => 'action',
+                         'n8nType' => 'shopifyAction',
+                         'label' => $action['label'],
+                         'description' => $action['description'] ?? '',
+                         'settings' => [
+                             'action' => $action['value'],
+                             'form' => $action['settings'] ?? []
+                         ],
+                         'group' => $category['category']
+                     ];
+                 }
+             }
+         }
          
          $definitions = [
              'apps' => [
