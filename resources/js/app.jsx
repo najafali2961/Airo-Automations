@@ -50,7 +50,13 @@ createInertiaApp({
 
         createRoot(el).render(
             <AppProvider i18n={enTranslations} config={config}>
-                <NavMenu></NavMenu>
+                <NavMenu>
+                    <a href="/" rel="home">
+                        Home
+                    </a>
+                    <a href="/workflows">Workflows</a>
+                    <a href="/executions">Executions</a>
+                </NavMenu>
                 <ErrorBoundary>
                     <App {...props} />
                 </ErrorBoundary>

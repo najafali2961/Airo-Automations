@@ -18,6 +18,7 @@ class DashboardController extends Controller
         // Stats
         $stats = [
             'total_executions' => Execution::whereHas('flow', fn($q) => $q->where('shop_id', $shopId))->count(),
+            'failed_executions' => Execution::whereHas('flow', fn($q) => $q->where('shop_id', $shopId))->where('status', 'failed')->count(),
             'active_flows' => Flow::where('shop_id', $shopId)->where('active', true)->count(),
             'total_flows' => Flow::where('shop_id', $shopId)->count(),
         ];

@@ -16,8 +16,6 @@ class FlowEngine
 
     public function run(Flow $flow, array $payload, string $topic, string $externalEventId)
     {
-        // idempotency check could go here or before calling run
-        
         // Create Execution Record
         $this->execution = Execution::create([
             'flow_id' => $flow->id,
@@ -28,6 +26,8 @@ class FlowEngine
             'nodes_executed' => 0
         ]);
 
+        $this->log(null, 'info', "Starting workflow execution for event: {$topic}", ['external_event_id' => $externalEventId]);
+
         try {
             // Find Trigger Node
             $triggerNode = $flow->nodes()
@@ -36,19 +36,24 @@ class FlowEngine
                 ->first();
 
             if (!$triggerNode) {
-                 // Try finding any generic trigger if exact topic match fails (fallback)
+                 $this->log(null, 'warning', "No specific trigger node found for topic: {$topic}. Searching for generic trigger.");
                  $triggerNode = $flow->nodes()->where('type', 'trigger')->first();
-                 // Validate topic if needed, but for now assume caller filtered flows by topic
             }
 
             if ($triggerNode) {
+                $this->log($triggerNode->id, 'info', "Trigger matched: {$triggerNode->label}");
                 $this->runNode($triggerNode, $payload);
+            } else {
+                $this->log(null, 'error', "No trigger node found in workflow.");
+                throw new \Exception("Workflow has no trigger node.");
             }
 
             $this->execution->update(['status' => 'success']);
+            $this->log(null, 'info', "Workflow execution completed successfully.");
 
         } catch (\Exception $e) {
             Log::error("Flow Execution Failed: " . $e->getMessage());
+            $this->log(null, 'error', "Flow Execution Failed: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             $this->execution->update([
                 'status' => 'failed',
                 'error_message' => $e->getMessage()
@@ -56,8 +61,19 @@ class FlowEngine
         }
     }
 
+    protected function log($nodeId, $level, $message, $data = null)
+    {
+        $this->execution->logs()->create([
+            'node_id' => $nodeId,
+            'level' => $level,
+            'message' => $message,
+            'data' => $data
+        ]);
+    }
+
     protected function runNode(Node $node, array $data)
     {
+        $this->log($node->id, 'info', "Executing node: {$node->label} ({$node->type})");
         if (in_array($node->id, $this->visited) || count($this->visited) > $this->maxDepth) {
             throw new \Exception("Cycle detected or max depth exceeded at Node {$node->id}");
         }
@@ -76,26 +92,29 @@ class FlowEngine
 
                 case 'condition':
                     $result = $this->evaluateCondition($node->settings, $data);
-                    // Use 'true' or 'false' label edges
                     $label = $result ? 'true' : 'false';
+                    $this->log($node->id, 'info', "Condition evaluated to: " . ($result ? 'TRUE' : 'FALSE'), ['result' => $result]);
                     $nextNodes = $node->nextNodes($label);
-                    // Fallback to 'then' if no logic branches found? usually condition has true/false
                     if ($nextNodes->isEmpty()) {
-                        // maybe 'then' used as default?
                         $nextNodes = $node->nextNodes('then');
                     }
                     break;
 
                 case 'action':
-                    $this->executeAction($node->settings, $data);
+                    $this->executeAction($node, $data);
                     $this->execution->increment('actions_completed');
                     $nextNodes = $node->nextNodes('then');
                     break;
             }
 
             // Recursive Call
-            foreach ($nextNodes as $nextNode) {
-                $this->runNode($nextNode, $data);
+            if ($nextNodes->isNotEmpty()) {
+                $this->log($node->id, 'info', "Moving to next nodes: " . $nextNodes->pluck('label')->implode(', '));
+                foreach ($nextNodes as $nextNode) {
+                    $this->runNode($nextNode, $data);
+                }
+            } else {
+                $this->log($node->id, 'info', "No sequence matching for this node branch.");
             }
 
         } catch (\Exception $e) {
@@ -133,34 +152,41 @@ class FlowEngine
         }
     }
 
-    protected function executeAction($settings, $data)
+    protected function executeAction(Node $node, array $data)
     {
+        $settings = $node->settings;
         $action = $settings['action'] ?? null;
         $form = $settings['form'] ?? [];
 
-        if (!$action) return;
+        if (!$action) {
+            $this->log($node->id, 'warning', "Action node has no action type configured.");
+            return;
+        }
 
-        // Simplified Action Dispatcher
+        $this->log($node->id, 'info', "Starting action: {$action}"); // Simplified Action Dispatcher
         switch ($action) {
             case 'log_output':
                 Log::info("Workflow Log: " . ($form['message'] ?? ''));
+                $this->log($node->id, 'info', "Output logged to Laravel logs: " . ($form['message'] ?? ''));
                 break;
             
             case 'http_request':
                 $method = $form['method'] ?? 'GET';
                 $url = $form['url'] ?? '';
                 if ($url) {
-                    Http::withHeaders(['Content-Type' => 'application/json'])
+                    $this->log($node->id, 'info', "Sending {$method} request to {$url}");
+                    $response = Http::withHeaders(['Content-Type' => 'application/json'])
                         ->$method($url, json_decode($form['body'] ?? '{}', true));
+                    $this->log($node->id, 'info', "HTTP Response received", ['status' => $response->status(), 'body' => $response->json()]);
                 }
                 break;
                 
             case 'add_product_tag':
-                $this->addProductTag($data, $form);
+                $this->addProductTag($data, $form, $node->id);
                 break;
                 
             case 'add_order_tag':
-                $this->addOrderTag($data, $form);
+                $this->addOrderTag($data, $form, $node->id);
                 break;
         }
     }
@@ -189,19 +215,23 @@ class FlowEngine
         }
     }
 
-    protected function addProductTag($data, $form)
+    protected function addProductTag($data, $form, $nodeId = null)
     {
         try {
             $productId = $data['id'] ?? $data['admin_graphql_api_id'] ?? null;
             $tag = $form['tag'] ?? null;
             
-            if (!$productId || !$tag) {
-                Log::warning("Missing product ID or tag for add_product_tag action");
+            if (!$productId) {
+                $this->log($nodeId, 'error', "Missing product ID in payload", ['payload' => $data]);
+                throw new \Exception("Missing product ID in payload");
+            }
+            if (!$tag) {
+                $this->log($nodeId, 'warning', "No tag specified in action settings");
                 return;
             }
 
             // Extract numeric ID if GID
-            if (strpos($productId, 'gid://') === 0) {
+            if (is_string($productId) && strpos($productId, 'gid://') === 0) {
                 $productId = (int) basename($productId);
             }
 
@@ -214,50 +244,75 @@ class FlowEngine
                 throw new \Exception("Shop not found for flow execution");
             }
 
-            // Fetch current tags
-            $response = $shop->api()->rest('GET', "/admin/api/2024-07/products/{$productId}.json");
+            $this->log($nodeId, 'info', "Fetching product details from Shopify...", ['product_id' => $productId]);
+
+            $apiVersion = config('shopify-app.api_version', '2024-07');
+            $response = $shop->api()->rest('GET', "/admin/api/{$apiVersion}/products/{$productId}.json");
+            
+            if ($response['errors']) {
+                $this->log($nodeId, 'error', "Shopify API Error (GET Product)", ['errors' => $response['errors']]);
+                throw new \Exception("Failed to fetch product: " . json_encode($response['errors']));
+            }
+
             $product = $response['body']['product'] ?? null;
             
             if (!$product) {
-                throw new \Exception("Product not found");
+                $this->log($nodeId, 'error', "Product not found in Shopify", ['product_id' => $productId]);
+                throw new \Exception("Product not found in Shopify.");
             }
 
             $currentTags = $product['tags'] ?? '';
             $tagsArray = array_filter(array_map('trim', explode(',', $currentTags)));
             
+            $this->log($nodeId, 'info', "Current tags: " . ($currentTags ?: '(none)'));
+
             // Add new tag if not exists
             if (!in_array($tag, $tagsArray)) {
                 $tagsArray[] = $tag;
+                $this->log($nodeId, 'info', "Adding tag: {$tag}");
+            } else {
+                $this->log($nodeId, 'info', "Tag '{$tag}' already exists. skipping update.");
+                return;
             }
 
             // Update product with new tags
-            $shop->api()->rest('PUT', "/admin/api/2024-07/products/{$productId}.json", [
+            $updateResponse = $shop->api()->rest('PUT', "/admin/api/{$apiVersion}/products/{$productId}.json", [
                 'product' => [
                     'id' => $productId,
                     'tags' => implode(', ', $tagsArray)
                 ]
             ]);
 
-            Log::info("Added tag '{$tag}' to product {$productId}");
+            if ($updateResponse['errors']) {
+                $this->log($nodeId, 'error', "Shopify API Error (PUT Product)", ['errors' => $updateResponse['errors']]);
+                throw new \Exception("Failed to update product: " . json_encode($updateResponse['errors']));
+            }
+
+            $this->log($nodeId, 'info', "Successfully added tag '{$tag}' to product {$productId}");
         } catch (\Exception $e) {
-            Log::error("Failed to add product tag", ['error' => $e->getMessage()]);
+            Log::error("Failed to add product tag: " . $e->getMessage());
+            $this->log($nodeId, 'error', "Action Failed: " . $e->getMessage());
             throw $e;
         }
     }
 
-    protected function addOrderTag($data, $form)
+    protected function addOrderTag($data, $form, $nodeId = null)
     {
         try {
             $orderId = $data['id'] ?? $data['admin_graphql_api_id'] ?? null;
             $tag = $form['tag'] ?? null;
             
-            if (!$orderId || !$tag) {
-                Log::warning("Missing order ID or tag for add_order_tag action");
+            if (!$orderId) {
+                $this->log($nodeId, 'error', "Missing order ID in payload", ['payload' => $data]);
+                throw new \Exception("Missing order ID in payload");
+            }
+            if (!$tag) {
+                $this->log($nodeId, 'warning', "No tag specified in action settings");
                 return;
             }
 
             // Extract numeric ID if GID
-            if (strpos($orderId, 'gid://') === 0) {
+            if (is_string($orderId) && strpos($orderId, 'gid://') === 0) {
                 $orderId = (int) basename($orderId);
             }
 
@@ -270,33 +325,52 @@ class FlowEngine
                 throw new \Exception("Shop not found for flow execution");
             }
 
-            // Fetch current tags
-            $response = $shop->api()->rest('GET', "/admin/api/2024-07/orders/{$orderId}.json");
+            $apiVersion = config('shopify-app.api_version', '2024-07');
+            $response = $shop->api()->rest('GET', "/admin/api/{$apiVersion}/orders/{$orderId}.json");
+            
+            if ($response['errors']) {
+                $this->log($nodeId, 'error', "Shopify API Error (GET Order)", ['errors' => $response['errors']]);
+                throw new \Exception("Failed to fetch order: " . json_encode($response['errors']));
+            }
+
             $order = $response['body']['order'] ?? null;
             
             if (!$order) {
-                throw new \Exception("Order not found");
+                $this->log($nodeId, 'error', "Order not found in Shopify", ['order_id' => $orderId]);
+                throw new \Exception("Order not found in Shopify.");
             }
 
             $currentTags = $order['tags'] ?? '';
             $tagsArray = array_filter(array_map('trim', explode(',', $currentTags)));
             
+            $this->log($nodeId, 'info', "Current tags: " . ($currentTags ?: '(none)'));
+
             // Add new tag if not exists
             if (!in_array($tag, $tagsArray)) {
                 $tagsArray[] = $tag;
+                $this->log($nodeId, 'info', "Adding tag: {$tag}");
+            } else {
+                $this->log($nodeId, 'info', "Tag '{$tag}' already exists. skipping update.");
+                return;
             }
 
             // Update order with new tags
-            $shop->api()->rest('PUT', "/admin/api/2024-07/orders/{$orderId}.json", [
+            $updateResponse = $shop->api()->rest('PUT', "/admin/api/{$apiVersion}/orders/{$orderId}.json", [
                 'order' => [
                     'id' => $orderId,
                     'tags' => implode(', ', $tagsArray)
                 ]
             ]);
 
-            Log::info("Added tag '{$tag}' to order {$orderId}");
+            if ($updateResponse['errors']) {
+                $this->log($nodeId, 'error', "Shopify API Error (PUT Order)", ['errors' => $updateResponse['errors']]);
+                throw new \Exception("Failed to update order: " . json_encode($updateResponse['errors']));
+            }
+
+            $this->log($nodeId, 'info', "Successfully added tag '{$tag}' to order {$orderId}");
         } catch (\Exception $e) {
-            Log::error("Failed to add order tag", ['error' => $e->getMessage()]);
+            Log::error("Failed to add order tag: " . $e->getMessage());
+            $this->log($nodeId, 'error', "Action Failed: " . $e->getMessage());
             throw $e;
         }
     }

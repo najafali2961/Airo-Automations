@@ -12,6 +12,9 @@ Route::middleware(['verify.shopify'])->group(function () {
     Route::delete('/workflows/{id}', [FlowController::class, 'destroy'])->name('workflows.destroy');
     Route::get('/workflows/{id}', [FlowController::class, 'editor'])->name('editor');
     Route::post('/workflows/{id}/toggle-active', [FlowController::class, 'toggleActive'])->name('workflows.toggle-active');
+    
+    Route::get('/executions', [\App\Http\Controllers\ExecutionsController::class, 'index'])->name('executions.index');
+    Route::get('/executions/{id}', [\App\Http\Controllers\ExecutionsController::class, 'show'])->name('executions.show');
 });
 
 Route::middleware(['verify.shopify'])->group(function () {

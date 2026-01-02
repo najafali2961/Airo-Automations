@@ -15,4 +15,8 @@ class Execution extends Model
     public function flow() {
         return $this->belongsTo(Flow::class);
     }
+
+    public function logs() {
+        return $this->hasMany(ExecutionLog::class);
+    }
 }

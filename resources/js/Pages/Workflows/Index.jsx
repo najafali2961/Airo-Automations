@@ -281,7 +281,17 @@ export default function Index({ flows = [] }) {
             <IndexTable.Cell>
                 <StatusBadge active={flow.active} />
             </IndexTable.Cell>
-            <IndexTable.Cell>{flow.execution_count || 0}</IndexTable.Cell>
+            <IndexTable.Cell>
+                <Link
+                    href={
+                        `/executions?flow_id=${flow.id}&` +
+                        window.location.search.substring(1)
+                    }
+                    className="hover:underline"
+                >
+                    {flow.execution_count || 0}
+                </Link>
+            </IndexTable.Cell>
             <IndexTable.Cell>
                 {new Date(flow.updated_at).toLocaleDateString()}
             </IndexTable.Cell>
