@@ -14,7 +14,7 @@ import Sidebar from "../../Components/WorkflowBuilder/Sidebar";
 import Builder from "../../Components/WorkflowBuilder/Canvas";
 import ConfigPanel from "../../Components/WorkflowBuilder/ConfigPanel";
 
-export default function WorkflowEditor({ shop, flow }) {
+export default function WorkflowEditor({ shop, flow, definitions }) {
     const shopify = useAppBridge();
     const [saving, setSaving] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
@@ -209,7 +209,7 @@ export default function WorkflowEditor({ shop, flow }) {
                             overflowY: "auto",
                         }}
                     >
-                        <Sidebar />
+                        <Sidebar definitions={definitions} />
                     </div>
 
                     {/* Canvas */}

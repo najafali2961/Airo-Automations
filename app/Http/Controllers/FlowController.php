@@ -22,7 +22,58 @@ class FlowController extends Controller
          
          if ($id && !$flow) abort(404);
 
-         return Inertia::render('Workflows/Editor', ['flow' => $flow]);
+         // Load Definitions
+         $webhooks = config('shopify-app.webhooks');
+         $shopifyTriggers = collect($webhooks)->map(function($webhook) {
+             return [
+                 'type' => 'trigger',
+                 'n8nType' => 'shopifyTrigger', // Mark as Shopify specific
+                 'label' => ucwords(strtolower(str_replace('_', ' ', $webhook['topic']))),
+                 'description' => "Triggers when " . strtolower(str_replace('_', ' ', $webhook['topic'])),
+                 'settings' => ['topic' => $webhook['topic']],
+                 'group' => 'Shopify'
+             ];
+         })->values();
+
+         $shopifyActions = [
+             [
+                 'type' => 'action',
+                 'n8nType' => 'shopifyAction',
+                 'label' => 'Create Product',
+                 'settings' => ['resource' => 'Product', 'operation' => 'create'],
+                 'group' => 'Shopify'
+             ],
+             [
+                 'type' => 'action',
+                 'n8nType' => 'shopifyAction',
+                 'label' => 'Update Product',
+                 'settings' => ['resource' => 'Product', 'operation' => 'update'],
+                 'group' => 'Shopify'
+             ],
+             [
+                 'type' => 'action',
+                 'n8nType' => 'shopifyAction',
+                 'label' => 'Add Tags to Customer',
+                 'settings' => ['resource' => 'Customer', 'operation' => 'add_tags'],
+                 'group' => 'Shopify'
+             ]
+         ];
+         
+         $definitions = [
+             'apps' => [
+                 [
+                     'name' => 'Shopify',
+                     'icon' => 'shopify', 
+                     'triggers' => $shopifyTriggers,
+                     'actions' => $shopifyActions
+                 ]
+             ]
+         ];
+
+         return Inertia::render('Workflows/Editor', [
+             'flow' => $flow,
+             'definitions' => $definitions
+         ]);
     }
 
     public function save(Request $request) {
