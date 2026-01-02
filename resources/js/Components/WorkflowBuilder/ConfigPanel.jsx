@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Box,
     BlockStack,
@@ -6,214 +6,227 @@ import {
     FormLayout,
     TextField,
     Select,
+    Button,
+    InlineStack,
     Banner,
-    Divider
 } from "@shopify/polaris";
 
-export default function ConfigPanel({ node, nodeTypes, credentials = [], onUpdate }) {
-    // Merge node.data.config into a single 'parameters' object for N8N compatibility
-    // N8N nodes store data in 'parameters'. Our previous version used 'config'
-    // We will normalize this.
-    const [parameters, setParameters] = useState(node?.data?.parameters || node?.data?.config || {});
-    const [selectedCredential, setSelectedCredential] = useState(node?.data?.credentials?.id || "");
+export default function ConfigPanel({ node, onUpdate }) {
+    const [settings, setSettings] = useState(node.data.settings || {});
 
     useEffect(() => {
-        setParameters(node?.data?.parameters || node?.data?.config || {});
-        setSelectedCredential(node?.data?.credentials?.id || "");
+        setSettings(node.data.settings || {});
     }, [node]);
 
+    const updateSetting = (key, value) => {
+        const newSettings = { ...settings, [key]: value };
+        setSettings(newSettings);
+        // Helper to update displayed label if needed
+        let newLabel = node.data.label;
+        if (node.type === "trigger" && key === "event") newLabel = value;
 
-
-    const handleParameterChange = (key, value) => {
-        const newParams = { ...parameters, [key]: value };
-        setParameters(newParams);
-        
-        if (node && onUpdate) {
-            // Update both 'config' (legacy) and 'parameters' (n8n-style)
-            onUpdate(node.id, { 
-                parameters: newParams,
-                config: newParams 
-            });
-        }
-    };
-    
-    const handleCredentialChange = (value) => {
-        setSelectedCredential(value);
-        if (node && onUpdate) {
-            onUpdate(node.id, {
-                credentials: { id: value }
-            });
-        }
+        onUpdate(node.id, {
+            settings: newSettings,
+            label: newLabel,
+        });
     };
 
-    // Find the node definition
-    const nodeDefinition = useMemo(() => {
-        if (!node || !nodeTypes) return null;
-        // Search by name (n8n-nodes-base.shopify)
-        const typeRaw = node.data?.n8nType || node.type;
-        return nodeTypes.find(t => t.name === typeRaw) || null;
-    }, [node, nodeTypes]);
-
-    // Debug logging
-    useEffect(() => {
-         if (nodeDefinition?.credentials) {
-             console.log("ConfigPanel: Node requires credentials", nodeDefinition.credentials);
-         }
-    }, [nodeDefinition, credentials]);
-
-    // Fetch Credential Schema if we were to build a new one (Future)
-    // For now, we just list existing credentials.
-
-    if (!node) {
+    if (!node)
         return (
-            <Box padding="400" minHeight="100%" background="bg-surface">
-                <Text tone="subdued" as="p">
-                    Select a node to configure
-                </Text>
+            <Box padding="400">
+                <Text>Select a node</Text>
             </Box>
         );
-    }
 
-    // --- Helper Logic for Display Options ---
-    const shouldShowProperty = (property) => {
-        if (!property.displayOptions) return true;
-        const { show, hide } = property.displayOptions;
-
-        // "Show" logic
-        if (show) {
-            const allMatch = Object.keys(show).every(dependencyKey => {
-                const requiredValues = show[dependencyKey];
-                const actualValue = parameters[dependencyKey];
-                return requiredValues.includes(actualValue);
-            });
-            if (!allMatch) return false;
+    const renderContent = () => {
+        switch (node.type) {
+            case "trigger":
+                return (
+                    <TriggerSettings
+                        settings={settings}
+                        onChange={updateSetting}
+                    />
+                );
+            case "condition":
+                return (
+                    <ConditionSettings
+                        settings={settings}
+                        onChange={updateSetting}
+                    />
+                );
+            case "action":
+                return (
+                    <ActionSettings
+                        settings={settings}
+                        onChange={updateSetting}
+                    />
+                );
+            default:
+                return <Text>Unknown node type: {node.type}</Text>;
         }
-
-        // "Hide" logic
-        if (hide) {
-             const anyMatch = Object.keys(hide).some(dependencyKey => {
-                const hiddenValues = hide[dependencyKey];
-                const actualValue = parameters[dependencyKey];
-                return hiddenValues.includes(actualValue);
-            });
-            if (anyMatch) return false;
-        }
-
-        return true;
-    };
-
-    // --- Recursive Field Renderer ---
-    const renderProperty = (property) => {
-        if (!shouldShowProperty(property)) return null;
-
-        const key = property.name;
-        const label = property.displayName || property.name;
-        const value = parameters[key] ?? property.default ?? "";
-
-        // Options (Select)
-        if (property.type === 'options') {
-            const options = property.options?.map(opt => ({
-                label: opt.name,
-                value: opt.value
-            })) || [];
-            
-            return (
-                <Select
-                    key={key}
-                    label={label}
-                    options={options}
-                    value={value}
-                    onChange={(val) => handleParameterChange(key, val)}
-                    helpText={property.description}
-                />
-            );
-        }
-
-        // Boolean
-        if (property.type === 'boolean') {
-             return (
-                 <Select
-                    key={key}
-                    label={label}
-                    options={[{ label: 'True', value: 'true'}, { label: 'False', value: 'false'}]}
-                    value={String(value)}
-                    onChange={(val) => handleParameterChange(key, val === 'true')}
-                    helpText={property.description}
-                 />
-             );
-        }
-
-        // String / Default
-        const isMultiline = property.typeOptions?.rows > 1;
-        
-        return (
-            <TextField
-                key={key}
-                label={label}
-                value={value}
-                onChange={(val) => handleParameterChange(key, val)}
-                multiline={isMultiline ? property.typeOptions.rows : false}
-                placeholder={property.placeholder}
-                helpText={property.description}
-                autoComplete="off"
-            />
-        );
     };
 
     return (
-        <Box padding="400" minHeight="100%" background="bg-surface">
+        <Box padding="400" background="bg-surface" minHeight="100%">
             <BlockStack gap="400">
-                {/* Header */}
-                <Box borderBlockEndWidth="025" borderColor="border" paddingBlockEnd="400">
-                    <BlockStack gap="100">
-                        <Text variant="headingMd" as="h3">
-                            {nodeDefinition?.displayName || node.data?.label || node.type}
-                        </Text>
-                        <Text variant="bodySm" tone="subdued">
-                           {nodeDefinition?.name || node.data?.type || node.type}
-                        </Text>
-                    </BlockStack>
+                <Box
+                    borderBlockEndWidth="025"
+                    borderColor="border"
+                    paddingBlockEnd="400"
+                >
+                    <Text variant="headingMd" as="h3">
+                        {node.data.label || node.type}
+                    </Text>
+                    <Text variant="bodySm" tone="subdued">
+                        ID: {node.id}
+                    </Text>
                 </Box>
-
-                {/* Form Fields */}
-                <FormLayout>
-                    {/* Credentials Selector */}
-                    {nodeDefinition?.credentials && (
-                        <Box paddingBlockEnd="200">
-                             <Text variant="bodySm" fontWeight="medium">Authentication</Text>
-                             <Select
-                                label="Connect Credential"
-                                labelHidden
-                                options={[
-                                    { label: 'Select Credential', value: '' },
-                                    ...credentials
-                                        .filter(c => nodeDefinition.credentials.some(nc => nc.name === c.type))
-                                        .map(c => ({ label: c.name, value: c.id }))
-                                ]}
-                                value={selectedCredential}
-                                onChange={handleCredentialChange}
-                                helpText="Select the authentication to use for this node."
-                             />
-                             {/* Create New Credential Button or Form? 
-                                 For now, just selection. 
-                                 Future: Add "New" button that fetches schema.
-                             */}
-                             <Divider />
-                        </Box>
-                    )}
-
-                    {/* Dynamic Parameters */}
-                    {nodeDefinition?.properties ? (
-                        nodeDefinition.properties.map(prop => renderProperty(prop))
-                    ) : (
-                        <Banner tone="warning">
-                            <p>No configuration properties found for this node type.</p>
-                        </Banner>
-                    )}
-                    
-                    {/* Fallback for "Generic" nodes or custom data entry if definition exists but is empty? */}
-                </FormLayout>
+                <FormLayout>{renderContent()}</FormLayout>
             </BlockStack>
         </Box>
     );
 }
+
+const TriggerSettings = ({ settings, onChange }) => (
+    <Select
+        label="Shopify Event"
+        options={[
+            { label: "Select Event", value: "" },
+            { label: "Order Created", value: "orders/create" },
+            { label: "Order Updated", value: "orders/updated" },
+            { label: "Order Paid", value: "orders/paid" },
+            { label: "Product Created", value: "products/create" },
+            { label: "Product Updated", value: "products/update" },
+            { label: "Customer Created", value: "customers/create" },
+            { label: "Fulfillment Created", value: "fulfillments/create" },
+        ]}
+        value={settings.event}
+        onChange={(val) => onChange("event", val)}
+    />
+);
+
+const ActionSettings = ({ settings, onChange }) => (
+    <>
+        <Select
+            label="Action Type"
+            options={[
+                { label: "Select Action", value: "" },
+                { label: "Send Email", value: "send_email" },
+                { label: "Apply Discount", value: "apply_discount" },
+                { label: "Add Tag", value: "add_tag" },
+                { label: "Update Note", value: "update_order_note" },
+                { label: "Call Webhook", value: "call_webhook" },
+            ]}
+            value={settings.action}
+            onChange={(val) => onChange("action", val)}
+        />
+
+        {settings.action === "send_email" && (
+            <>
+                <TextField
+                    label="Recipient (Path)"
+                    value={settings.recipient}
+                    onChange={(v) => onChange("recipient", v)}
+                    helpText="e.g. customer.email"
+                />
+                <TextField
+                    label="Template"
+                    value={settings.template}
+                    onChange={(v) => onChange("template", v)}
+                />
+                <TextField
+                    label="Subject"
+                    value={settings.subject}
+                    onChange={(v) => onChange("subject", v)}
+                />
+            </>
+        )}
+
+        {settings.action === "add_tag" && (
+            <>
+                <Select
+                    label="Target"
+                    options={[
+                        { label: "Product", value: "product" },
+                        { label: "Customer", value: "customer" },
+                        { label: "Order", value: "order" },
+                    ]}
+                    value={settings.object_type}
+                    onChange={(v) => onChange("object_type", v)}
+                />
+                <TextField
+                    label="Tags (comma separated)"
+                    value={settings.tags}
+                    onChange={(v) => onChange("tags", v)}
+                />
+            </>
+        )}
+
+        {settings.action === "apply_discount" && (
+            <>
+                <TextField
+                    label="Discount Code"
+                    value={settings.code}
+                    onChange={(v) => onChange("code", v)}
+                />
+                <TextField
+                    label="Value"
+                    type="number"
+                    value={settings.discount_value}
+                    onChange={(v) => onChange("discount_value", v)}
+                />
+            </>
+        )}
+    </>
+);
+
+const ConditionSettings = ({ settings, onChange }) => {
+    // Simplified single rule editor for MVP
+    const rules = settings.rules || [{}];
+    const rule = rules[0];
+
+    const updateRule = (key, val) => {
+        const newRule = { ...rule, [key]: val };
+        onChange("rules", [newRule]);
+    };
+
+    return (
+        <Box>
+            <BlockStack gap="200">
+                <Select
+                    label="Logic"
+                    options={[
+                        { label: "AND", value: "AND" },
+                        { label: "OR", value: "OR" },
+                    ]}
+                    value={settings.logic || "AND"}
+                    onChange={(v) => onChange("logic", v)}
+                />
+                <Text variant="headingSm">Rule 1</Text>
+                <TextField
+                    label="Field Path"
+                    value={rule.field}
+                    onChange={(v) => updateRule("field", v)}
+                    placeholder="order.total_price"
+                />
+                <Select
+                    label="Operator"
+                    options={[
+                        { label: "Equals", value: "=" },
+                        { label: "Not Equals", value: "!=" },
+                        { label: "Greater Than", value: ">" },
+                        { label: "Less Than", value: "<" },
+                        { label: "Contains", value: "contains" },
+                    ]}
+                    value={rule.operator}
+                    onChange={(v) => updateRule("operator", v)}
+                />
+                <TextField
+                    label="Value"
+                    value={rule.value}
+                    onChange={(v) => updateRule("value", v)}
+                />
+            </BlockStack>
+        </Box>
+    );
+};

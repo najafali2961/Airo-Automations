@@ -1,4 +1,4 @@
-s{
+{
     "$schema": "https://www.schemastore.org/package.json",
     "private": true,
     "type": "module",
@@ -22,7 +22,7 @@ s{
         "@vitejs/plugin-react": "^5.1.2",
         "@xyflow/react": "^12.10.0",
         "date-fns": "^4.1.0",
-        "react": "^19.2.3",
-        "react-dom": "^19.2.3"
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
     }
 }

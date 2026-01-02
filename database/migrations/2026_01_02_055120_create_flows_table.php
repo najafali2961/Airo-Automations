@@ -11,17 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('n8n_executions', function (Blueprint $table) {
+        Schema::create('flows', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('shop_id');
-            $table->unsignedBigInteger('webhook_log_id')->nullable();
-            $table->string('n8n_execution_id')->nullable();
-            $table->string('status')->default('pending');
-            $table->json('logs')->nullable();
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->boolean('active')->default(false);
+            $table->integer('execution_count')->default(0);
+            $table->timestamp('last_executed_at')->nullable();
             $table->timestamps();
-
+            
             $table->index('shop_id');
-            $table->foreign('webhook_log_id')->references('id')->on('webhook_logs')->onDelete('set null');
+            $table->index('active');
         });
     }
 
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('n8n_executions');
+        Schema::dropIfExists('flows');
     }
 };

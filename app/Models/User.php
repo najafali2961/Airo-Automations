@@ -61,6 +61,14 @@ class User extends Authenticatable implements IShopModel
     }
 
     /**
+     * Get flows (New Automation Builder)
+     */
+    public function flows()
+    {
+        return $this->hasMany(Flow::class, 'shop_id');
+    }
+
+    /**
      * Get barcode printer settings
      */
     public function barcodePrinterSettings()

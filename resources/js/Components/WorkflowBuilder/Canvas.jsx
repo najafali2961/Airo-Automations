@@ -41,12 +41,31 @@ const InnerBuilder = ({
     initialEdges,
     onNodeSelect,
     onExecute,
+    onFlowChange,
     forwardedRef,
 }) => {
     const reactFlowWrapper = useRef(null);
     const { screenToFlowPosition } = useReactFlow();
 
-    // ... (existing state) ...
+    // Custom change handlers to track dirty state
+    const handleNodesChange = useCallback(
+        (changes) => {
+            onNodesChange(changes);
+            if (onFlowChange) onFlowChange();
+        },
+        [onFlowChange]
+    );
+
+    const handleEdgesChange = useCallback(
+        (changes) => {
+            onEdgesChange(changes);
+            if (onFlowChange) onFlowChange();
+        },
+        [onFlowChange]
+    );
+
+    // Also trigger on updateNode, onConnect, onDrop
+
     const [nodes, setNodes, onNodesChange] = useNodesState(
         initialNodes || initialNodesDefault
     );
@@ -66,7 +85,7 @@ const InnerBuilder = ({
             );
         },
     }));
-    
+
     // ... (existing code for nodeTypes, onConnect, etc.)
     const nodeTypes = useMemo(
         () => ({
@@ -102,9 +121,15 @@ const InnerBuilder = ({
         (event) => {
             event.preventDefault();
             const type = event.dataTransfer.getData("application/reactflow");
-            const label = event.dataTransfer.getData("application/reactflow/label");
-            const n8nType = event.dataTransfer.getData("application/reactflow/n8nType");
-            const defaultsStr = event.dataTransfer.getData("application/reactflow/defaults");
+            const label = event.dataTransfer.getData(
+                "application/reactflow/label"
+            );
+            const n8nType = event.dataTransfer.getData(
+                "application/reactflow/n8nType"
+            );
+            const defaultsStr = event.dataTransfer.getData(
+                "application/reactflow/defaults"
+            );
 
             if (typeof type === "undefined" || !type) return;
 
@@ -115,17 +140,20 @@ const InnerBuilder = ({
                 console.error("Failed to parse node defaults", e);
             }
 
-            const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
+            const position = screenToFlowPosition({
+                x: event.clientX,
+                y: event.clientY,
+            });
 
             const newNode = {
                 id: getId(),
                 type,
                 position,
-                data: { 
-                    label: label, 
+                data: {
+                    label: label,
                     n8nType: n8nType,
-                    parameters: defaults, 
-                    config: defaults
+                    parameters: defaults,
+                    config: defaults,
                 },
             };
 
@@ -143,9 +171,12 @@ const InnerBuilder = ({
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
+                onNodesChange={handleNodesChange}
+                onEdgesChange={handleEdgesChange}
+                onConnect={(params) => {
+                    onConnect(params);
+                    if (onFlowChange) onFlowChange();
+                }}
                 onNodeClick={onNodeClick}
                 onPaneClick={onPaneClick}
                 onDrop={onDrop}
@@ -156,27 +187,29 @@ const InnerBuilder = ({
                 <Controls />
                 <MiniMap />
                 <Background variant="dots" gap={12} size={1} />
-                <div style={{
-                    position: 'absolute',
-                    bottom: 20,
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    zIndex: 10,
-                    display: 'flex',
-                    gap: '10px'
-                }}>
+                <div
+                    style={{
+                        position: "absolute",
+                        bottom: 20,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        zIndex: 10,
+                        display: "flex",
+                        gap: "10px",
+                    }}
+                >
                     <button
                         className="Polaris-Button Polaris-Button--primary"
                         onClick={onExecute}
                         style={{
-                           padding: "8px 16px",
-                           backgroundColor: "#ff6d2d", 
-                           color: "white",
-                           border: "none",
-                           borderRadius: "4px",
-                           cursor: "pointer",
-                           fontWeight: "bold",
-                           boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+                            padding: "8px 16px",
+                            backgroundColor: "#ff6d2d",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            cursor: "pointer",
+                            fontWeight: "bold",
+                            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                         }}
                     >
                         Execute Workflow

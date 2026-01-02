@@ -330,7 +330,7 @@ return [
     |
     */
     'app_legacy_supports' => [
-        'after_authenticate_job' => true,
+        'after_authenticate_job' => false,
     ],
 
     /*

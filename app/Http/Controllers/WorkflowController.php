@@ -275,15 +275,14 @@ class WorkflowController extends Controller
 
     public function nodeTypeDefinition($name)
     {
-        // Try to fetch specific definition if the list was shallow
         try {
-             // We can expose a method in N8NService to get a single node type details
-             // For now, let's just return what we have in the list if details are there,
-             // or try to fetch it. Use a new service method.
-             // But wait, N8NService::getNodeTypes() already does merging.
-             // Let's rely on that for now, or add a specific fetcher.
-             return response()->json(['error' => 'Endpoint not yet optimized for single fetch, use list.'], 501);
+            $details = $this->n8nService->getNodeTypeDetails($name);
+            if ($details) {
+                return response()->json($details);
+            }
+            return response()->json(['error' => 'Node schema not found'], 404);
         } catch (\Exception $e) {
+            Log::error("WorkflowController: Failed to fetch definition for {$name}", ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Failed to fetch node definition'], 500);
         }
     }
