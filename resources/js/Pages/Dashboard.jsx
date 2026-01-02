@@ -13,6 +13,12 @@ import {
     useIndexResourceState,
     Box,
     Icon,
+    IndexFilters,
+    useSetIndexFiltersMode,
+    ChoiceList,
+    TextField,
+    LegacyCard,
+    Pagination,
 } from "@shopify/polaris";
 import {
     PlusIcon,
@@ -20,7 +26,9 @@ import {
     LayoutColumns3Icon,
     ClockIcon,
     AlertCircleIcon,
+    SearchIcon,
 } from "@shopify/polaris-icons";
+import { useState, useCallback, useMemo } from "react";
 
 export default function Dashboard({
     shop,
@@ -28,11 +36,119 @@ export default function Dashboard({
     executions = [],
     flows = [],
 }) {
+    // --- IndexFilters Logic ---
+    const [itemStrings, setItemStrings] = useState([
+        "All",
+        "Failed",
+        "Success",
+    ]);
+    const [selected, setSelected] = useState(0);
+    const { mode, setMode } = useSetIndexFiltersMode();
+    const [queryValue, setQueryValue] = useState("");
+    const [statusFilter, setStatusFilter] = useState([]);
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const PAGE_SIZE = 3;
+
+    const tabs = itemStrings.map((item, index) => ({
+        content: item,
+        index,
+        onAction: () => {},
+        id: `${item}-${index}`,
+        isLocked: index === 0,
+    }));
+
+    const handleFiltersQueryChange = useCallback((value) => {
+        setQueryValue(value);
+        setCurrentPage(1);
+    }, []);
+    const handleStatusFilterChange = useCallback((value) => {
+        setStatusFilter(value);
+        setCurrentPage(1);
+    }, []);
+    const handleTabChange = useCallback((index) => {
+        setSelected(index);
+        setCurrentPage(1);
+    }, []);
+
+    const filters = [
+        {
+            key: "status",
+            label: "Status",
+            filter: (
+                <ChoiceList
+                    title="Execution Status"
+                    titleHidden
+                    choices={[
+                        { label: "Success", value: "success" },
+                        { label: "Failed", value: "failed" },
+                        { label: "Running", value: "running" },
+                    ]}
+                    selected={statusFilter || []}
+                    onChange={handleStatusFilterChange}
+                    allowMultiple
+                />
+            ),
+            shortcut: true,
+        },
+    ];
+
+    const appliedFilters = [];
+    if (statusFilter.length > 0) {
+        appliedFilters.push({
+            key: "status",
+            label: `Status is ${statusFilter.join(", ")}`,
+            onRemove: () => {
+                setStatusFilter([]);
+                setCurrentPage(1);
+            },
+        });
+    }
+
+    // --- Data Filtering Logic ---
+    const filteredExecutions = useMemo(() => {
+        return executions.filter((exec) => {
+            // Search filter
+            if (
+                queryValue &&
+                !exec.flow?.name
+                    ?.toLowerCase()
+                    .includes(queryValue.toLowerCase()) &&
+                !exec.event?.toLowerCase().includes(queryValue.toLowerCase())
+            ) {
+                return false;
+            }
+            // Tab filter
+            if (selected === 1 && exec.status !== "failed") return false;
+            if (selected === 2 && exec.status !== "success") return false;
+            // Status filter
+            if (statusFilter.length > 0 && !statusFilter.includes(exec.status))
+                return false;
+
+            return true;
+        });
+    }, [executions, queryValue, selected, statusFilter]);
+
+    // Slice for pagination
+    const paginatedExecutions = useMemo(() => {
+        const start = (currentPage - 1) * PAGE_SIZE;
+        return filteredExecutions.slice(start, start + PAGE_SIZE);
+    }, [filteredExecutions, currentPage]);
+
+    const resourceName = {
+        singular: "execution",
+        plural: "executions",
+    };
+
+    const { selectedResources, allResourcesSelected, handleSelectionChange } =
+        useIndexResourceState(paginatedExecutions);
+
     // Helper for status badge
     const StatusBadge = ({ status }) => {
         let tone = "subdued";
-        if (status === "success") tone = "success";
-        if (status === "failed") tone = "critical";
+        if (status === "success" || status === "SUCCESS") tone = "success";
+        if (status === "failed" || status === "FAILED") tone = "critical";
         if (status === "running") tone = "info";
 
         return <Badge tone={tone}>{status.toUpperCase()}</Badge>;
@@ -40,7 +156,7 @@ export default function Dashboard({
 
     return (
         <Page
-            title="Overview"
+            title="Airo Automations"
             subtitle={`Welcome back, ${shop.name}`}
             primaryAction={{
                 content: "New Workflow",
@@ -118,8 +234,31 @@ export default function Dashboard({
                                 </InlineStack>
                             </Box>
 
-                            {/* Illustration / Empty State if needed, or just list */}
-                            {executions.length === 0 ? (
+                            {/* Enhanced IndexTable with Filters */}
+                            <IndexFilters
+                                queryValue={queryValue}
+                                queryPlaceholder="Search by workflow or event..."
+                                onQueryChange={handleFiltersQueryChange}
+                                onQueryClear={() => {
+                                    setQueryValue("");
+                                    setCurrentPage(1);
+                                }}
+                                tabs={tabs}
+                                selected={selected}
+                                onSelect={handleTabChange}
+                                filters={filters}
+                                appliedFilters={appliedFilters}
+                                onClearAll={() => {
+                                    setQueryValue("");
+                                    setStatusFilter([]);
+                                    setCurrentPage(1);
+                                }}
+                                mode={mode}
+                                setMode={setMode}
+                                canCreateNewView={false}
+                            />
+
+                            {filteredExecutions.length === 0 ? (
                                 <Box padding="800">
                                     <BlockStack
                                         align="center"
@@ -129,58 +268,132 @@ export default function Dashboard({
                                         <img
                                             src="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
                                             alt="No executions"
-                                            style={{ width: 150, opacity: 0.5 }}
+                                            style={{ width: 100, opacity: 0.5 }}
                                         />
                                         <Text tone="subdued" alignment="center">
-                                            No recent activity found.
+                                            No matches found for your filters.
                                         </Text>
                                     </BlockStack>
                                 </Box>
                             ) : (
                                 <IndexTable
-                                    resourceName={{
-                                        singular: "execution",
-                                        plural: "executions",
-                                    }}
-                                    itemCount={executions.length}
+                                    resourceName={resourceName}
+                                    itemCount={filteredExecutions.length}
+                                    selectedItemsCount={
+                                        allResourcesSelected
+                                            ? "All"
+                                            : selectedResources.length
+                                    }
+                                    condensed
+                                    onSelectionChange={handleSelectionChange}
                                     headings={[
+                                        { title: "Execution" },
                                         { title: "Status" },
-                                        { title: "Flow" },
-                                        { title: "Event" },
-                                        { title: "Date" },
                                     ]}
-                                    selectable={false}
                                 >
-                                    {executions.map((exec, index) => (
+                                    {paginatedExecutions.map((exec, index) => (
                                         <IndexTable.Row
                                             id={exec.id}
                                             key={exec.id}
+                                            selected={selectedResources.includes(
+                                                exec.id
+                                            )}
                                             position={index}
+                                            onClick={() =>
+                                                router.visit(
+                                                    `/executions/${exec.id}` +
+                                                        window.location.search
+                                                )
+                                            }
                                         >
-                                            <IndexTable.Cell>
-                                                <StatusBadge
-                                                    status={exec.status}
-                                                />
-                                            </IndexTable.Cell>
-                                            <IndexTable.Cell>
-                                                <Text fontWeight="bold">
-                                                    {exec.flow?.name ||
-                                                        "Unknown Flow"}
-                                                </Text>
-                                            </IndexTable.Cell>
-                                            <IndexTable.Cell>
-                                                <Badge tone="info">
-                                                    {exec.event}
-                                                </Badge>
-                                            </IndexTable.Cell>
-                                            <IndexTable.Cell>
-                                                {new Date(
-                                                    exec.created_at
-                                                ).toLocaleString()}
-                                            </IndexTable.Cell>
+                                            <div
+                                                style={{
+                                                    padding: "12px 16px",
+                                                    width: "100%",
+                                                    cursor: "pointer",
+                                                }}
+                                            >
+                                                <BlockStack gap="100">
+                                                    <Text
+                                                        as="span"
+                                                        variant="bodySm"
+                                                        tone="subdued"
+                                                    >
+                                                        #{exec.id} •{" "}
+                                                        {new Date(
+                                                            exec.created_at
+                                                        ).toLocaleString()}
+                                                    </Text>
+                                                    <InlineStack
+                                                        align="space-between"
+                                                        blockAlign="center"
+                                                    >
+                                                        <Text
+                                                            as="span"
+                                                            variant="bodyMd"
+                                                            fontWeight="semibold"
+                                                        >
+                                                            {exec.flow?.name ||
+                                                                "Deleted Flow"}
+                                                        </Text>
+                                                        <StatusBadge
+                                                            status={exec.status}
+                                                        />
+                                                    </InlineStack>
+                                                    <InlineStack
+                                                        align="start"
+                                                        gap="100"
+                                                    >
+                                                        <Badge
+                                                            tone="info"
+                                                            size="small"
+                                                        >
+                                                            {exec.event}
+                                                        </Badge>
+                                                        {exec.actions_completed >
+                                                            0 && (
+                                                            <Text
+                                                                as="span"
+                                                                variant="bodyXs"
+                                                                tone="subdued"
+                                                            >
+                                                                {
+                                                                    exec.actions_completed
+                                                                }{" "}
+                                                                actions
+                                                            </Text>
+                                                        )}
+                                                    </InlineStack>
+                                                </BlockStack>
+                                            </div>
                                         </IndexTable.Row>
                                     ))}
                                 </IndexTable>
+                            )}
+
+                            {/* Pagination Controls */}
+                            {filteredExecutions.length > PAGE_SIZE && (
+                                <Box padding="400">
+                                    <InlineStack align="center">
+                                        <Pagination
+                                            hasPrevious={currentPage > 1}
+                                            onPrevious={() =>
+                                                setCurrentPage(
+                                                    (prev) => prev - 1
+                                                )
+                                            }
+                                            hasNext={
+                                                currentPage * PAGE_SIZE <
+                                                filteredExecutions.length
+                                            }
+                                            onNext={() =>
+                                                setCurrentPage(
+                                                    (prev) => prev + 1
+                                                )
+                                            }
+                                        />
+                                    </InlineStack>
+                                </Box>
                             )}
                         </Card>
                     </Layout.Section>

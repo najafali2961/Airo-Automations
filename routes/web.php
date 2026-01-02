@@ -5,18 +5,27 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FlowController;
 
 Route::middleware(['verify.shopify'])->group(function () {
-    Route::get('/force-migrate', function () {
+    Route::get('/debug-queue', function () {
         try {
-            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            $jobs = \Illuminate\Support\Facades\DB::table('jobs')->get();
+            $failed = \Illuminate\Support\Facades\DB::table('failed_jobs')->get();
+            $logs = \App\Models\ExecutionLog::latest()->limit(5)->get();
+            
+            // Try to run one job
+            $output = '';
+            if ($jobs->count() > 0) {
+                \Illuminate\Support\Facades\Artisan::call('queue:work', ['--once' => true]);
+                $output = \Illuminate\Support\Facades\Artisan::output();
+            }
+
             return response()->json([
-                'status' => 'success',
-                'output' => \Illuminate\Support\Facades\Artisan::output()
+                'jobs_count' => $jobs->count(),
+                'failed_count' => $failed->count(),
+                'latest_logs' => $logs,
+                'worker_output' => $output
             ]);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     });
 
