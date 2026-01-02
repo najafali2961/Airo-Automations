@@ -8,6 +8,7 @@ import { getSessionToken } from "@shopify/app-bridge/utilities";
 import axios from "axios";
 import enTranslations from "@shopify/polaris/locales/en.json";
 import "@shopify/polaris/build/esm/styles.css";
+import ErrorBoundary from "./Components/ErrorBoundary";
 
 createInertiaApp({
     resolve: (name) => {
@@ -49,10 +50,10 @@ createInertiaApp({
 
         createRoot(el).render(
             <AppProvider i18n={enTranslations} config={config}>
-                <NavMenu>
-                 
-                </NavMenu>
-                <App {...props} />
+                <NavMenu></NavMenu>
+                <ErrorBoundary>
+                    <App {...props} />
+                </ErrorBoundary>
             </AppProvider>
         );
     },
