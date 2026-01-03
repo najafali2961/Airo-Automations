@@ -57,7 +57,7 @@ class ShopifyGqlAction extends BaseAction
         $response = $shop->api()->graph($query, $variables);
 
         if ($response['errors']) {
-            $this->log($execution, $node->id, 'error', "GraphQL Errors: " . json_encode($response['errors']));
+            $this->log($execution, $node->id, 'error', "GraphQL Error: " . json_encode($response));
             return;
         }
 

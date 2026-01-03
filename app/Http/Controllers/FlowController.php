@@ -118,10 +118,12 @@ class FlowController extends Controller
             // Save edges
             foreach ($validated['edges'] as $edgeData) {
                 if (isset($nodeMap[$edgeData['source']]) && isset($nodeMap[$edgeData['target']])) {
+                    $label = $edgeData['label'] ?? $edgeData['sourceHandle'] ?? 'then';
+                    
                     $flow->edges()->create([
                         'source_node_id' => $nodeMap[$edgeData['source']],
                         'target_node_id' => $nodeMap[$edgeData['target']],
-                        'label' => $edgeData['label'] ?? 'then' // Default edge type
+                        'label' => $label
                     ]);
                 }
             }

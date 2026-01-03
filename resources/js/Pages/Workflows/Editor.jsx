@@ -58,6 +58,7 @@ export default function WorkflowEditor({ shop, flow, definitions }) {
             id: `e${e.source_node_id}-${e.target_node_id}`,
             source: String(e.source_node_id),
             target: String(e.target_node_id),
+            sourceHandle: e.label,
             label: e.label || "then",
         }));
     }, [flow]);
