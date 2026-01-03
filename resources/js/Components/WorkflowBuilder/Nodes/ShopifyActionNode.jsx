@@ -33,6 +33,7 @@ export default memo(({ data, selected }) => {
 
             <Handle
                 type="source"
+                id="then"
                 position={Position.Bottom}
                 className="w-3 h-3 bg-gray-500"
             />
