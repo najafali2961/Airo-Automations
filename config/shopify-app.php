@@ -330,7 +330,7 @@ return [
     |
     */
     'app_legacy_supports' => [
-        'after_authenticate_job' => false,
+        'after_authenticate_job' => true,
     ],
 
     /*
@@ -354,7 +354,7 @@ return [
 
     'listen' => [
         \Osiset\ShopifyApp\Messaging\Events\AppInstalledEvent::class => [
-            \App\Listeners\AssignDefaultPlanOnInstall::class,
+            // \App\Listeners\AssignDefaultPlanOnInstall::class,
         ],
         \Osiset\ShopifyApp\Messaging\Events\ShopAuthenticatedEvent::class => [
             // \App\Listeners\MyListener::class,
@@ -366,7 +366,7 @@ return [
             // \App\Listeners\MyListener::class,
         ],
         \Osiset\ShopifyApp\Messaging\Events\PlanActivatedEvent::class => [
-            \App\Listeners\PlanActivatedListener::class,
+            // \App\Listeners\PlanActivatedListener::class,
         ],
     ],
 
@@ -386,31 +386,43 @@ return [
 
     'webhooks' => [
         [
-            'topic' => 'PRODUCTS_CREATE',
-            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhooks/shopify-automation'
-        ],
-        [
             'topic' => 'PRODUCTS_UPDATE',
-            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhooks/shopify-automation'
+            'address' => 'https://automation.omni-sync.com/webhook/products-update'
         ],
         [
             'topic' => 'PRODUCTS_DELETE',
-            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhooks/shopify-automation'
+            'address' => 'https://automation.omni-sync.com/webhook/products-delete'
+        ],
+        [
+            'topic' => 'PRODUCTS_CREATE',
+            'address' => 'https://automation.omni-sync.com/webhook/products-create'
         ],
         [
             'topic' => 'ORDERS_CREATE',
-            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhooks/shopify-automation'
+            'address' => 'https://automation.omni-sync.com/webhook/orders-create'
         ],
         [
             'topic' => 'ORDERS_UPDATED',
-            'address' => env('APP_URL', 'https://automation.omni-sync.com') . '/webhooks/shopify-automation'
+            'address' => 'https://automation.omni-sync.com/webhook/orders-updated'
+        ],
+        [
+            'topic' => 'ORDERS_PAID',
+            'address' => 'https://automation.omni-sync.com/webhook/orders-paid'
         ],
         /*
-            To map a webhook to a specific class instead of the default WebhookController:
             [
-                'topic' => 'ORDERS_PAID',
-                'address' => env('APP_URL') . '/webhook/orders-paid',
-                'class' => \App\Jobs\MyCustomWebhookJob::class
+                'topic' => env('SHOPIFY_WEBHOOK_1_TOPIC', 'ORDERS_CREATE'),
+                'address' => env('SHOPIFY_WEBHOOK_1_ADDRESS', 'https://example.com/webhook/orders-create')
+            ], [
+                'topic' => env('SHOPIFY_WEBHOOK_2_TOPIC', 'APP_PURCHASES_ONE_TIME_UPDATE'),
+                'address' => env('SHOPIFY_WEBHOOK_2_ADDRESS', 'https://example.com/webhook/purchase'),
+            ]
+            // In certain situations you may wish to map the webhook to a specific class
+            // To do this, change the array to an associative array with a 'class' key
+            'orders-create' => [
+                'topic' => env('SHOPIFY_WEBHOOK_3_TOPIC', 'ORDERS_PAID'),
+                'address' => env('SHOPIFY_WEBHOOK_3_ADDRESS', 'https://example.com/webhook/orders-create'),
+                'class' => \App\Shopify\Actions\ExampleAppJob::class
             ],
         */
     ],
@@ -451,8 +463,8 @@ return [
      * @see
      */
     'after_authenticate_job' => [
-        'job' => null,
-        'inline' => false,
+        // 'job' =>  null,
+        // 'inline' => true,
     ],
 
 

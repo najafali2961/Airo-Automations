@@ -13,18 +13,17 @@ dev_store_url = "teststore-10010101001010716.myshopify.com"
 [webhooks]
 api_version = "2025-10"
 
-  # Product webhooks for automation triggers
   [[webhooks.subscriptions]]
-  topics = [ "products/create" ]
-  uri = "/webhooks/shopify-automation"
+  uri = "/webhook/customers-redact"
+  compliance_topics = [ "customers/redact" ]
 
   [[webhooks.subscriptions]]
-  topics = [ "products/update" ]
-  uri = "/webhooks/shopify-automation"
+  uri = "/webhook/customers-data-request"
+  compliance_topics = [ "customers/data_request" ]
 
   [[webhooks.subscriptions]]
-  topics = [ "products/delete" ]
-  uri = "/webhooks/shopify-automation"
+  uri = "/webhook/shop-redact"
+  compliance_topics = [ "shop/redact" ]
 
 [access.admin]
 direct_api_mode = "online"
@@ -36,8 +35,7 @@ scopes = "read_assigned_fulfillment_orders,read_checkouts,read_content,read_draf
 
 [auth]
 redirect_urls = [
-  "https://automation.omni-sync.com/authenticate",
-  "https://primary-production-d49a.up.railway.app/rest/oauth2-credential/callback"
+  "https://automation.omni-sync.com/authenticate"
 ]
 
 [pos]
