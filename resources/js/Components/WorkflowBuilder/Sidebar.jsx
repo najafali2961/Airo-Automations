@@ -14,9 +14,12 @@ import {
     ArrowRightIcon,
     CheckIcon,
     AppsIcon,
-    ChevronRightIcon,
     ChevronLeftIcon,
     SearchIcon,
+    StoreIcon,
+    PersonIcon,
+    OrderIcon,
+    ProductIcon,
 } from "@shopify/polaris-icons";
 
 export default function Sidebar({ definitions }) {
@@ -24,87 +27,79 @@ export default function Sidebar({ definitions }) {
     const [selectedApp, setSelectedApp] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
 
+    const mockApps = [
+        { name: "Slack", color: "#4A154B", triggers: [], actions: [] },
+        { name: "Gmail", color: "#EA4335", triggers: [], actions: [] },
+        { name: "Google Sheets", color: "#34A853", triggers: [], actions: [] },
+        { name: "Asana", color: "#F06560", triggers: [], actions: [] },
+        { name: "Mailchimp", color: "#FFE01B", triggers: [], actions: [] },
+    ];
+
     const standardNodes = [
         {
             type: "condition",
             label: "Condition",
             icon: CheckIcon,
             color: "#E29100",
-            description: "Branch your workflow based on rules",
+            description: "Branch workflow logic",
             group: "Logic",
         },
     ];
 
     const apps = definitions?.apps || [];
+    const allApps = [...apps, ...mockApps];
 
-    // Global Search Filtering
     const searchResults = useMemo(() => {
         if (!searchQuery) return null;
         const query = searchQuery.toLowerCase();
-        const results = {
-            apps: [],
-            nodes: [],
-        };
+        const results = { apps: [], nodes: [] };
 
-        // Search logic nodes
         standardNodes.forEach((node) => {
-            if (
-                node.label.toLowerCase().includes(query) ||
-                node.description?.toLowerCase().includes(query)
-            ) {
+            if (node.label.toLowerCase().includes(query)) {
                 results.nodes.push({ ...node, category: "Logic" });
             }
         });
 
-        // Search apps and their nodes
-        apps.forEach((app) => {
-            let matchedApp = false;
-            if (app.name.toLowerCase().includes(query)) {
-                results.apps.push(app);
-                matchedApp = true;
-            }
-
+        allApps.forEach((app) => {
+            if (app.name.toLowerCase().includes(query)) results.apps.push(app);
             app.triggers?.forEach((t) => {
-                if (
-                    t.label.toLowerCase().includes(query) ||
-                    t.description?.toLowerCase().includes(query)
-                ) {
+                if (t.label.toLowerCase().includes(query)) {
                     results.nodes.push({
                         ...t,
                         type: "trigger",
                         category: app.name,
-                        icon: AlertCircleIcon,
+                        icon: t.label.includes("Order")
+                            ? OrderIcon
+                            : t.label.includes("Product")
+                            ? ProductIcon
+                            : t.label.includes("Customer")
+                            ? PersonIcon
+                            : AlertCircleIcon,
                         color: "#008060",
                     });
                 }
             });
-
             app.actions?.forEach((a) => {
-                if (
-                    a.label.toLowerCase().includes(query) ||
-                    a.description?.toLowerCase().includes(query)
-                ) {
+                if (a.label.toLowerCase().includes(query)) {
                     results.nodes.push({
                         ...a,
                         type: "action",
                         category: app.name,
-                        icon: ArrowRightIcon,
+                        icon: a.label.includes("Tag")
+                            ? CheckIcon
+                            : ArrowRightIcon,
                         color: "#0070f3",
                     });
                 }
             });
         });
-
         return results;
-    }, [searchQuery, apps]);
+    }, [searchQuery, apps, allApps]);
 
     const handleSearchChange = (value) => {
         setSearchQuery(value);
-        if (value && view !== "search") {
-            setView("search");
-        } else if (!value && view === "search") {
-            setView("categories");
-        }
+        if (value && view !== "search") setView("search");
+        else if (!value && view === "search") setView("categories");
     };
 
     const handleAppClick = (app) => {
@@ -139,22 +134,20 @@ export default function Sidebar({ definitions }) {
             key={`${node.category}-${node.label}`}
             draggable
             onDragStart={(e) => onDragStart(e, node)}
-            className="cursor-grab group"
+            className="cursor-grab"
         >
-            <Box
-                padding="300"
-                background="bg-surface"
-                borderRadius="200"
-                shadow="100"
-                borderColor="border"
-                borderWidth="025"
-                className="transition-all hover:border-blue-500 hover:shadow-md"
-            >
-                <InlineStack gap="300" align="start" blockAlign="center">
+            <div className="bg-white border-2 border-gray-100 rounded-2xl p-4 transition-all hover:border-blue-500 hover:shadow-sm">
+                <InlineStack
+                    gap="300"
+                    align="start"
+                    blockAlign="center"
+                    wrap={false}
+                >
                     <div
                         style={{
                             color: node.color || "#5c5f62",
                             display: "flex",
+                            flexShrink: 0,
                         }}
                     >
                         <Icon
@@ -162,31 +155,18 @@ export default function Sidebar({ definitions }) {
                             tone="inherit"
                         />
                     </div>
-                    <BlockStack gap="050">
-                        <InlineStack gap="200" align="start">
-                            <Text fontWeight="bold" variant="bodySm">
-                                {node.label}
-                            </Text>
-                            {node.category && (
-                                <Box
-                                    background="bg-fill-secondary"
-                                    paddingInline="100"
-                                    borderRadius="100"
-                                >
-                                    <Text variant="bodyXs" tone="subdued">
-                                        {node.category}
-                                    </Text>
-                                </Box>
-                            )}
-                        </InlineStack>
+                    <BlockStack gap="050" minWidth="0">
+                        <Text fontWeight="bold" variant="bodySm" truncate>
+                            {node.label}
+                        </Text>
                         {node.description && (
-                            <Text variant="bodyXs" tone="subdued">
+                            <Text variant="bodyXs" tone="subdued" truncate>
                                 {node.description}
                             </Text>
                         )}
                     </BlockStack>
                 </InlineStack>
-            </Box>
+            </div>
         </div>
     );
 
@@ -201,78 +181,73 @@ export default function Sidebar({ definitions }) {
             <BlockStack gap="400">
                 <TextField
                     prefix={<Icon source={SearchIcon} tone="subdued" />}
-                    placeholder="Search triggers, actions..."
+                    placeholder="Search triggers..."
                     value={searchQuery}
                     onChange={handleSearchChange}
                     autoComplete="off"
                     clearButton
-                    onClearButtonClick={() => handleSearchChange("")}
                 />
 
                 {view === "categories" && (
                     <BlockStack gap="500">
                         <BlockStack gap="300">
                             <Text variant="headingSm" tone="subdued">
-                                Logic
+                                Choose Integration
                             </Text>
-                            {standardNodes.map((n) =>
-                                renderNodeItem({ ...n, category: "Logic" })
-                            )}
+                            <Box className="overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+                                <InlineStack gap="300" wrap={false}>
+                                    {allApps.map((app) => (
+                                        <div
+                                            key={app.name}
+                                            onClick={() => handleAppClick(app)}
+                                            className="cursor-pointer group flex-shrink-0"
+                                            style={{ width: "80px" }}
+                                        >
+                                            <div className="bg-white border-2 border-gray-100 rounded-2xl p-4 flex flex-col items-center gap-2 transition-all group-hover:border-blue-500 group-hover:shadow-sm">
+                                                <div
+                                                    style={{
+                                                        color:
+                                                            app.color ||
+                                                            "#95a5a6",
+                                                        display: "flex",
+                                                    }}
+                                                >
+                                                    <Icon
+                                                        source={
+                                                            app.name ===
+                                                            "Shopify"
+                                                                ? StoreIcon
+                                                                : AppsIcon
+                                                        }
+                                                        tone="inherit"
+                                                    />
+                                                </div>
+                                                <Text
+                                                    variant="bodyXs"
+                                                    fontWeight="bold"
+                                                    alignment="center"
+                                                    tone="subdued"
+                                                    truncate
+                                                >
+                                                    {app.name}
+                                                </Text>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </InlineStack>
+                            </Box>
                         </BlockStack>
 
                         <Divider />
 
                         <BlockStack gap="300">
                             <Text variant="headingSm" tone="subdued">
-                                Apps
+                                Common Units
                             </Text>
-                            <Box className="grid grid-cols-1 gap-2">
-                                {apps.map((app) => (
-                                    <div
-                                        key={app.name}
-                                        onClick={() => handleAppClick(app)}
-                                        className="cursor-pointer group"
-                                    >
-                                        <Box
-                                            padding="300"
-                                            background="bg-surface"
-                                            borderRadius="200"
-                                            shadow="100"
-                                            borderColor="border"
-                                            borderWidth="025"
-                                            className="transition-all hover:bg-gray-50"
-                                        >
-                                            <InlineStack
-                                                align="space-between"
-                                                blockAlign="center"
-                                            >
-                                                <InlineStack
-                                                    gap="300"
-                                                    align="start"
-                                                    blockAlign="center"
-                                                >
-                                                    <Box
-                                                        background="bg-fill-success"
-                                                        borderRadius="150"
-                                                        padding="100"
-                                                    >
-                                                        <Icon
-                                                            source={AppsIcon}
-                                                            tone="base"
-                                                        />
-                                                    </Box>
-                                                    <Text fontWeight="bold">
-                                                        {app.name}
-                                                    </Text>
-                                                </InlineStack>
-                                                <Icon
-                                                    source={ChevronRightIcon}
-                                                    tone="subdued"
-                                                />
-                                            </InlineStack>
-                                        </Box>
-                                    </div>
-                                ))}
+                            <Box className="grid grid-cols-1 gap-3">
+                                {standardNodes.map((n) =>
+                                    renderNodeItem({ ...n, category: "Logic" })
+                                )}
                             </Box>
                         </BlockStack>
                     </BlockStack>
@@ -280,63 +255,117 @@ export default function Sidebar({ definitions }) {
 
                 {view === "app" && selectedApp && (
                     <BlockStack gap="400">
-                        <Button
-                            icon={ChevronLeftIcon}
-                            onClick={handleBack}
-                            variant="plain"
-                        >
-                            Back to Apps
-                        </Button>
-                        <InlineStack gap="300" blockAlign="center">
-                            <Box
-                                background="bg-fill-success"
-                                borderRadius="150"
-                                padding="100"
+                        <div className="flex items-center justify-between">
+                            <Button
+                                icon={ChevronLeftIcon}
+                                onClick={handleBack}
+                                variant="plain"
                             >
-                                <Icon source={AppsIcon} tone="base" />
+                                Back
+                            </Button>
+                        </div>
+
+                        <div className="bg-white border-2 border-gray-100 rounded-3xl p-6 flex flex-col items-center gap-3">
+                            <div
+                                style={{
+                                    color: selectedApp.color || "#95a5a6",
+                                    display: "flex",
+                                    transform: "scale(1.5)",
+                                }}
+                            >
+                                <Icon
+                                    source={
+                                        selectedApp.name === "Shopify"
+                                            ? StoreIcon
+                                            : AppsIcon
+                                    }
+                                    tone="inherit"
+                                />
+                            </div>
+                            <Text variant="headingMd" fontWeight="bold">
+                                {selectedApp.name}
+                            </Text>
+                        </div>
+
+                        {selectedApp.triggers?.length > 0 ||
+                        selectedApp.actions?.length > 0 ? (
+                            <BlockStack gap="400">
+                                {selectedApp.triggers?.length > 0 && (
+                                    <BlockStack gap="300">
+                                        <Text
+                                            variant="headingSm"
+                                            tone="subdued"
+                                        >
+                                            Triggers
+                                        </Text>
+                                        <Box className="grid grid-cols-1 gap-3">
+                                            {selectedApp.triggers.map((t) =>
+                                                renderNodeItem({
+                                                    ...t,
+                                                    icon: t.label.includes(
+                                                        "Order"
+                                                    )
+                                                        ? OrderIcon
+                                                        : t.label.includes(
+                                                              "Product"
+                                                          )
+                                                        ? ProductIcon
+                                                        : t.label.includes(
+                                                              "Customer"
+                                                          )
+                                                        ? PersonIcon
+                                                        : AlertCircleIcon,
+                                                    color: "#008060",
+                                                    category: selectedApp.name,
+                                                })
+                                            )}
+                                        </Box>
+                                    </BlockStack>
+                                )}
+
+                                {selectedApp.actions?.length > 0 && (
+                                    <BlockStack gap="300">
+                                        <Text
+                                            variant="headingSm"
+                                            tone="subdued"
+                                        >
+                                            Actions
+                                        </Text>
+                                        <Box className="grid grid-cols-1 gap-3">
+                                            {selectedApp.actions.map((a) =>
+                                                renderNodeItem({
+                                                    ...a,
+                                                    icon: a.label.includes(
+                                                        "Tag"
+                                                    )
+                                                        ? CheckIcon
+                                                        : ArrowRightIcon,
+                                                    color: "#0070f3",
+                                                    category: selectedApp.name,
+                                                })
+                                            )}
+                                        </Box>
+                                    </BlockStack>
+                                )}
+                            </BlockStack>
+                        ) : (
+                            <Box padding="600" textAlign="center">
+                                <BlockStack gap="400">
+                                    <Text tone="subdued">Coming soon...</Text>
+                                    <Button onClick={handleBack} size="slim">
+                                        Notify Me
+                                    </Button>
+                                </BlockStack>
                             </Box>
-                            <Text variant="headingMd">{selectedApp.name}</Text>
-                        </InlineStack>
-
-                        {selectedApp.triggers?.length > 0 && (
-                            <BlockStack gap="300">
-                                <Text variant="headingSm" tone="subdued">
-                                    Triggers
-                                </Text>
-                                {selectedApp.triggers.map((trigger) =>
-                                    renderNodeItem({
-                                        ...trigger,
-                                        icon: AlertCircleIcon,
-                                        color: "#008060",
-                                        category: selectedApp.name,
-                                    })
-                                )}
-                            </BlockStack>
-                        )}
-
-                        {selectedApp.actions?.length > 0 && (
-                            <BlockStack gap="300">
-                                <Text variant="headingSm" tone="subdued">
-                                    Actions
-                                </Text>
-                                {selectedApp.actions.map((action) =>
-                                    renderNodeItem({
-                                        ...action,
-                                        icon: ArrowRightIcon,
-                                        color: "#0070f3",
-                                        category: selectedApp.name,
-                                    })
-                                )}
-                            </BlockStack>
                         )}
                     </BlockStack>
                 )}
 
                 {view === "search" && searchResults && (
                     <BlockStack gap="400">
-                        <InlineStack align="space-between">
+                        <InlineStack align="space-between" blockAlign="center">
                             <Text variant="headingSm" tone="subdued">
-                                Search Results
+                                Results
                             </Text>
                             <Button variant="plain" onClick={handleBack}>
                                 Clear
@@ -344,62 +373,74 @@ export default function Sidebar({ definitions }) {
                         </InlineStack>
 
                         {searchResults.nodes.length === 0 &&
-                            searchResults.apps.length === 0 && (
-                                <Box padding="400" textAlign="center">
-                                    <Text tone="subdued">
-                                        No results found for "{searchQuery}"
-                                    </Text>
-                                </Box>
-                            )}
-
-                        {searchResults.apps.length > 0 && (
-                            <BlockStack gap="200">
-                                <Text
-                                    variant="bodyXs"
-                                    fontWeight="bold"
-                                    tone="subdued"
-                                >
-                                    APPS
-                                </Text>
-                                {searchResults.apps.map((app) => (
-                                    <div
-                                        key={app.name}
-                                        onClick={() => handleAppClick(app)}
-                                        className="cursor-pointer"
-                                    >
-                                        <Box
-                                            padding="200"
-                                            background="bg-surface"
-                                            borderRadius="100"
-                                            borderWidth="025"
-                                            borderColor="border"
+                        searchResults.apps.length === 0 ? (
+                            <Box padding="400" textAlign="center">
+                                <Text tone="subdued">Nothing found</Text>
+                            </Box>
+                        ) : (
+                            <BlockStack gap="400">
+                                {searchResults.apps.length > 0 && (
+                                    <BlockStack gap="300">
+                                        <Text
+                                            variant="bodyXs"
+                                            fontWeight="bold"
+                                            tone="subdued"
                                         >
-                                            <InlineStack
-                                                gap="200"
-                                                blockAlign="center"
-                                            >
-                                                <Icon
-                                                    source={AppsIcon}
-                                                    tone="subdued"
-                                                />
-                                                <Text>{app.name}</Text>
-                                            </InlineStack>
-                                        </Box>
-                                    </div>
-                                ))}
-                            </BlockStack>
-                        )}
-
-                        {searchResults.nodes.length > 0 && (
-                            <BlockStack gap="300">
-                                <Text
-                                    variant="bodyXs"
-                                    fontWeight="bold"
-                                    tone="subdued"
-                                >
-                                    TRIGGERS & ACTIONS
-                                </Text>
-                                {searchResults.nodes.map(renderNodeItem)}
+                                            APPS
+                                        </Text>
+                                        <div className="grid grid-cols-1 gap-2">
+                                            {searchResults.apps.map((app) => (
+                                                <div
+                                                    key={app.name}
+                                                    onClick={() =>
+                                                        handleAppClick(app)
+                                                    }
+                                                    className="cursor-pointer"
+                                                >
+                                                    <div className="bg-white border-2 border-gray-100 rounded-2xl p-4 flex items-center gap-3 hover:border-blue-500">
+                                                        <div
+                                                            style={{
+                                                                color:
+                                                                    app.color ||
+                                                                    "#95a5a6",
+                                                                display: "flex",
+                                                            }}
+                                                        >
+                                                            <Icon
+                                                                source={
+                                                                    app.name ===
+                                                                    "Shopify"
+                                                                        ? StoreIcon
+                                                                        : AppsIcon
+                                                                }
+                                                                tone="inherit"
+                                                            />
+                                                        </div>
+                                                        <Text fontWeight="bold">
+                                                            {app.name}
+                                                        </Text>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </BlockStack>
+                                )}
+                                {searchResults.nodes.length > 0 && (
+                                    <BlockStack gap="300">
+                                        <Text
+                                            variant="bodyXs"
+                                            fontWeight="bold"
+                                            tone="subdued"
+                                        >
+                                            UNITS
+                                        </Text>
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {searchResults.nodes.map(
+                                                renderNodeItem
+                                            )}
+                                        </div>
+                                    </BlockStack>
+                                )}
                             </BlockStack>
                         )}
                     </BlockStack>
