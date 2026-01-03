@@ -12,7 +12,7 @@ class AddOrderTag extends BaseAction
     public function handle(Node $node, array $payload, Execution $execution): void
     {
         $shop = $this->getShop($execution);
-        $settings = $node->settings['form'] ?? $node->settings;
+        $settings = $this->getSettings($node);
         
         $orderId = $payload['id'] ?? $payload['admin_graphql_api_id'] ?? $settings['order_id'] ?? null;
         $tagsToAdd = $settings['tag'] ?? $settings['tags'] ?? null;

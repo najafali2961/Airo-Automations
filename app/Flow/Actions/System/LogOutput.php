@@ -11,7 +11,8 @@ class LogOutput extends BaseAction
 {
     public function handle(Node $node, array $payload, Execution $execution): void
     {
-        $message = $node->settings['form']['message'] ?? 'No message provided.';
+        $settings = $this->getSettings($node);
+        $message = $settings['message'] ?? 'No message provided.';
         
         Log::info("Flow Engine Log: " . $message, [
             'flow_id' => $execution->flow_id,

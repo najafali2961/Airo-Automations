@@ -48,9 +48,9 @@ Route::middleware(['verify.shopify'])->group(function () {
 });
 
 Route::post('/webhooks/shopify-automation', [\App\Http\Controllers\WebhookController::class, 'handle'])->name('webhooks.handle');
-Route::post('/webhook/{any}', [\App\Http\Controllers\WebhookController::class, 'handle'])->where('any', '.*');
+Route::post('/shopify-webhooks/{any}', [\App\Http\Controllers\WebhookController::class, 'handle'])->where('any', '.*');
 
-Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
+Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
 
 // make test route
 Route::get('/test/shopify', [DashboardController::class, 'handleShopifyCall']);

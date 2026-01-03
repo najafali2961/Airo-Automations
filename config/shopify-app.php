@@ -387,83 +387,83 @@ return [
     'webhooks' => [
         [
             'topic' => 'PRODUCTS_UPDATE',
-            'address' => 'https://automation.omni-sync.com/webhook/products-update'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/products-update'
         ],
         [
             'topic' => 'PRODUCTS_DELETE',
-            'address' => 'https://automation.omni-sync.com/webhook/products-delete'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/products-delete'
         ],
         [
             'topic' => 'PRODUCTS_CREATE',
-            'address' => 'https://automation.omni-sync.com/webhook/products-create'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/products-create'
         ],
         [
             'topic' => 'PRODUCT_PUBLICATIONS_CREATE',
-            'address' => 'https://automation.omni-sync.com/webhook/products-published'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/products-published'
         ],
         [
             'topic' => 'PRODUCT_PUBLICATIONS_DELETE',
-            'address' => 'https://automation.omni-sync.com/webhook/products-unpublished'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/products-unpublished'
         ],
         [
             'topic' => 'ORDERS_CREATE',
-            'address' => 'https://automation.omni-sync.com/webhook/orders-create'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-create'
         ],
         [
             'topic' => 'ORDERS_UPDATED',
-            'address' => 'https://automation.omni-sync.com/webhook/orders-updated'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-updated'
         ],
         [
             'topic' => 'ORDERS_PAID',
-            'address' => 'https://automation.omni-sync.com/webhook/orders-paid'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-paid'
         ],
         [
             'topic' => 'ORDERS_CANCELLED',
-            'address' => 'https://automation.omni-sync.com/webhook/orders-cancelled'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-cancelled'
         ],
         [
             'topic' => 'ORDERS_FULFILLED',
-            'address' => 'https://automation.omni-sync.com/webhook/orders-fulfilled'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-fulfilled'
         ],
         [
             'topic' => 'ORDERS_PARTIALLY_FULFILLED',
-            'address' => 'https://automation.omni-sync.com/webhook/orders-partially-fulfilled'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-partially-fulfilled'
         ],
         [
             'topic' => 'ORDERS_DELETE',
-            'address' => 'https://automation.omni-sync.com/webhook/orders-deleted'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-deleted'
         ],
         [
             'topic' => 'CUSTOMERS_CREATE',
-            'address' => 'https://automation.omni-sync.com/webhook/customers-create'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/customers-create'
         ],
         [
             'topic' => 'CUSTOMERS_UPDATE',
-            'address' => 'https://automation.omni-sync.com/webhook/customers-update'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/customers-update'
         ],
         [
             'topic' => 'CUSTOMERS_DELETE',
-            'address' => 'https://automation.omni-sync.com/webhook/customers-delete'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/customers-delete'
         ],
         [
             'topic' => 'COLLECTIONS_CREATE',
-            'address' => 'https://automation.omni-sync.com/webhook/collections-create'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/collections-create'
         ],
         [
             'topic' => 'COLLECTIONS_UPDATE',
-            'address' => 'https://automation.omni-sync.com/webhook/collections-update'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/collections-update'
         ],
         [
             'topic' => 'COLLECTIONS_DELETE',
-            'address' => 'https://automation.omni-sync.com/webhook/collections-delete'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/collections-delete'
         ],
         [
             'topic' => 'SHOP_UPDATE',
-            'address' => 'https://automation.omni-sync.com/webhook/shop-update'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/shop-update'
         ],
         [
             'topic' => 'APP_UNINSTALLED',
-            'address' => 'https://automation.omni-sync.com/webhook/app-uninstalled'
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/app-uninstalled'
         ],
         /*
             [

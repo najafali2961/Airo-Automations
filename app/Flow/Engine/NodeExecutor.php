@@ -90,7 +90,7 @@ class NodeExecutor
 
         // Context-aware dynamic mapping (Legacy support / Conveniences)
         if ($actionKey === 'add_tag') {
-            $topic = $execution->event;
+            $topic = strtoupper($execution->event);
             if (str_contains($topic, 'PRODUCT')) $actionKey = 'add_product_tag';
             elseif (str_contains($topic, 'ORDER')) $actionKey = 'add_order_tag';
             elseif (str_contains($topic, 'CUSTOMER')) $actionKey = 'add_customer_tag';

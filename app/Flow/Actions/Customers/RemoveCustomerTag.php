@@ -11,7 +11,7 @@ class RemoveCustomerTag extends BaseAction
     public function handle(Node $node, array $payload, Execution $execution): void
     {
         $shop = $this->getShop($execution);
-        $settings = $node->settings['form'] ?? $node->settings;
+        $settings = $this->getSettings($node);
         
         $customerId = $payload['id'] ?? $payload['admin_graphql_api_id'] ?? $settings['customer_id'] ?? null;
         $tagsToRemove = $settings['tags'] ?? $settings['tag'] ?? null;

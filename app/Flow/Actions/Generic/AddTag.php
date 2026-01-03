@@ -14,7 +14,7 @@ class AddTag extends BaseAction
 {
     public function handle(Node $node, array $payload, Execution $execution): void
     {
-        $topic = $execution->event;
+        $topic = strtoupper($execution->event);
         
         // Determine resource type from topic
         if (str_contains($topic, 'PRODUCT')) {

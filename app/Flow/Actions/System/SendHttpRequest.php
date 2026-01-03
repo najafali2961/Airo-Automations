@@ -11,7 +11,7 @@ class SendHttpRequest extends BaseAction
 {
     public function handle(Node $node, array $payload, Execution $execution): void
     {
-        $settings = $node->settings['form'] ?? $node->settings;
+        $settings = $this->getSettings($node);
         
         $method = strtoupper($settings['method'] ?? 'POST');
         $url = $settings['url'] ?? null;

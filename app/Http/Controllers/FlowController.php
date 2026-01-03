@@ -47,7 +47,6 @@ class FlowController extends Controller
                  'description' => $action['description'],
                  'settings' => [
                      'action' => $action['key'],
-                     'form' => []
                  ],
                  'group' => $action['category'],
                  'icon' => $action['icon'],

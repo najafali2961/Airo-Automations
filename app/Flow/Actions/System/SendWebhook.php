@@ -12,7 +12,7 @@ class SendWebhook extends BaseAction
 {
     public function handle(Node $node, array $payload, Execution $execution): void
     {
-        $settings = $node->settings['form'] ?? $node->settings;
+        $settings = $this->getSettings($node);
         $url = $settings['url'] ?? null;
 
         if (!$url) {

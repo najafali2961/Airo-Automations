@@ -11,7 +11,7 @@ class AddCustomerTag extends BaseAction
     public function handle(Node $node, array $payload, Execution $execution): void
     {
         $shop = $this->getShop($execution);
-        $settings = $node->settings['form'] ?? $node->settings;
+        $settings = $this->getSettings($node);
         
         // Customers create webhook has customer data as root, Orders create has 'customer' nested.
         $customerId = $payload['customer']['id'] ?? $payload['id'] ?? $settings['customer_id'] ?? null;

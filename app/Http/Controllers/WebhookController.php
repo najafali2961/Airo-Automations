@@ -36,13 +36,10 @@ class WebhookController extends Controller
         Log::info("Webhook Checked: $topic for $shopDomain", ['event_id' => $eventId]);
 
         // 3. Find Matching Active Flows
-        // We need to match the shop (if we are multi-tenant) and the topic.
-        // Assuming 'flows' table has 'shop_id' which maps to a User or Shop model.
-        // But headers give us domain, not ID. We might need to look up shop.
-        // For simple single-app context with auth()->user(), webhooks are stateless.
-        // We need to find the shop by domain. 
-        // Assuming User model has 'name' as domain (standard in osiset) or 'domain' field.
-        
+        // Shopify sends topics like 'orders/create' (REST) or 'ORDERS_CREATE' (GraphQL)
+        // Our config uses uppercase with underscores.
+        $normalizedTopic = strtoupper(str_replace(['/', '-'], '_', $topic));
+
         $userModel = config('auth.providers.users.model');
         $shop = $userModel::where('name', $shopDomain)->first();
 
@@ -52,15 +49,20 @@ class WebhookController extends Controller
         }
 
         // Query Flows: Active, Belongs to Shop, Has Trigger with matching topic
+        // We check both the incoming topic and the normalized version
         $flows = Flow::where('shop_id', $shop->id)
             ->where('active', true)
-            ->whereHas('nodes', function ($query) use ($topic) {
+            ->whereHas('nodes', function ($query) use ($topic, $normalizedTopic) {
                 $query->where('type', 'trigger')
-                      ->where('settings->topic', $topic);
+                      ->where(function($q) use ($topic, $normalizedTopic) {
+                          $q->where('settings->topic', $topic)
+                            ->orWhere('settings->topic', $normalizedTopic);
+                      });
             })
             ->get();
 
         if ($flows->isEmpty()) {
+            Log::info("No active flows found for topic: $topic or $normalizedTopic");
             return response()->json(['message' => 'No active flows found for this topic'], 200);
         }
 

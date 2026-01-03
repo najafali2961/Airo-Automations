@@ -29,7 +29,20 @@ abstract class BaseAction implements ActionInterface
     /**
      * Get the Shopify API instance for the shop owning the execution.
      */
-    protected function getShop(Execution $execution)
+    /**
+     * Helper to get consolidated settings from a node.
+     * Merges 'form' into the main settings if it's not empty.
+     */
+    protected function getSettings(Node $node): array
+    {
+        $settings = $node->settings ?? [];
+        if (isset($settings['form']) && is_array($settings['form']) && !empty($settings['form'])) {
+            return array_merge($settings, $settings['form']);
+        }
+        return $settings;
+    }
+
+    public function getShop(Execution $execution)
     {
         $flow = $execution->flow;
         $userModel = config('auth.providers.users.model');

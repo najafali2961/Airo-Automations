@@ -28,7 +28,7 @@ class ShopifyGqlAction extends BaseAction
     {
         $shop = $this->getShop($execution);
         $actionKey = $node->settings['action'] ?? null;
-        $settings = $node->settings['form'] ?? $node->settings;
+        $settings = $this->getSettings($node);
 
         if (!isset(self::$mutationMap[$actionKey])) {
             // Fallback: If not mapped, we might try to handle it specifically or log error
