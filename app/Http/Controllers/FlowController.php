@@ -13,7 +13,10 @@ class FlowController extends Controller
 {
     public function index() {
         return Inertia::render('Workflows/Index', [
-             'flows' => auth()->user()->flows()->orderByDesc('updated_at')->get()
+             'flows' => auth()->user()->flows()
+                ->withCount(['executions as execution_count'])
+                ->orderByDesc('updated_at')
+                ->get()
         ]);
     }
 
@@ -88,8 +91,7 @@ class FlowController extends Controller
                 $flow->update(['name' => $validated['name']]);
                 
                 // Reset nodes/edges
-                // Deleting nodes cascades to edges in DB if set up correctly, 
-                // but explicit delete is safer for Eloquent events if we use them later.
+                $flow->edges()->delete();
                 $flow->nodes()->delete(); 
             } else {
                 $flow = $user->flows()->create([
@@ -116,15 +118,23 @@ class FlowController extends Controller
             }
 
             // Save edges
+            $savedEdges = [];
             foreach ($validated['edges'] as $edgeData) {
                 if (isset($nodeMap[$edgeData['source']]) && isset($nodeMap[$edgeData['target']])) {
+                    $sourceId = $nodeMap[$edgeData['source']];
+                    $targetId = $nodeMap[$edgeData['target']];
                     $label = $edgeData['label'] ?? $edgeData['sourceHandle'] ?? 'then';
+
+                    // Prevent duplicate edges (same source, target, and label)
+                    $edgeKey = "{$sourceId}-{$targetId}-{$label}";
+                    if (in_array($edgeKey, $savedEdges)) continue;
                     
                     $flow->edges()->create([
-                        'source_node_id' => $nodeMap[$edgeData['source']],
-                        'target_node_id' => $nodeMap[$edgeData['target']],
+                        'source_node_id' => $sourceId,
+                        'target_node_id' => $targetId,
                         'label' => $label
                     ]);
+                    $savedEdges[] = $edgeKey;
                 }
             }
             

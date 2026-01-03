@@ -59,6 +59,7 @@ class FlowEngine
             }
 
             // 3. Delegate execution to NodeExecutor
+            $this->nodeExecutor->clearVisited();
             $this->nodeExecutor->run($triggerNode, $payload, $execution);
 
             // 4. Finalize Execution

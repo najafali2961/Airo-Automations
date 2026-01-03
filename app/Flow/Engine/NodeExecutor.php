@@ -17,11 +17,16 @@ class NodeExecutor
         $this->conditionEvaluator = $conditionEvaluator;
     }
 
-    public function run(Node $node, array $data, Execution $execution): void
+    public function clearVisited(): void
     {
-        if (in_array($node->id, $this->visited)) {
-            $this->log($execution, $node->id, 'error', "Cycle detected at node #{$node->id}");
-            throw new \Exception("Cycle detected at node #{$node->id}");
+        $this->visited = [];
+    }
+
+    public function run(Node $node, array $data, Execution $execution, array $stack = []): void
+    {
+        if (in_array($node->id, $stack)) {
+            $this->log($execution, $node->id, 'error', "Infinite loop detected at node #{$node->id}");
+            throw new \Exception("Infinite loop detected at node #{$node->id}");
         }
 
         if (count($this->visited) >= $this->maxDepth) {
@@ -29,6 +34,7 @@ class NodeExecutor
             throw new \Exception("Max execution depth reached.");
         }
 
+        $stack[] = $node->id;
         $this->visited[] = $node->id;
         $execution->increment('nodes_executed');
 
@@ -75,7 +81,7 @@ class NodeExecutor
             }
 
             foreach ($nextNodes as $nextNode) {
-                $this->run($nextNode, $data, $execution);
+                $this->run($nextNode, $data, $execution, $stack);
             }
 
         } catch (\Throwable $e) {

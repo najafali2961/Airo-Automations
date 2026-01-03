@@ -13,20 +13,39 @@ class ExecutionsController extends Controller
     {
         $shop = Auth::user();
         
-        $query = Execution::with('flow')
+        $queryBuilder = Execution::with('flow')
             ->whereHas('flow', fn($q) => $q->where('shop_id', $shop->id));
 
-        if ($request->has('flow_id')) {
-            $query->where('flow_id', $request->flow_id);
+        if ($request->filled('flow_id')) {
+            $queryBuilder->where('flow_id', $request->flow_id);
         }
 
-        $executions = $query->orderBy('created_at', 'desc')
-            ->paginate(15)
-            ->withQueryString();
+        if ($request->filled('status')) {
+            $queryBuilder->where('status', $request->status);
+        }
+
+        if ($request->filled('query')) {
+            $s = $request->input('query');
+            $queryBuilder->where(function($q) use ($s) {
+                $q->where('event', 'like', "%{$s}%")
+                  ->orWhereHas('flow', fn($fq) => $fq->where('name', 'like', "%{$s}%"));
+            });
+        }
+
+        $sort = $request->input('sort');
+        if (!is_string($sort) || !str_contains($sort, ' ')) {
+            $sort = 'created_at desc';
+        }
+
+        [$column, $direction] = explode(' ', $sort);
+        $queryBuilder->orderBy($column, $direction);
+
+        $executions = $queryBuilder->paginate(15)->withQueryString();
 
         return Inertia::render('Executions/Index', [
             'executions' => $executions,
-            'flow_id' => $request->flow_id
+            'flow_id' => $request->flow_id,
+            'filters' => $request->only(['query', 'status', 'sort'])
         ]);
     }
 

@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Head, router } from "@inertiajs/react";
 import {
     Page,
-    Card,
+    LegacyCard,
     IndexTable,
     Text,
     Badge,
@@ -10,10 +10,170 @@ import {
     BlockStack,
     Box,
     InlineStack,
+    IndexFilters,
+    useSetIndexFiltersMode,
+    useIndexResourceState,
+    ChoiceList,
+    useBreakpoints,
 } from "@shopify/polaris";
 
-export default function Index({ executions }) {
-    const { data, links, meta } = executions;
+export default function Index({ executions, filters: serverFilters = {} }) {
+    const { data } = executions;
+
+    // Filter states
+    const [queryValue, setQueryValue] = useState(serverFilters.query || "");
+
+    // Strict helper to ensure value is an array of strings
+    const ensureStringArray = (val, fallback = []) => {
+        if (!val) return fallback;
+        const arr = Array.isArray(val) ? val : [val];
+        return arr.filter(
+            (item) => typeof item === "string" && item.length > 0
+        );
+    };
+
+    const [statusSelected, setStatusSelected] = useState(() =>
+        ensureStringArray(serverFilters.status)
+    );
+
+    const [sortSelected, setSortSelected] = useState(() => {
+        const arr = ensureStringArray(serverFilters.sort);
+        return arr.length > 0 ? arr : ["created_at desc"];
+    });
+
+    const { mode, setMode } = useSetIndexFiltersMode();
+
+    // Map status to tab index
+    const getTabIndex = (status) => {
+        if (status === "success") return 1;
+        if (status === "failed") return 2;
+        return 0;
+    };
+
+    const [selectedTab, setSelectedTab] = useState(() =>
+        getTabIndex(
+            Array.isArray(serverFilters.status)
+                ? serverFilters.status[0]
+                : serverFilters.status
+        )
+    );
+
+    const tabs = [
+        { content: "All", index: 0, id: "all" },
+        { content: "Success", index: 1, id: "success" },
+        { content: "Failed", index: 2, id: "failed" },
+    ];
+
+    const sortOptions = [
+        {
+            label: "Date",
+            value: "created_at desc",
+            directionLabel: "Newest first",
+        },
+        {
+            label: "Date",
+            value: "created_at asc",
+            directionLabel: "Oldest first",
+        },
+    ];
+
+    const resourceName = { singular: "execution", plural: "executions" };
+
+    const { selectedResources, allResourcesSelected, handleSelectionChange } =
+        useIndexResourceState(data);
+
+    // Final update function to sync with server
+    const navigate = useCallback((params) => {
+        const cleanParams = Object.fromEntries(
+            Object.entries(params).filter(
+                ([_, v]) =>
+                    v != null &&
+                    v !== "" &&
+                    !(Array.isArray(v) && v.length === 0)
+            )
+        );
+
+        router.get(window.location.pathname, cleanParams, {
+            preserveState: true,
+            replace: true,
+        });
+    }, []);
+
+    const handleFiltersQueryChange = useCallback(
+        (value) => {
+            setQueryValue(value);
+            navigate({
+                query: value,
+                status: statusSelected[0],
+                sort: sortSelected[0],
+            });
+        },
+        [statusSelected, sortSelected, navigate]
+    );
+
+    const handleStatusChange = useCallback(
+        (value) => {
+            const safeValue = ensureStringArray(value);
+            setStatusSelected(safeValue);
+            setSelectedTab(getTabIndex(safeValue[0]));
+            navigate({
+                query: queryValue,
+                status: safeValue[0],
+                sort: sortSelected[0],
+            });
+        },
+        [queryValue, sortSelected, navigate]
+    );
+
+    const handleSortChange = useCallback(
+        (value) => {
+            const safeValue = ensureStringArray(value, ["created_at desc"]);
+            setSortSelected(safeValue);
+            navigate({
+                query: queryValue,
+                status: statusSelected[0],
+                sort: safeValue[0],
+            });
+        },
+        [queryValue, statusSelected, navigate]
+    );
+
+    const handleFiltersClearAll = useCallback(() => {
+        setQueryValue("");
+        setStatusSelected([]);
+        setSelectedTab(0);
+        navigate({});
+    }, [navigate]);
+
+    const filters = [
+        {
+            key: "status",
+            label: "Status",
+            filter: (
+                <ChoiceList
+                    title="Status"
+                    titleHidden
+                    choices={[
+                        { label: "Success", value: "success" },
+                        { label: "Failed", value: "failed" },
+                        { label: "Running", value: "running" },
+                    ]}
+                    selected={statusSelected}
+                    onChange={handleStatusChange}
+                />
+            ),
+            shortcut: true,
+        },
+    ];
+
+    const appliedFilters = [];
+    if (statusSelected && statusSelected.length > 0 && statusSelected[0]) {
+        appliedFilters.push({
+            key: "status",
+            label: `Status: ${statusSelected[0]}`,
+            onRemove: () => handleStatusChange([]),
+        });
+    }
 
     const StatusBadge = ({ status }) => {
         let tone = "subdued";
@@ -21,13 +181,7 @@ export default function Index({ executions }) {
         if (status === "failed") tone = "critical";
         if (status === "running") tone = "info";
         if (status === "partial") tone = "attention";
-
         return <Badge tone={tone}>{status.toUpperCase()}</Badge>;
-    };
-
-    const resourceName = {
-        singular: "execution",
-        plural: "executions",
     };
 
     const rowMarkup = data.map((execution, index) => (
@@ -35,14 +189,15 @@ export default function Index({ executions }) {
             id={execution.id}
             key={execution.id}
             position={index}
-            onClick={() =>
-                router.visit(
-                    `/executions/${execution.id}` + window.location.search
-                )
-            }
+            selected={selectedResources.includes(execution.id)}
         >
             <IndexTable.Cell>
-                <StatusBadge status={execution.status} />
+                <div
+                    onClick={() => router.visit(`/executions/${execution.id}`)}
+                    className="cursor-pointer"
+                >
+                    <StatusBadge status={execution.status} />
+                </div>
             </IndexTable.Cell>
             <IndexTable.Cell>
                 <Text variant="bodyMd" fontWeight="bold" as="span">
@@ -54,7 +209,7 @@ export default function Index({ executions }) {
             </IndexTable.Cell>
             <IndexTable.Cell>
                 <Text variant="bodyMd" tone="subdued" as="span">
-                    {execution.external_event_id.substring(0, 12)}...
+                    {(execution.external_event_id || "").substring(0, 12)}...
                 </Text>
             </IndexTable.Cell>
             <IndexTable.Cell>
@@ -71,12 +226,41 @@ export default function Index({ executions }) {
             subtitle="Monitor every single detail of your workflow executions."
         >
             <Head title="Executions" />
-
             <BlockStack gap="500">
-                <Card padding="0">
+                <LegacyCard>
+                    <IndexFilters
+                        sortOptions={sortOptions}
+                        sortSelected={sortSelected}
+                        queryValue={queryValue}
+                        queryPlaceholder="Search executions..."
+                        onQueryChange={handleFiltersQueryChange}
+                        onQueryClear={() => handleFiltersQueryChange("")}
+                        onSort={handleSortChange}
+                        tabs={tabs}
+                        selected={selectedTab}
+                        onSelect={(index) => {
+                            const status =
+                                tabs[index].id === "all"
+                                    ? []
+                                    : [tabs[index].id];
+                            handleStatusChange(status);
+                        }}
+                        filters={filters}
+                        appliedFilters={appliedFilters}
+                        onClearAll={handleFiltersClearAll}
+                        mode={mode}
+                        setMode={setMode}
+                    />
                     <IndexTable
+                        condensed={useBreakpoints().smDown}
                         resourceName={resourceName}
                         itemCount={data.length}
+                        selectedItemsCount={
+                            allResourcesSelected
+                                ? "All"
+                                : selectedResources.length
+                        }
+                        onSelectionChange={handleSelectionChange}
                         headings={[
                             { title: "Status" },
                             { title: "Workflow" },
@@ -84,11 +268,9 @@ export default function Index({ executions }) {
                             { title: "Event ID" },
                             { title: "Date" },
                         ]}
-                        selectable={false}
                     >
                         {rowMarkup}
                     </IndexTable>
-
                     <Box padding="400">
                         <InlineStack align="center">
                             <Pagination
@@ -103,7 +285,7 @@ export default function Index({ executions }) {
                             />
                         </InlineStack>
                     </Box>
-                </Card>
+                </LegacyCard>
             </BlockStack>
         </Page>
     );
