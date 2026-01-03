@@ -398,6 +398,14 @@ return [
             'address' => 'https://automation.omni-sync.com/webhook/products-create'
         ],
         [
+            'topic' => 'PRODUCT_PUBLICATIONS_CREATE',
+            'address' => 'https://automation.omni-sync.com/webhook/products-published'
+        ],
+        [
+            'topic' => 'PRODUCT_PUBLICATIONS_DELETE',
+            'address' => 'https://automation.omni-sync.com/webhook/products-unpublished'
+        ],
+        [
             'topic' => 'ORDERS_CREATE',
             'address' => 'https://automation.omni-sync.com/webhook/orders-create'
         ],
@@ -408,6 +416,54 @@ return [
         [
             'topic' => 'ORDERS_PAID',
             'address' => 'https://automation.omni-sync.com/webhook/orders-paid'
+        ],
+        [
+            'topic' => 'ORDERS_CANCELLED',
+            'address' => 'https://automation.omni-sync.com/webhook/orders-cancelled'
+        ],
+        [
+            'topic' => 'ORDERS_FULFILLED',
+            'address' => 'https://automation.omni-sync.com/webhook/orders-fulfilled'
+        ],
+        [
+            'topic' => 'ORDERS_PARTIALLY_FULFILLED',
+            'address' => 'https://automation.omni-sync.com/webhook/orders-partially-fulfilled'
+        ],
+        [
+            'topic' => 'ORDERS_DELETE',
+            'address' => 'https://automation.omni-sync.com/webhook/orders-deleted'
+        ],
+        [
+            'topic' => 'CUSTOMERS_CREATE',
+            'address' => 'https://automation.omni-sync.com/webhook/customers-create'
+        ],
+        [
+            'topic' => 'CUSTOMERS_UPDATE',
+            'address' => 'https://automation.omni-sync.com/webhook/customers-update'
+        ],
+        [
+            'topic' => 'CUSTOMERS_DELETE',
+            'address' => 'https://automation.omni-sync.com/webhook/customers-delete'
+        ],
+        [
+            'topic' => 'COLLECTIONS_CREATE',
+            'address' => 'https://automation.omni-sync.com/webhook/collections-create'
+        ],
+        [
+            'topic' => 'COLLECTIONS_UPDATE',
+            'address' => 'https://automation.omni-sync.com/webhook/collections-update'
+        ],
+        [
+            'topic' => 'COLLECTIONS_DELETE',
+            'address' => 'https://automation.omni-sync.com/webhook/collections-delete'
+        ],
+        [
+            'topic' => 'SHOP_UPDATE',
+            'address' => 'https://automation.omni-sync.com/webhook/shop-update'
+        ],
+        [
+            'topic' => 'APP_UNINSTALLED',
+            'address' => 'https://automation.omni-sync.com/webhook/app-uninstalled'
         ],
         /*
             [
