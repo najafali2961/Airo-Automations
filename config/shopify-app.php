@@ -465,6 +465,62 @@ return [
             'topic' => 'APP_UNINSTALLED',
             'address' => 'https://automation.omni-sync.com/shopify-webhooks/app-uninstalled'
         ],
+        [
+            'topic' => 'DISCOUNTS_CREATE',
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/discounts-create'
+        ],
+        [
+            'topic' => 'DISCOUNTS_UPDATE',
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/discounts-update'
+        ],
+        [
+            'topic' => 'DISCOUNTS_DELETE',
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/discounts-delete'
+        ],
+        [
+            'topic' => 'CHECKOUTS_CREATE',
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/checkouts-create'
+        ],
+        [
+            'topic' => 'CHECKOUTS_UPDATE',
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/checkouts-update'
+        ],
+        [
+            'topic' => 'CHECKOUTS_DELETE',
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/checkouts-delete'
+        ],
+        [
+            'topic' => 'INVENTORY_LEVELS_UPDATE',
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/inventory-levels-update'
+        ],
+        [
+            'topic' => 'INVENTORY_ITEMS_CREATE',
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/inventory-items-create'
+        ],
+        [
+            'topic' => 'INVENTORY_ITEMS_UPDATE',
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/inventory-items-update'
+        ],
+        [
+            'topic' => 'BULK_OPERATIONS_FINISH',
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/bulk-operations-finish'
+        ],
+       [
+    'topic' => 'FULFILLMENT_ORDERS_CANCELLATION_REQUEST_SUBMITTED',
+    'address' => 'https://automation.omni-sync.com/shopify-webhooks/fulfillment-orders-cancellation-request'
+],
+        [
+            'topic' => 'CARTS_CREATE',
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/carts-create'
+        ],
+        [
+            'topic' => 'CARTS_UPDATE',
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/carts-update'
+        ],
+        [
+            'topic' => 'APP_SUBSCRIPTIONS_UPDATE',
+            'address' => 'https://automation.omni-sync.com/shopify-webhooks/app-subscriptions-update'
+        ],
         /*
             [
                 'topic' => env('SHOPIFY_WEBHOOK_1_TOPIC', 'ORDERS_CREATE'),

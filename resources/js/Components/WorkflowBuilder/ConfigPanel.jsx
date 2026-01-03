@@ -173,51 +173,128 @@ function getAllTriggers(definitions) {
 }
 
 const ConditionSettings = ({ settings, onChange }) => {
-    const rules = settings.rules || [{}];
-    const rule = rules[0];
+    const rules = settings.rules || [{ field: "", operator: "=", value: "" }];
 
-    const updateRule = (key, val) => {
-        const newRule = { ...rule, [key]: val };
-        onChange("rules", [newRule]);
+    const updateRule = (index, key, val) => {
+        const newRules = [...rules];
+        newRules[index] = { ...newRules[index], [key]: val };
+        onChange("rules", newRules);
     };
+
+    const addRule = () => {
+        onChange("rules", [...rules, { field: "", operator: "=", value: "" }]);
+    };
+
+    const removeRule = (index) => {
+        const newRules = rules.filter((_, i) => i !== index);
+        onChange(
+            "rules",
+            newRules.length > 0
+                ? newRules
+                : [{ field: "", operator: "=", value: "" }]
+        );
+    };
+
+    const commonFields = [
+        { label: "Custom Path", value: "" },
+        { label: "Order Total Price", value: "total_price" },
+        { label: "Order Subtotal", value: "subtotal_price" },
+        { label: "Order Tags", value: "tags" },
+        { label: "Customer Tags", value: "customer.tags" },
+        { label: "Line Items Count", value: "line_items.length" },
+        { label: "Shipping Country", value: "shipping_address.country_code" },
+        { label: "Product Title", value: "title" },
+        { label: "Product Type", value: "product_type" },
+        { label: "Customer Email", value: "email" },
+    ];
+
+    const operators = [
+        { label: "Equals", value: "=" },
+        { label: "Not Equals", value: "!=" },
+        { label: "Greater Than", value: ">" },
+        { label: "Less Than", value: "<" },
+        { label: "Greater or Equal", value: ">=" },
+        { label: "Less or Equal", value: "<=" },
+        { label: "Contains", value: "contains" },
+        { label: "Not Contains", value: "not_contains" },
+    ];
 
     return (
         <BlockStack gap="400">
             <Select
-                label="Logic"
+                label="Match Rules Using Logic"
                 options={[
-                    { label: "AND", value: "AND" },
-                    { label: "OR", value: "OR" },
+                    { label: "All rules must match (AND)", value: "AND" },
+                    { label: "Any rule can match (OR)", value: "OR" },
                 ]}
                 value={settings.logic || "AND"}
                 onChange={(v) => onChange("logic", v)}
             />
+
             <Divider />
-            <Text variant="headingSm">Rule</Text>
-            <TextField
-                label="Field Path"
-                value={rule.field || ""}
-                onChange={(v) => updateRule("field", v)}
-                placeholder="order.total_price"
-                helpText="Use dot notation for nested fields"
-            />
-            <Select
-                label="Operator"
-                options={[
-                    { label: "Equals", value: "=" },
-                    { label: "Not Equals", value: "!=" },
-                    { label: "Greater Than", value: ">" },
-                    { label: "Less Than", value: "<" },
-                    { label: "Contains", value: "contains" },
-                ]}
-                value={rule.operator || "="}
-                onChange={(v) => updateRule("operator", v)}
-            />
-            <TextField
-                label="Value"
-                value={rule.value || ""}
-                onChange={(v) => updateRule("value", v)}
-            />
+
+            {rules.map((rule, index) => (
+                <Box
+                    key={index}
+                    padding="300"
+                    background="bg-surface-secondary"
+                    borderRadius="200"
+                >
+                    <BlockStack gap="300">
+                        <InlineStack align="space-between">
+                            <Text variant="headingSm">Rule {index + 1}</Text>
+                            {rules.length > 1 && (
+                                <Button
+                                    tone="critical"
+                                    variant="plain"
+                                    onClick={() => removeRule(index)}
+                                    size="slim"
+                                >
+                                    Remove
+                                </Button>
+                            )}
+                        </InlineStack>
+
+                        <Select
+                            label="Quick Fields"
+                            options={commonFields}
+                            value={
+                                commonFields.find((f) => f.value === rule.field)
+                                    ?.value || ""
+                            }
+                            onChange={(v) => {
+                                if (v) updateRule(index, "field", v);
+                            }}
+                        />
+
+                        <TextField
+                            label="Field Path"
+                            value={rule.field || ""}
+                            onChange={(v) => updateRule(index, "field", v)}
+                            placeholder="e.g. total_price"
+                            autoComplete="off"
+                        />
+
+                        <Select
+                            label="Operator"
+                            options={operators}
+                            value={rule.operator || "="}
+                            onChange={(v) => updateRule(index, "operator", v)}
+                        />
+
+                        <TextField
+                            label="Value"
+                            value={rule.value || ""}
+                            onChange={(v) => updateRule(index, "value", v)}
+                            autoComplete="off"
+                        />
+                    </BlockStack>
+                </Box>
+            ))}
+
+            <Button onClick={addRule} fullWidth>
+                Add Another Rule
+            </Button>
         </BlockStack>
     );
 };

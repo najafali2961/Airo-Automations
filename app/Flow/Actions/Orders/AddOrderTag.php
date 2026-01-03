@@ -14,7 +14,17 @@ class AddOrderTag extends BaseAction
         $shop = $this->getShop($execution);
         $settings = $this->getSettings($node);
         
-        $orderId = $payload['id'] ?? $payload['admin_graphql_api_id'] ?? $settings['order_id'] ?? null;
+        $orderId = $payload['admin_graphql_api_id'] ?? $settings['order_id'] ?? null;
+        
+        // If we only have numeric ID, convert to GID
+        if ($orderId && !str_starts_with((string)$orderId, 'gid://')) {
+            $orderId = "gid://shopify/Order/{$orderId}";
+        }
+
+        if (!$orderId && !empty($payload['id'])) {
+             $orderId = "gid://shopify/Order/" . $payload['id'];
+        }
+
         $tagsToAdd = $settings['tag'] ?? $settings['tags'] ?? null;
 
         if (!$orderId) {
@@ -27,46 +37,41 @@ class AddOrderTag extends BaseAction
             return;
         }
 
-        // Clean ID if GID
-        if (is_string($orderId) && strpos($orderId, 'gid://') === 0) {
-            $orderId = (int) basename($orderId);
-        }
+        $tagsArray = array_filter(array_map('trim', explode(',', $tagsToAdd)));
 
-        $this->log($execution, $node->id, 'info', "Adding tags to order #{$orderId}: {$tagsToAdd}");
+        $this->log($execution, $node->id, 'info', "Adding tags to order {$orderId}: " . implode(', ', $tagsArray));
 
-        $apiVersion = config('shopify-app.api_version', '2025-10');
-        
-        // 1. Fetch current tags
-        $response = $shop->api()->rest('GET', "/admin/api/{$apiVersion}/orders/{$orderId}.json", ['fields' => 'id,tags']);
-        
+        $query = <<<'GQL'
+mutation tagsAdd($id: ID!, $tags: [String!]!) {
+  tagsAdd(id: $id, tags: $tags) {
+    node {
+      id
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+GQL;
+
+        $variables = [
+            'id' => $orderId,
+            'tags' => $tagsArray
+        ];
+
+        $response = $shop->api()->graph($query, $variables);
+
         if ($response['errors']) {
-             $this->log($execution, $node->id, 'error', "Failed to fetch order: " . json_encode($response['errors']));
+             $this->log($execution, $node->id, 'error', "GraphQL Error: " . json_encode($response['errors']));
              return;
         }
 
-        $order = $response['body']['order'];
-        $currentTags = array_filter(array_map('trim', explode(',', $order['tags'] ?? '')));
-        $newTags = array_filter(array_map('trim', explode(',', $tagsToAdd)));
-        
-        $mergedTags = array_unique(array_merge($currentTags, $newTags));
-
-        if (count($mergedTags) === count($currentTags)) {
-            $this->log($execution, $node->id, 'info', "All tags already present on order. Skipping update.");
-            return;
-        }
-
-        // 2. Update order
-        $updateResponse = $shop->api()->rest('PUT', "/admin/api/{$apiVersion}/orders/{$orderId}.json", [
-            'order' => [
-                'id' => $orderId,
-                'tags' => implode(', ', $mergedTags)
-            ]
-        ]);
-
-        if ($updateResponse['errors']) {
-            $this->log($execution, $node->id, 'error', "Failed to update order tags: " . json_encode($updateResponse['errors']));
+        $userErrors = $response['body']['data']['tagsAdd']['userErrors'] ?? [];
+        if (!empty($userErrors)) {
+            $this->log($execution, $node->id, 'error', "Shopify Error: " . json_encode($userErrors));
         } else {
-            $this->log($execution, $node->id, 'info', "Successfully updated tags for order #{$orderId}");
+            $this->log($execution, $node->id, 'info', "Successfully added tags to order.");
         }
     }
 }

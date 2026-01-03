@@ -194,6 +194,72 @@ return [
             'category' => 'shop',
             'icon' => 'Store',
         ],
+
+        // Discounts
+        [
+            'key' => 'discounts_create',
+            'label' => 'Discount Created',
+            'description' => 'Starts when a discount is created',
+            'topic' => 'DISCOUNTS_CREATE',
+            'category' => 'discounts',
+            'icon' => 'Tag',
+        ],
+        [
+            'key' => 'discounts_update',
+            'label' => 'Discount Updated',
+            'description' => 'Starts when a discount is updated',
+            'topic' => 'DISCOUNTS_UPDATE',
+            'category' => 'discounts',
+            'icon' => 'Tag',
+        ],
+
+        // Inventory
+        [
+            'key' => 'inventory_levels_update',
+            'label' => 'Inventory Updated',
+            'description' => 'Starts when an inventory level is updated',
+            'topic' => 'INVENTORY_LEVELS_UPDATE',
+            'category' => 'inventory',
+            'icon' => 'Database',
+        ],
+
+        // Checkouts
+        [
+            'key' => 'checkouts_create',
+            'label' => 'Checkout Created',
+            'description' => 'Starts when a checkout is created',
+            'topic' => 'CHECKOUTS_CREATE',
+            'category' => 'checkouts',
+            'icon' => 'CreditCard',
+        ],
+        [
+            'key' => 'checkouts_update',
+            'label' => 'Checkout Updated',
+            'description' => 'Starts when a checkout is updated',
+            'topic' => 'CHECKOUTS_UPDATE',
+            'category' => 'checkouts',
+            'icon' => 'CreditCard',
+        ],
+
+        // Carts
+        [
+            'key' => 'carts_create',
+            'label' => 'Cart Created',
+            'description' => 'Starts when a cart is created',
+            'topic' => 'CARTS_CREATE',
+            'category' => 'carts',
+            'icon' => 'ShoppingCart',
+        ],
+
+        // App
+        [
+            'key' => 'app_subscriptions_update',
+            'label' => 'App Subscription Updated',
+            'description' => 'Starts when an app subscription is updated',
+            'topic' => 'APP_SUBSCRIPTIONS_UPDATE',
+            'category' => 'app',
+            'icon' => 'AppWindow',
+        ],
     ],
 
     /*
@@ -406,6 +472,51 @@ return [
             'category' => 'advanced',
             'icon' => 'Code',
             'fields' => [['name' => 'code', 'label' => 'JavaScript', 'type' => 'textarea', 'placeholder' => '// write your code here', 'required' => true]],
+        ],
+
+        // Inventory Actions
+        [
+            'key' => 'adjust_inventory',
+            'label' => 'Adjust Inventory',
+            'description' => 'Adjust inventory quantity for a variant',
+            'category' => 'inventory',
+            'icon' => 'PlusCircle',
+            'fields' => [
+                ['name' => 'inventory_item_id', 'label' => 'Inventory Item ID', 'type' => 'text', 'required' => true],
+                ['name' => 'location_id', 'label' => 'Location ID', 'type' => 'text', 'required' => true],
+                ['name' => 'delta', 'label' => 'Adjustment Amount', 'type' => 'number', 'required' => true, 'placeholder' => 'e.g. -1 or 5'],
+            ],
+        ],
+
+        // Discount Actions
+        [
+            'key' => 'create_basic_discount',
+            'label' => 'Create Basic Discount',
+            'description' => 'Create a simple percentage/amount discount',
+            'category' => 'discounts',
+            'icon' => 'Tag',
+            'fields' => [
+                ['name' => 'title', 'label' => 'Title', 'type' => 'text', 'required' => true, 'placeholder' => 'Summer Sale'],
+                ['name' => 'code', 'label' => 'Code', 'type' => 'text', 'required' => true, 'placeholder' => 'SUMMER20'],
+                ['name' => 'value', 'label' => 'Value', 'type' => 'number', 'required' => true],
+                ['name' => 'value_type', 'label' => 'Value Type', 'type' => 'select', 'options' => [
+                    ['value' => 'percentage', 'label' => 'Percentage'],
+                    ['value' => 'fixed_amount', 'label' => 'Fixed Amount'],
+                ], 'default' => 'percentage'],
+            ],
+        ],
+
+        // Product Pricing
+        [
+            'key' => 'update_variant_price',
+            'label' => 'Update Variant Price',
+            'description' => 'Update the price of a product variant',
+            'category' => 'products',
+            'icon' => 'DollarSign',
+            'fields' => [
+                ['name' => 'variant_id', 'label' => 'Variant ID', 'type' => 'text', 'required' => true],
+                ['name' => 'price', 'label' => 'New Price', 'type' => 'number', 'required' => true],
+            ],
         ],
 
     ],

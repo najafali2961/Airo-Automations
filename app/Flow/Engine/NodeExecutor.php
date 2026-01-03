@@ -43,7 +43,8 @@ class NodeExecutor
                     break;
 
                 case 'condition':
-                    $result = $this->conditionEvaluator->evaluate($node->settings, $data);
+                    $settings = $this->getSettings($node);
+                    $result = $this->conditionEvaluator->evaluate($settings, $data);
                     $nextPath = $result ? 'true' : 'false';
                     $this->log($execution, $node->id, 'info', "Condition evaluated to: " . ($result ? 'TRUE' : 'FALSE'));
                     break;
@@ -56,9 +57,21 @@ class NodeExecutor
 
             $nextNodes = $node->nextNodes($nextPath);
             
-            // If path-specific nodes not found, try generic 'then' for conditions/actions
+            // If path-specific nodes not found:
             if ($nextNodes->isEmpty() && $nextPath !== 'then') {
-                 $nextNodes = $node->nextNodes('then');
+                 // For conditions: 'true' can fall back to 'then' (legacy/generic edge)
+                 // But 'false' should NOT fall back to 'then'
+                 if ($node->type === 'condition' && $nextPath === 'true') {
+                     $nextNodes = $node->nextNodes('then');
+                 } else if ($node->type !== 'condition') {
+                     $nextNodes = $node->nextNodes('then');
+                 }
+            }
+
+            if ($nextNodes->isNotEmpty()) {
+                $this->log($execution, $node->id, 'info', "Transitioning to " . count($nextNodes) . " node(s) on path: '{$nextPath}'");
+            } else {
+                $this->log($execution, $node->id, 'info', "No next nodes found for path: '{$nextPath}'. Stopping branch.");
             }
 
             foreach ($nextNodes as $nextNode) {
@@ -104,6 +117,15 @@ class NodeExecutor
         }
 
         $action->handle($node, $data, $execution);
+    }
+
+    protected function getSettings(Node $node): array
+    {
+        $settings = $node->settings ?? [];
+        if (!empty($settings['form']) && is_array($settings['form'])) {
+            $settings = array_merge($settings, $settings['form']);
+        }
+        return $settings;
     }
 
     protected function log(Execution $execution, ?int $nodeId, string $level, string $message): void

@@ -21,7 +21,10 @@ class ShopifyGqlAction extends BaseAction
         'enable_customer' => 'customerUpdate', // We'll handle account state
         'disable_customer' => 'customerUpdate',
         'add_to_collection' => 'collectionAddProducts',
-        'capture_payment' => 'orderPaymentUpsert', // Or similar depending on API version
+        'capture_payment' => 'orderPaymentUpsert', 
+        'adjust_inventory' => 'inventoryAdjustQuantities',
+        'create_basic_discount' => 'discountCodeBasicCreate',
+        'update_variant_price' => 'productVariantUpdate',
     ];
 
     public function handle(Node $node, array $payload, Execution $execution): void
@@ -119,6 +122,45 @@ class ShopifyGqlAction extends BaseAction
                         'note' => 'Account disabled by automation'
                     ]
                 ];
+
+            case 'adjust_inventory':
+                return [
+                    'input' => [
+                        'reason' => 'correction',
+                        'name' => 'available',
+                        'changes' => [
+                            [
+                                'inventoryItemId' => $this->ensureGid($settings['inventory_item_id'], 'InventoryItem'),
+                                'locationId' => $this->ensureGid($settings['location_id'], 'Location'),
+                                'delta' => (int)($settings['delta'] ?? 0),
+                            ]
+                        ]
+                    ]
+                ];
+
+            case 'create_basic_discount':
+                return [
+                    'basicCodeDiscount' => [
+                        'title' => $settings['title'],
+                        'code' => $settings['code'],
+                        'startsAt' => now()->toIso8601String(),
+                        'customerSelection' => ['all' => true],
+                        'customerGets' => [
+                            'value' => [
+                                ($settings['value_type'] === 'percentage' ? 'percentage' : 'discountAmount') => (float)$settings['value']
+                            ],
+                            'items' => ['all' => true]
+                        ]
+                    ]
+                ];
+
+            case 'update_variant_price':
+                return [
+                    'input' => [
+                        'id' => $this->ensureGid($settings['variant_id'] ?? $id, 'ProductVariant'),
+                        'price' => (string)$settings['price']
+                    ]
+                ];
         }
 
         return [];
@@ -150,6 +192,12 @@ class ShopifyGqlAction extends BaseAction
                 return 'mutation orderPaymentUpsert($id: ID!) { orderPaymentUpsert(id: $id) { order { id } userErrors { field message } } }';
             case 'customerUpdate':
                 return 'mutation customerUpdate($input: CustomerInput!) { customerUpdate(input: $input) { customer { id } userErrors { field message } } }';
+            case 'inventoryAdjustQuantities':
+                return 'mutation inventoryAdjustQuantities($input: InventoryAdjustQuantitiesInput!) { inventoryAdjustQuantities(input: $input) { inventoryAdjustmentGroup { id } userErrors { field message } } }';
+            case 'discountCodeBasicCreate':
+                return 'mutation discountCodeBasicCreate($basicCodeDiscount: DiscountCodeBasicInput!) { discountCodeBasicCreate(basicCodeDiscount: $basicCodeDiscount) { codeDiscountNode { idDiscount { id } } userErrors { field message } } }';
+            case 'productVariantUpdate':
+                return 'mutation productVariantUpdate($input: ProductVariantInput!) { productVariantUpdate(input: $input) { productVariant { id } userErrors { field message } } }';
         }
         return '';
     }
