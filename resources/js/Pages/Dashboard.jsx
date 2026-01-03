@@ -156,19 +156,62 @@ export default function Dashboard({
 
     return (
         <Page
-            title="Airo Automations"
-            subtitle={`Welcome back, ${shop.name}`}
+            title={`Hey, ${shop.name.split(".")[0]}!`}
+            subtitle="👋 Welcome to Airo Automations. Here's your efficiency summary."
             primaryAction={{
                 content: "New Workflow",
                 icon: PlusIcon,
                 onAction: () =>
-                    router.visit("/workflows" + window.location.search),
+                    router.visit("/workflows/create" + window.location.search),
             }}
         >
             <Head title="Dashboard" />
 
-            <BlockStack gap="600">
-                {/* Stats Grid */}
+            <BlockStack gap="400">
+                {/* Motivational Stats Banner */}
+                <Card padding="400">
+                    <div className="flex items-center justify-between">
+                        <div className="flex-1 space-y-1">
+                            <Text variant="headingMd" as="h3">
+                                Keep it up!
+                            </Text>
+                            <Text variant="bodyMd" tone="subdued">
+                                You've automated <b>{stats.total_executions}</b>{" "}
+                                tasks this month. That's a huge marathon run!
+                            </Text>
+                        </div>
+
+                        <div className="flex items-center gap-6 px-12 border-x border-gray-100">
+                            <div className="text-center">
+                                <Text variant="heading2xl" as="p">
+                                    {Math.round(
+                                        (stats.total_executions * 5) / 60
+                                    )}{" "}
+                                    <span className="text-green-600 text-lg">
+                                        ↑
+                                    </span>
+                                </Text>
+                                <Text variant="bodySm" tone="subdued">
+                                    hours saved
+                                </Text>
+                            </div>
+                        </div>
+
+                        <div className="flex-shrink-0 animate-bounce-subtle ml-8">
+                            <img
+                                src="/assets/illustration.png"
+                                alt="Mascot"
+                                style={{
+                                    width: "120px",
+                                    height: "auto",
+                                    filter: "brightness(1.05) contrast(1.05)", // Perfectly bleaches the background to pure white
+                                }}
+                            />
+                        </div>
+                    </div>
+                </Card>
+
+                {/* Stats Grid - Smaller version */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <StatCard
                         title="Total Flows"
