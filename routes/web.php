@@ -50,3 +50,6 @@ Route::middleware(['verify.shopify'])->group(function () {
 Route::post('/webhooks/shopify-automation', [\App\Http\Controllers\WebhookController::class, 'handle'])->name('webhooks.handle');
 
 Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
+
+// make test route
+Route::get('/test/shopify', [DashboardController::class, 'handleShopifyCall']);
