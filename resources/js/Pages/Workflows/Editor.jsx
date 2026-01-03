@@ -393,6 +393,7 @@ export default function WorkflowEditor({ shop, flow, definitions }) {
                     >
                         <ConfigPanel
                             node={selectedNode}
+                            definitions={definitions}
                             onUpdate={(id, data) => {
                                 if (builderRef.current) {
                                     builderRef.current.updateNode(id, data);

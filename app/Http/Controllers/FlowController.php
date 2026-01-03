@@ -22,42 +22,37 @@ class FlowController extends Controller
          
          if ($id && !$flow) abort(404);
 
-         // Load Definitions from Config
-         $eventConfig = config('shopify_events');
+         // Load from new flow.php config
+         $flowConfig = config('flow');
 
          $shopifyTriggers = [];
-         if (isset($eventConfig['triggers'])) {
-             foreach ($eventConfig['triggers'] as $category) {
-                 foreach ($category['list'] as $trigger) {
-                     $shopifyTriggers[] = [
-                         'type' => 'trigger',
-                         'n8nType' => 'shopifyTrigger',
-                         'label' => $trigger['label'],
-                         'description' => $trigger['description'] ?? '',
-                         'settings' => ['topic' => $trigger['value']],
-                         'group' => $category['category']
-                     ];
-                 }
-             }
+         foreach ($flowConfig['triggers'] as $trigger) {
+             $shopifyTriggers[] = [
+                 'type' => 'trigger',
+                 'n8nType' => 'shopifyTrigger',
+                 'label' => $trigger['label'],
+                 'description' => $trigger['description'],
+                 'settings' => ['topic' => $trigger['topic']],
+                 'group' => $trigger['category'],
+                 'icon' => $trigger['icon']
+             ];
          }
 
          $shopifyActions = [];
-         if (isset($eventConfig['actions'])) {
-             foreach ($eventConfig['actions'] as $category) {
-                 foreach ($category['list'] as $action) {
-                     $shopifyActions[] = [
-                         'type' => 'action',
-                         'n8nType' => 'shopifyAction',
-                         'label' => $action['label'],
-                         'description' => $action['description'] ?? '',
-                         'settings' => [
-                             'action' => $action['value'],
-                             'form' => $action['settings'] ?? []
-                         ],
-                         'group' => $category['category']
-                     ];
-                 }
-             }
+         foreach ($flowConfig['actions'] as $action) {
+             $shopifyActions[] = [
+                 'type' => 'action',
+                 'n8nType' => 'shopifyAction',
+                 'label' => $action['label'],
+                 'description' => $action['description'],
+                 'settings' => [
+                     'action' => $action['key'],
+                     'form' => []
+                 ],
+                 'group' => $action['category'],
+                 'icon' => $action['icon'],
+                 'fields' => $action['fields'] ?? []
+             ];
          }
          
          $definitions = [
