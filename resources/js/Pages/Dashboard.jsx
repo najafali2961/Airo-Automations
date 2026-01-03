@@ -216,15 +216,13 @@ export default function Dashboard({
                     <StatCard
                         title="Total Flows"
                         value={stats.total_flows}
-                        icon={LayoutColumns3Icon}
-                        color="bg-blue-50 text-blue-600"
+                        image="/assets/total_flows.png"
                         subtext={`${stats.active_flows} Active`}
                     />
                     <StatCard
                         title="Total Executions"
                         value={stats.total_executions}
-                        icon={ClockIcon}
-                        color="bg-purple-50 text-purple-600"
+                        image="/assets/total_executions.png"
                     />
                     <StatCard
                         title="Success Rate"
@@ -238,12 +236,7 @@ export default function Dashboard({
                                   ) + "%"
                                 : "N/A"
                         }
-                        icon={AlertCircleIcon}
-                        color={
-                            stats.failed_executions > 0
-                                ? "bg-amber-50 text-amber-600"
-                                : "bg-green-50 text-green-600"
-                        }
+                        image="/assets/success_rate.png"
                     />
                 </div>
 
@@ -529,15 +522,31 @@ export default function Dashboard({
     );
 }
 
-const StatCard = ({ title, value, icon, color, subtext }) => (
+const StatCard = ({ title, value, image, subtext }) => (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex items-start justify-between">
         <div>
-            <p className="text-gray-500 text-sm font-medium">{title}</p>
-            <h3 className="text-2xl font-bold mt-1 text-gray-900">{value}</h3>
-            {subtext && <p className="text-xs text-gray-400 mt-1">{subtext}</p>}
+            <p className="text-gray-900 text-sm font-bold uppercase tracking-wider">
+                {title}
+            </p>
+            <h3 className="text-4xl font-black mt-2 text-gray-900">{value}</h3>
+            {subtext && (
+                <p className="text-xs text-gray-400 mt-2 font-medium">
+                    {subtext}
+                </p>
+            )}
         </div>
-        <div className={`p-3 rounded-lg ${color}`}>
-            <Icon source={icon} tone="inherit" />
+        <div className="flex items-center justify-center">
+            <div className="animate-spin-slow">
+                <img
+                    src={image}
+                    alt={title}
+                    style={{
+                        width: "48px",
+                        height: "48px",
+                        filter: "brightness(1.05) contrast(1.05)",
+                    }}
+                />
+            </div>
         </div>
     </div>
 );
