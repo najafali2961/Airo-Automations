@@ -18,13 +18,14 @@ class ShopifyGqlAction extends BaseAction
         'hold_fulfillment' => 'fulfillmentOrderHold',
         'release_hold' => 'fulfillmentOrderReleaseHold',
         'delete_product' => 'productDelete',
-        'enable_customer' => 'customerUpdate', // We'll handle account state
+        'enable_customer' => 'customerUpdate',
         'disable_customer' => 'customerUpdate',
         'add_to_collection' => 'collectionAddProducts',
         'capture_payment' => 'orderPaymentUpsert', 
         'adjust_inventory' => 'inventoryAdjustQuantities',
         'create_basic_discount' => 'discountCodeBasicCreate',
         'update_variant_price' => 'productVariantUpdate',
+        'cancel_order' => 'orderCancel',
     ];
 
     public function handle(Node $node, array $payload, Execution $execution): void
@@ -34,14 +35,11 @@ class ShopifyGqlAction extends BaseAction
         $settings = $this->getSettings($node);
 
         if (!isset(self::$mutationMap[$actionKey])) {
-            // Fallback: If not mapped, we might try to handle it specifically or log error
             $this->log($execution, $node->id, 'error', "No GraphQL mapping for action: {$actionKey}");
             return;
         }
 
         $mutationName = self::$mutationMap[$actionKey];
-        
-        // Prepare variables based on action key
         $variables = $this->prepareVariables($actionKey, $settings, $payload);
 
         if (empty($variables)) {
@@ -50,14 +48,12 @@ class ShopifyGqlAction extends BaseAction
         }
 
         $this->log($execution, $node->id, 'info', "Executing Shopify GraphQL mutation: {$mutationName}");
-
-        // Build a simple mutation string (In a real app, we'd have a library of these)
         $query = $this->getQueryForMutation($mutationName);
 
         $response = $shop->api()->graph($query, $variables);
 
         if ($response['errors']) {
-            $this->log($execution, $node->id, 'error', "GraphQL Error: " . json_encode($response));
+            $this->log($execution, $node->id, 'error', "GraphQL Error: " . json_encode($response['errors']));
             return;
         }
 
@@ -90,7 +86,7 @@ class ShopifyGqlAction extends BaseAction
             case 'hold_fulfillment':
                 return [
                     'fulfillmentOrderId' => $this->ensureGid($id, 'FulfillmentOrder'),
-                    'fulfillmentOrderLineItemsToHold' => [], // Empty = all
+                    'fulfillmentOrderLineItemsToHold' => [],
                     'reason' => 'OTHER',
                     'reasonNotes' => $settings['reason'] ?? 'Hold by Automation'
                 ];
@@ -201,5 +197,4 @@ class ShopifyGqlAction extends BaseAction
         }
         return '';
     }
-
 }

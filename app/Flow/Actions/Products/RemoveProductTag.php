@@ -13,11 +13,20 @@ class RemoveProductTag extends BaseAction
         $shop = $this->getShop($execution);
         $settings = $this->getSettings($node);
         
-        $productId = $payload['id'] ?? $payload['admin_graphql_api_id'] ?? $settings['product_id'] ?? null;
-        $tagsToRemove = $settings['tags'] ?? $settings['tag'] ?? null;
+        $productId = $payload['admin_graphql_api_id'] ?? $settings['product_id'] ?? null;
+
+        if (!$productId && !empty($payload['id'])) {
+            $productId = "gid://shopify/Product/" . $payload['id'];
+        }
+
+        if ($productId && !str_starts_with((string)$productId, 'gid://')) {
+            $productId = "gid://shopify/Product/{$productId}";
+        }
+
+        $tagsToRemove = $settings['tag'] ?? $settings['tags'] ?? null;
 
         if (!$productId) {
-            $this->log($execution, $node->id, 'error', "Missing Product ID.");
+            $this->log($execution, $node->id, 'error', "Missing Product ID in payload or settings.");
             return;
         }
 
@@ -26,43 +35,41 @@ class RemoveProductTag extends BaseAction
             return;
         }
 
-        if (is_string($productId) && strpos($productId, 'gid://') === 0) {
-            $productId = (int) basename($productId);
-        }
+        $tagsArray = array_filter(array_map('trim', explode(',', $tagsToRemove)));
 
-        $this->log($execution, $node->id, 'info', "Removing tags from product #{$productId}: {$tagsToRemove}");
+        $this->log($execution, $node->id, 'info', "Removing tags from product {$productId}: " . implode(', ', $tagsArray));
 
-        $apiVersion = config('shopify-app.api_version', '2025-10');
-        
-        $response = $shop->api()->rest('GET', "/admin/api/{$apiVersion}/products/{$productId}.json", ['fields' => 'id,tags']);
-        
+        $query = <<<'GQL'
+mutation tagsRemove($id: ID!, $tags: [String!]!) {
+  tagsRemove(id: $id, tags: $tags) {
+    node {
+      id
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+GQL;
+
+        $variables = [
+            'id' => $productId,
+            'tags' => $tagsArray
+        ];
+
+        $response = $shop->api()->graph($query, $variables);
+
         if ($response['errors']) {
-             $this->log($execution, $node->id, 'error', "Failed to fetch product: " . json_encode($response['errors']));
+             $this->log($execution, $node->id, 'error', "GraphQL Error: " . json_encode($response['errors']));
              return;
         }
 
-        $product = $response['body']['product'];
-        $currentTags = array_filter(array_map('trim', explode(',', $product['tags'] ?? '')));
-        $toRemove = array_filter(array_map('trim', explode(',', $tagsToRemove)));
-        
-        $newTags = array_diff($currentTags, $toRemove);
-
-        if (count($newTags) === count($currentTags)) {
-            $this->log($execution, $node->id, 'info', "Tags not found. Skipping update.");
-            return;
-        }
-
-        $updateResponse = $shop->api()->rest('PUT', "/admin/api/{$apiVersion}/products/{$productId}.json", [
-            'product' => [
-                'id' => $productId,
-                'tags' => implode(', ', $newTags)
-            ]
-        ]);
-
-        if ($updateResponse['errors']) {
-            $this->log($execution, $node->id, 'error', "Failed to update product tags: " . json_encode($updateResponse['errors']));
+        $userErrors = $response['body']['data']['tagsRemove']['userErrors'] ?? [];
+        if (!empty($userErrors)) {
+            $this->log($execution, $node->id, 'error', "Shopify Error: " . json_encode($userErrors));
         } else {
-            $this->log($execution, $node->id, 'info', "Successfully removed tags for product #{$productId}");
+            $this->log($execution, $node->id, 'info', "Successfully removed tags from product.");
         }
     }
 }

@@ -5,7 +5,6 @@ namespace App\Flow\Actions\Orders;
 use App\Flow\Actions\BaseAction;
 use App\Models\Node;
 use App\Models\Execution;
-use Illuminate\Support\Facades\Log;
 
 class AddOrderTag extends BaseAction
 {
@@ -60,8 +59,10 @@ GQL;
             'tags' => $tagsArray
         ];
 
+        $response = $shop->api()->graph($query, $variables);
+
         if ($response['errors']) {
-             $this->log($execution, $node->id, 'error', "GraphQL Error: " . json_encode($response));
+             $this->log($execution, $node->id, 'error', "GraphQL Error: " . json_encode($response['errors']));
              return;
         }
 

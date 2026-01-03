@@ -13,7 +13,16 @@ class AddProductTag extends BaseAction
         $shop = $this->getShop($execution);
         $settings = $this->getSettings($node);
         
-        $productId = $payload['id'] ?? $payload['admin_graphql_api_id'] ?? $settings['product_id'] ?? null;
+        $productId = $payload['admin_graphql_api_id'] ?? $settings['product_id'] ?? null;
+
+        if (!$productId && !empty($payload['id'])) {
+            $productId = "gid://shopify/Product/" . $payload['id'];
+        }
+
+        if ($productId && !str_starts_with((string)$productId, 'gid://')) {
+            $productId = "gid://shopify/Product/{$productId}";
+        }
+
         $tagsToAdd = $settings['tag'] ?? $settings['tags'] ?? null;
 
         if (!$productId) {
@@ -26,43 +35,41 @@ class AddProductTag extends BaseAction
             return;
         }
 
-        if (is_string($productId) && strpos($productId, 'gid://') === 0) {
-            $productId = (int) basename($productId);
-        }
+        $tagsArray = array_filter(array_map('trim', explode(',', $tagsToAdd)));
 
-        $this->log($execution, $node->id, 'info', "Adding tags to product #{$productId}: {$tagsToAdd}");
+        $this->log($execution, $node->id, 'info', "Adding tags to product {$productId}: " . implode(', ', $tagsArray));
 
-        $apiVersion = config('shopify-app.api_version', '2025-10');
-        
-        $response = $shop->api()->rest('GET', "/admin/api/{$apiVersion}/products/{$productId}.json", ['fields' => 'id,tags']);
-        
+        $query = <<<'GQL'
+mutation tagsAdd($id: ID!, $tags: [String!]!) {
+  tagsAdd(id: $id, tags: $tags) {
+    node {
+      id
+    }
+    userErrors {
+      field
+      message
+    }
+  }
+}
+GQL;
+
+        $variables = [
+            'id' => $productId,
+            'tags' => $tagsArray
+        ];
+
+        $response = $shop->api()->graph($query, $variables);
+
         if ($response['errors']) {
-             $this->log($execution, $node->id, 'error', "Failed to fetch product: " . json_encode($response['errors']));
+             $this->log($execution, $node->id, 'error', "GraphQL Error: " . json_encode($response['errors']));
              return;
         }
 
-        $product = $response['body']['product'];
-        $currentTags = array_filter(array_map('trim', explode(',', $product['tags'] ?? '')));
-        $newTags = array_filter(array_map('trim', explode(',', $tagsToAdd)));
-        
-        $mergedTags = array_unique(array_merge($currentTags, $newTags));
-
-        if (count($mergedTags) === count($currentTags)) {
-            $this->log($execution, $node->id, 'info', "All tags already present. Skipping.");
-            return;
-        }
-
-        $updateResponse = $shop->api()->rest('PUT', "/admin/api/{$apiVersion}/products/{$productId}.json", [
-            'product' => [
-                'id' => $productId,
-                'tags' => implode(', ', $mergedTags)
-            ]
-        ]);
-
-        if ($updateResponse['errors']) {
-            $this->log($execution, $node->id, 'error', "Failed to update product tags: " . json_encode($updateResponse['errors']));
+        $userErrors = $response['body']['data']['tagsAdd']['userErrors'] ?? [];
+        if (!empty($userErrors)) {
+            $this->log($execution, $node->id, 'error', "Shopify Error: " . json_encode($userErrors));
         } else {
-            $this->log($execution, $node->id, 'info', "Successfully updated tags for product #{$productId}");
+            $this->log($execution, $node->id, 'info', "Successfully added tags to product.");
         }
     }
 }
