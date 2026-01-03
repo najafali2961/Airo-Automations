@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Head, router } from "@inertiajs/react";
+import { Head, router, Link } from "@inertiajs/react";
 import {
     Page,
     LegacyCard,
@@ -23,7 +23,6 @@ export default function Index({ executions, filters: serverFilters = {} }) {
     // Filter states
     const [queryValue, setQueryValue] = useState(serverFilters.query || "");
 
-    // Strict helper to ensure value is an array of strings
     const ensureStringArray = (val, fallback = []) => {
         if (!val) return fallback;
         const arr = Array.isArray(val) ? val : [val];
@@ -43,7 +42,6 @@ export default function Index({ executions, filters: serverFilters = {} }) {
 
     const { mode, setMode } = useSetIndexFiltersMode();
 
-    // Map status to tab index
     const getTabIndex = (status) => {
         if (status === "success") return 1;
         if (status === "failed") return 2;
@@ -78,11 +76,9 @@ export default function Index({ executions, filters: serverFilters = {} }) {
     ];
 
     const resourceName = { singular: "execution", plural: "executions" };
-
     const { selectedResources, allResourcesSelected, handleSelectionChange } =
         useIndexResourceState(data);
 
-    // Final update function to sync with server
     const navigate = useCallback((params) => {
         const cleanParams = Object.fromEntries(
             Object.entries(params).filter(
@@ -92,7 +88,6 @@ export default function Index({ executions, filters: serverFilters = {} }) {
                     !(Array.isArray(v) && v.length === 0)
             )
         );
-
         router.get(window.location.pathname, cleanParams, {
             preserveState: true,
             replace: true,
@@ -190,18 +185,21 @@ export default function Index({ executions, filters: serverFilters = {} }) {
             key={execution.id}
             position={index}
             selected={selectedResources.includes(execution.id)}
+            onClick={() => router.visit(`/executions/${execution.id}`)}
         >
             <IndexTable.Cell>
-                <div
-                    onClick={() => router.visit(`/executions/${execution.id}`)}
-                    className="cursor-pointer"
-                >
-                    <StatusBadge status={execution.status} />
-                </div>
+                <StatusBadge status={execution.status} />
             </IndexTable.Cell>
             <IndexTable.Cell>
                 <Text variant="bodyMd" fontWeight="bold" as="span">
-                    {execution.flow?.name || "Deleted Flow"}
+                    <Link
+                        href={`/executions/${execution.id}`}
+                        className="hover:underline"
+                        style={{ color: "inherit", textDecoration: "none" }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {execution.flow?.name || "Deleted Flow"}
+                    </Link>
                 </Text>
             </IndexTable.Cell>
             <IndexTable.Cell>
@@ -224,6 +222,10 @@ export default function Index({ executions, filters: serverFilters = {} }) {
         <Page
             title="Activity Logs"
             subtitle="Monitor every single detail of your workflow executions."
+            backAction={{
+                content: "Dashboard",
+                onAction: () => router.visit("/" + window.location.search),
+            }}
         >
             <Head title="Executions" />
             <BlockStack gap="500">
