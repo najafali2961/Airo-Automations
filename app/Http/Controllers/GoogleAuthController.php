@@ -30,20 +30,46 @@ class GoogleAuthController extends Controller
         return redirect()->back()->with('success', 'Google account disconnected.');
     }
 
-    public function redirect(Request $request)
+    public function generateAuthUrl(Request $request)
     {
         try {
+            /** @var \App\Models\User $user */
             $user = Auth::user();
+            
+            // Generate a SIGNED url for the redirect endpoint
+            // This URL will be valid for 60 seconds and includes the user ID
+            $url = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                'auth.google.redirect',
+                now()->addMinutes(1),
+                [
+                    'user_id' => $user->id,
+                    'host' => $request->input('host')
+                ]
+            );
+
+            return response()->json(['url' => $url]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function redirect(Request $request)
+    {
+        // Protected by 'signed' middleware, so we trust the params
+        try {
+            $userId = $request->get('user_id');
+            $user = \App\Models\User::find($userId);
+            
             if (!$user) {
-                \Log::error("GoogleAuth: No authenticated user found for redirect.");
-                return redirect()->route('home')->with('error', 'Authentication required.');
+                \Log::error("GoogleAuth: Signed URL valid but user not found: $userId");
+                return view('auth.popup-close', ['error' => 'User not found']);
             }
 
             // Create a state token with User ID and Host to persist context
             $statePayload = json_encode([
                 'user_id' => $user->id,
                 'shop' => $user->name,
-                'host' => $request->input('host'), // Capture host for redirect back
+                'host' => $request->get('host'), // Capture host for redirect back
                 'nonce' => \Illuminate\Support\Str::random(16)
             ]);
             $state = base64_encode($statePayload);
@@ -53,7 +79,7 @@ class GoogleAuthController extends Controller
             return redirect()->away($this->googleService->getAuthUrl($state));
         } catch (\Exception $e) {
             \Log::error("GoogleAuth: Redirect failed: " . $e->getMessage());
-            return redirect()->back()->with('error', 'Failed to initiate Google Auth.');
+            return view('auth.popup-close', ['error' => 'Failed to initiate Google Auth']);
         }
     }
 

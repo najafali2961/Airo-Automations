@@ -18,7 +18,7 @@ class SendTriggerContextEmailAction extends BaseAction
         $this->googleService = $googleService;
     }
 
-    public function handle(Execution $execution, Node $node, array $payload)
+    public function handle(Node $node, array $payload, Execution $execution): void
     {
         try {
             $settings = $this->getSettings($node, $payload);
@@ -40,8 +40,29 @@ class SendTriggerContextEmailAction extends BaseAction
             $flattened = \Illuminate\Support\Arr::dot($payload);
             
             foreach ($flattened as $key => $value) {
+                // Force string conversion for safety
+                try {
+                    if (is_array($value) || is_object($value)) {
+                        $value = json_encode($value);
+                    } else {
+                        $value = (string) $value;
+                    }
+                } catch (\Throwable $e) {
+                   $value = '[Complex Data]'; 
+                }
+
+                if (is_array($value)) {
+                    $this->log($execution, $node->id, 'error', 'CRITICAL: Value is still array after conversion. Key: ' . $key);
+                    continue; 
+                }
+
                 // Skip huge or irrelevant keys
-                if (strlen($value) > 500) $value = substr($value, 0, 500) . '...';
+                try {
+                    if (strlen($value) > 500) $value = substr($value, 0, 500) . '...';
+                } catch (\Throwable $e) {
+                    $this->log($execution, $node->id, 'error', 'Strlen failed. Type: ' . gettype($value));
+                    continue;
+                }
                 
                 $body .= "<tr><td><strong>{$key}</strong></td><td>{$value}</td></tr>";
             }

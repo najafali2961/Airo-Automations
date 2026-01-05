@@ -58,6 +58,14 @@ class GoogleService
             if ($user->google_refresh_token) {
                 $check = $this->client->fetchAccessTokenWithRefreshToken($user->google_refresh_token);
                 
+                if (isset($check['error'])) {
+                     throw new \Exception('Error refreshing token: ' . json_encode($check));
+                }
+
+                if (!isset($check['access_token'])) {
+                    throw new \Exception('Failed to refresh token, response missing access_token. Response: ' . json_encode($check));
+                }
+                
                 // Update user token
                 $user->update([
                     'google_access_token' => $check['access_token'],

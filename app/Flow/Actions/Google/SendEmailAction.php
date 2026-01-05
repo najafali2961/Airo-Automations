@@ -31,7 +31,21 @@ class SendEmailAction extends BaseAction
                 return;
             }
 
-            $client = $this->googleService->getClient($execution->flow->user);
+            $flowUser = $execution->flow->user;
+            
+            if (!$flowUser) {
+                $shopId = $execution->flow->shop_id;
+                $this->log($execution, $node->id, 'warning', 'Relation failed. Trying direct User::find(' . $shopId . ')');
+                $flowUser = \App\Models\User::find($shopId);
+            }
+
+            if (!$flowUser) {
+                $this->log($execution, $node->id, 'error', 'User not found even with direct find. Shop ID: ' . $execution->flow->shop_id);
+            } else {
+                 $this->log($execution, $node->id, 'info', 'User found (' . ($execution->flow->user ? 'relation' : 'direct') . '). ID: ' . $flowUser->id . ' | Token: ' . ($flowUser->google_access_token ? 'YES' : 'NO'));
+            }
+
+            $client = $this->googleService->getClient($flowUser);
             $service = new Gmail($client);
 
             $strSubject = 'Subject: ' . $subject . "\r\n";

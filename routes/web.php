@@ -58,6 +58,11 @@ Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'i
 // Google Auth Disconnect & Redirect (Needs Shopify Session)
 Route::middleware(['verify.shopify'])->group(function () {
     Route::post('/auth/google/disconnect', [\App\Http\Controllers\GoogleAuthController::class, 'disconnect'])->name('auth.google.disconnect');
+    Route::get('/api/google/auth-url', [\App\Http\Controllers\GoogleAuthController::class, 'generateAuthUrl'])->name('auth.google.url');
+});
+
+// Redirect endpoint - MUST be outside verify.shopify to allow popup opening (params expire), but protected by signed URL
+Route::middleware(['signed'])->group(function () {
     Route::get('/auth/google/redirect', [\App\Http\Controllers\GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
 });
 
