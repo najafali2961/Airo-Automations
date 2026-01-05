@@ -45,6 +45,11 @@ class ActionRegistry
         'create_doc' => \App\Flow\Actions\Google\CreateDocAction::class,
         'create_sheet' => \App\Flow\Actions\Google\CreateSheetAction::class,
         'send_smart_email' => \App\Flow\Actions\Google\SendTriggerContextEmailAction::class,
+
+        // Google Drive
+        'create_folder' => \App\Flow\Actions\Google\CreateFolderAction::class,
+        'upload_file' => \App\Flow\Actions\Google\UploadFileAction::class,
+        'create_text_file' => \App\Flow\Actions\Google\CreateTextFileAction::class,
     ];
 
 
