@@ -28,8 +28,11 @@ class GoogleService
         $this->client->addScope('email');
     }
 
-    public function getAuthUrl()
+    public function getAuthUrl($state = null)
     {
+        if ($state) {
+            $this->client->setState($state);
+        }
         return $this->client->createAuthUrl();
     }
 
@@ -38,10 +41,12 @@ class GoogleService
         return $this->client->fetchAccessTokenWithAuthCode($code);
     }
 
-    public function getClient()
+    public function getClient($user = null)
     {
         /** @var \App\Models\User $user */
-        $user = Auth::user();
+        if (!$user) {
+            $user = Auth::user();
+        }
         
         if (!$user || !$user->google_access_token) {
             throw new \Exception('User not connected to Google.');

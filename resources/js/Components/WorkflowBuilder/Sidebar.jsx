@@ -27,12 +27,35 @@ export default function Sidebar({ definitions }) {
     const [selectedApp, setSelectedApp] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const mockApps = [
-        { name: "Slack", color: "#4A154B", triggers: [], actions: [] },
-        { name: "Gmail", color: "#EA4335", triggers: [], actions: [] },
-        { name: "Google Sheets", color: "#34A853", triggers: [], actions: [] },
-        { name: "Asana", color: "#F06560", triggers: [], actions: [] },
-        { name: "Mailchimp", color: "#FFE01B", triggers: [], actions: [] },
+    const connectorApps = [
+        {
+            name: "Google",
+            color: "#EA4335",
+            iconUrl: "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
+            triggers: [],
+            actions: [],
+        },
+        {
+            name: "Slack",
+            color: "#4A154B",
+            iconUrl: "https://cdn-icons-png.flaticon.com/512/2111/2111615.png",
+            triggers: [],
+            actions: [],
+        },
+        {
+            name: "SMTP",
+            color: "#D93025",
+            iconUrl: "https://cdn-icons-png.flaticon.com/512/732/732200.png",
+            triggers: [],
+            actions: [],
+        },
+        {
+            name: "Twilio",
+            color: "#F22F46",
+            iconUrl: "https://cdn-icons-png.flaticon.com/512/5968/5968841.png",
+            triggers: [],
+            actions: [],
+        },
     ];
 
     const standardNodes = [
@@ -46,8 +69,19 @@ export default function Sidebar({ definitions }) {
         },
     ];
 
-    const apps = definitions?.apps || [];
-    const allApps = [...apps, ...mockApps];
+    const apps = (definitions?.apps || []).map((app) => {
+        if (app.name === "Shopify") {
+            return {
+                ...app,
+                color: "#95BF47", // Shopify Green
+                iconUrl:
+                    "https://upload.wikimedia.org/wikipedia/commons/0/0e/Shopify_logo_2018.svg",
+            };
+        }
+
+        return app;
+    });
+    const allApps = [...apps, ...connectorApps];
 
     const searchResults = useMemo(() => {
         if (!searchQuery) return null;
@@ -194,47 +228,62 @@ export default function Sidebar({ definitions }) {
                             <Text variant="headingSm" tone="subdued">
                                 Choose Integration
                             </Text>
-                            <Box className="overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-                                <InlineStack gap="300" wrap={false}>
-                                    {allApps.map((app) => (
-                                        <div
-                                            key={app.name}
-                                            onClick={() => handleAppClick(app)}
-                                            className="cursor-pointer group flex-shrink-0"
-                                            style={{ width: "80px" }}
-                                        >
-                                            <div className="bg-white border-2 border-gray-100 rounded-2xl p-4 flex flex-col items-center gap-2 transition-all group-hover:border-blue-500 group-hover:shadow-sm">
-                                                <div
-                                                    style={{
-                                                        color:
-                                                            app.color ||
-                                                            "#95a5a6",
-                                                        display: "flex",
-                                                    }}
-                                                >
-                                                    <Icon
-                                                        source={
-                                                            app.name ===
-                                                            "Shopify"
-                                                                ? StoreIcon
-                                                                : AppsIcon
-                                                        }
-                                                        tone="inherit"
+                            <Box className="grid grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-1">
+                                {/* Changed to vertical grid */}
+                                {allApps.map((app) => (
+                                    <div
+                                        key={app.name}
+                                        onClick={() => handleAppClick(app)}
+                                        className="cursor-pointer group"
+                                    >
+                                        <div className="bg-white border-2 border-gray-100 rounded-2xl p-4 flex flex-col items-center gap-2 transition-all group-hover:border-blue-500 group-hover:shadow-sm h-full justify-center">
+                                            <div
+                                                style={{
+                                                    width: "32px",
+                                                    height: "32px",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
+                                                {app.iconUrl ? (
+                                                    <img
+                                                        src={app.iconUrl}
+                                                        alt={app.name}
+                                                        className="w-full h-full object-contain"
                                                     />
-                                                </div>
-                                                <Text
-                                                    variant="bodyXs"
-                                                    fontWeight="bold"
-                                                    alignment="center"
-                                                    tone="subdued"
-                                                    truncate
-                                                >
-                                                    {app.name}
-                                                </Text>
+                                                ) : (
+                                                    <div
+                                                        style={{
+                                                            color:
+                                                                app.color ||
+                                                                "#95a5a6",
+                                                        }}
+                                                    >
+                                                        <Icon
+                                                            source={
+                                                                app.name ===
+                                                                "Shopify"
+                                                                    ? StoreIcon
+                                                                    : AppsIcon
+                                                            }
+                                                            tone="inherit"
+                                                        />
+                                                    </div>
+                                                )}
                                             </div>
+                                            <Text
+                                                variant="bodyXs"
+                                                fontWeight="bold"
+                                                alignment="center"
+                                                tone="subdued"
+                                                truncate
+                                            >
+                                                {app.name}
+                                            </Text>
                                         </div>
-                                    ))}
-                                </InlineStack>
+                                    </div>
+                                ))}
                             </Box>
                         </BlockStack>
 
@@ -268,19 +317,37 @@ export default function Sidebar({ definitions }) {
                         <div className="bg-white border-2 border-gray-100 rounded-3xl p-6 flex flex-col items-center gap-3">
                             <div
                                 style={{
-                                    color: selectedApp.color || "#95a5a6",
+                                    width: "40px",
+                                    height: "40px",
                                     display: "flex",
-                                    transform: "scale(1.5)",
+                                    justifyContent: "center",
+                                    alignItems: "center",
                                 }}
                             >
-                                <Icon
-                                    source={
-                                        selectedApp.name === "Shopify"
-                                            ? StoreIcon
-                                            : AppsIcon
-                                    }
-                                    tone="inherit"
-                                />
+                                {selectedApp.iconUrl ? (
+                                    <img
+                                        src={selectedApp.iconUrl}
+                                        alt={selectedApp.name}
+                                        className="w-full h-full object-contain"
+                                    />
+                                ) : (
+                                    <div
+                                        style={{
+                                            color:
+                                                selectedApp.color || "#95a5a6",
+                                            transform: "scale(1.5)",
+                                        }}
+                                    >
+                                        <Icon
+                                            source={
+                                                selectedApp.name === "Shopify"
+                                                    ? StoreIcon
+                                                    : AppsIcon
+                                            }
+                                            tone="inherit"
+                                        />
+                                    </div>
+                                )}
                             </div>
                             <Text variant="headingMd" fontWeight="bold">
                                 {selectedApp.name}
@@ -400,21 +467,40 @@ export default function Sidebar({ definitions }) {
                                                     <div className="bg-white border-2 border-gray-100 rounded-2xl p-4 flex items-center gap-3 hover:border-blue-500">
                                                         <div
                                                             style={{
-                                                                color:
-                                                                    app.color ||
-                                                                    "#95a5a6",
-                                                                display: "flex",
+                                                                width: "24px",
+                                                                height: "24px",
+                                                                flexShrink: 0,
                                                             }}
                                                         >
-                                                            <Icon
-                                                                source={
-                                                                    app.name ===
-                                                                    "Shopify"
-                                                                        ? StoreIcon
-                                                                        : AppsIcon
-                                                                }
-                                                                tone="inherit"
-                                                            />
+                                                            {app.iconUrl ? (
+                                                                <img
+                                                                    src={
+                                                                        app.iconUrl
+                                                                    }
+                                                                    alt={
+                                                                        app.name
+                                                                    }
+                                                                    className="w-full h-full object-contain"
+                                                                />
+                                                            ) : (
+                                                                <div
+                                                                    style={{
+                                                                        color:
+                                                                            app.color ||
+                                                                            "#95a5a6",
+                                                                    }}
+                                                                >
+                                                                    <Icon
+                                                                        source={
+                                                                            app.name ===
+                                                                            "Shopify"
+                                                                                ? StoreIcon
+                                                                                : AppsIcon
+                                                                        }
+                                                                        tone="inherit"
+                                                                    />
+                                                                </div>
+                                                            )}
                                                         </div>
                                                         <Text fontWeight="bold">
                                                             {app.name}

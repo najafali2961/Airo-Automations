@@ -18,7 +18,7 @@ class AddToSheetAction extends BaseAction
         $this->googleService = $googleService;
     }
 
-    public function handle(Execution $execution, Node $node, array $payload)
+    public function handle(Node $node, array $payload, Execution $execution): void
     {
         try {
             $settings = $this->getSettings($node, $payload);
@@ -46,7 +46,7 @@ class AddToSheetAction extends BaseAction
             }
 
 
-            $client = $this->googleService->getClient();
+            $client = $this->googleService->getClient($execution->flow->user);
             $service = new Sheets($client);
 
             $body = new ValueRange([

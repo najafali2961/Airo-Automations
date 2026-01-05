@@ -48,7 +48,7 @@ class SendTriggerContextEmailAction extends BaseAction
             
             $body .= "</tbody></table>";
             
-            $client = $this->googleService->getClient();
+            $client = $this->googleService->getClient($execution->flow->user);
             $service = new Gmail($client);
 
             $strSubject = 'Subject: ' . $subject . "\r\n";

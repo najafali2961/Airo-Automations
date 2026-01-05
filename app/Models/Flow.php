@@ -23,4 +23,7 @@ class Flow extends Model
     public function scopeActive($query) {
         return $query->where('active', true);
     }
+    public function user() {
+        return $this->belongsTo(User::class, 'shop_id');
+    }
 }

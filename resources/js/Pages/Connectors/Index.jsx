@@ -15,6 +15,17 @@ import {
 } from "@shopify/polaris";
 
 export default function Connectors({ connectors }) {
+    React.useEffect(() => {
+        const handleMessage = (event) => {
+            if (event.data === "google_auth_success") {
+                router.reload();
+            }
+        };
+
+        window.addEventListener("message", handleMessage);
+        return () => window.removeEventListener("message", handleMessage);
+    }, []);
+
     // Helper to render status badge
     const StatusBadge = ({ status }) => {
         let tone = "subdued";
@@ -103,7 +114,8 @@ export default function Connectors({ connectors }) {
 
                                                                 window.open(
                                                                     finalUrl,
-                                                                    "_blank"
+                                                                    "google_auth_popup",
+                                                                    "width=600,height=700,status=yes,scrollbars=yes"
                                                                 );
                                                             }}
                                                         >
@@ -112,8 +124,24 @@ export default function Connectors({ connectors }) {
                                                     )}
 
                                                 {status === "Connected" && (
-                                                    <Button disabled>
-                                                        Connected
+                                                    <Button
+                                                        variant="primary"
+                                                        tone="critical"
+                                                        onClick={() => {
+                                                            if (
+                                                                confirm(
+                                                                    "Are you sure you want to disconnect?"
+                                                                )
+                                                            ) {
+                                                                router.post(
+                                                                    route(
+                                                                        "auth.google.disconnect"
+                                                                    )
+                                                                );
+                                                            }
+                                                        }}
+                                                    >
+                                                        Disconnect
                                                     </Button>
                                                 )}
 

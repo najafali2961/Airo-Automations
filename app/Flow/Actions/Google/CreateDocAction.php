@@ -17,14 +17,14 @@ class CreateDocAction extends BaseAction
         $this->googleService = $googleService;
     }
 
-    public function handle(Execution $execution, Node $node, array $payload)
+    public function handle(Node $node, array $payload, Execution $execution): void
     {
         try {
             $settings = $this->getSettings($node, $payload);
             $title = $settings['title'] ?? 'Untitled Doc';
             $content = $settings['content'] ?? '';
 
-            $client = $this->googleService->getClient();
+            $client = $this->googleService->getClient($execution->flow->user);
             $service = new Docs($client);
 
             $doc = new \Google\Service\Docs\Document([

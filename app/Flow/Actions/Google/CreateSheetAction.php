@@ -19,13 +19,13 @@ class CreateSheetAction extends BaseAction
         $this->googleService = $googleService;
     }
 
-    public function handle(Execution $execution, Node $node, array $payload)
+    public function handle(Node $node, array $payload, Execution $execution): void
     {
         try {
             $settings = $this->getSettings($node, $payload);
             $title = $settings['title'] ?? 'New Spreadsheet';
 
-            $client = $this->googleService->getClient();
+            $client = $this->googleService->getClient($execution->flow->user);
             $service = new Sheets($client);
 
             $spreadsheet = new Spreadsheet([
