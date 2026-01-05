@@ -56,6 +56,7 @@ createInertiaApp({
                     </a>
                     <a href="/workflows">Workflows</a>
                     <a href="/executions">Executions</a>
+                    <a href="/connectors">Connectors</a>
                 </NavMenu>
                 <ErrorBoundary>
                     <App {...props} />

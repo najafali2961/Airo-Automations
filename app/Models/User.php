@@ -28,6 +28,9 @@ class User extends Authenticatable implements IShopModel
         'credits',
         'credits_used',
         'credits_reset_at',
+        'google_access_token',
+        'google_refresh_token',
+        'google_token_expires_at',
     ];
 
     /**
@@ -50,6 +53,7 @@ class User extends Authenticatable implements IShopModel
         'credits_used' => 'integer',
         'credits_reset_at' => 'datetime',
         'shopify_freemium' => 'boolean',
+        'google_token_expires_at' => 'datetime',
     ];
 
     /**

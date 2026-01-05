@@ -519,5 +519,68 @@ return [
             ],
         ],
 
+
+        // Google Actions
+        [
+            'key' => 'send_gmail',
+            'label' => 'Send Gmail',
+            'description' => 'Send an email via Gmail',
+            'category' => 'communication',
+            'icon' => 'Mail',
+            'app' => 'google',
+            'fields' => [
+                 ['name' => 'to', 'label' => 'To', 'type' => 'text', 'required' => true, 'placeholder' => 'example@email.com'],
+                 ['name' => 'subject', 'label' => 'Subject', 'type' => 'text', 'required' => true],
+                 ['name' => 'body', 'label' => 'Body (HTML)', 'type' => 'textarea', 'required' => true],
+            ]
+        ],
+        [
+            'key' => 'add_to_sheet',
+            'label' => 'Add to Google Sheet',
+            'description' => 'Append a row to a Google Sheet',
+            'category' => 'productivity',
+            'icon' => 'Table',
+            'app' => 'google',
+            'fields' => [
+                 ['name' => 'spreadsheet_id', 'label' => 'Spreadsheet ID', 'type' => 'text', 'required' => true],
+                 ['name' => 'range', 'label' => 'Range', 'type' => 'text', 'default' => 'Sheet1!A1'],
+                 ['name' => 'values', 'label' => 'Values (Comma Separated)', 'type' => 'textarea', 'required' => true, 'placeholder' => 'Val1, Val2, Val3'],
+            ]
+        ],
+        [
+            'key' => 'create_doc',
+            'label' => 'Create Google Doc',
+            'description' => 'Create a new Google Doc',
+            'category' => 'productivity',
+            'icon' => 'FileText',
+            'app' => 'google',
+            'fields' => [
+                 ['name' => 'title', 'label' => 'Document Title', 'type' => 'text', 'required' => true],
+                 ['name' => 'content', 'label' => 'Content', 'type' => 'textarea'],
+            ]
+        ],
+        [
+            'key' => 'create_sheet',
+            'label' => 'Create Google Sheet',
+            'description' => 'Create a new Google Spreadsheet',
+            'category' => 'productivity',
+            'icon' => 'Table',
+            'app' => 'google',
+            'fields' => [
+                 ['name' => 'title', 'label' => 'Sheet Title', 'type' => 'text', 'required' => true, 'placeholder' => 'Project {{ product.title }}'],
+            ]
+        ],
+        [
+            'key' => 'send_smart_email',
+            'label' => 'Send Smart Email',
+            'description' => 'Send an email with all trigger details automatically formatted.',
+            'category' => 'communication',
+            'icon' => 'Mail',
+            'app' => 'google',
+            'fields' => [
+                 ['name' => 'to', 'label' => 'To', 'type' => 'text', 'required' => true],
+                 ['name' => 'subject', 'label' => 'Subject', 'type' => 'text', 'required' => true, 'default' => 'New Event: {{ event }}'],
+            ]
+        ],
     ],
 ];

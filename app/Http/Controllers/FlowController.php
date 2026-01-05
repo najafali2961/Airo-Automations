@@ -42,10 +42,12 @@ class FlowController extends Controller
          }
 
          $shopifyActions = [];
+         $googleActions = [];
+
          foreach ($flowConfig['actions'] as $action) {
-             $shopifyActions[] = [
+             $actionDef = [
                  'type' => 'action',
-                 'n8nType' => 'shopifyAction',
+                 'n8nType' => 'shopifyAction', // keeping n8nType consistent for now or generic? frontend likely uses it for icon/node style
                  'label' => $action['label'],
                  'description' => $action['description'],
                  'settings' => [
@@ -55,6 +57,12 @@ class FlowController extends Controller
                  'icon' => $action['icon'],
                  'fields' => $action['fields'] ?? []
              ];
+
+             if (isset($action['app']) && $action['app'] === 'google') {
+                 $googleActions[] = $actionDef;
+             } else {
+                 $shopifyActions[] = $actionDef;
+             }
          }
          
          $definitions = [
@@ -64,6 +72,12 @@ class FlowController extends Controller
                      'icon' => 'shopify', 
                      'triggers' => $shopifyTriggers,
                      'actions' => $shopifyActions
+                 ],
+                 [
+                     'name' => 'Google',
+                     'icon' => 'google', 
+                     'triggers' => [], // No google triggers yet
+                     'actions' => $googleActions
                  ]
              ]
          ];

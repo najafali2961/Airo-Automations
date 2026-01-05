@@ -38,6 +38,13 @@ class ActionRegistry
 
         // Collections
         'add_to_collection' => \App\Flow\Actions\Shopify\ShopifyGqlAction::class,
+
+        // Google
+        'send_gmail' => \App\Flow\Actions\Google\SendEmailAction::class,
+        'add_to_sheet' => \App\Flow\Actions\Google\AddToSheetAction::class,
+        'create_doc' => \App\Flow\Actions\Google\CreateDocAction::class,
+        'create_sheet' => \App\Flow\Actions\Google\CreateSheetAction::class,
+        'send_smart_email' => \App\Flow\Actions\Google\SendTriggerContextEmailAction::class,
     ];
 
 
@@ -46,7 +53,7 @@ class ActionRegistry
         $class = self::$actions[$key] ?? null;
 
         if ($class && class_exists($class)) {
-            return new $class();
+            return app($class);
         }
 
         return null;

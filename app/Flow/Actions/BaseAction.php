@@ -7,8 +7,12 @@ use App\Models\Node;
 use App\Models\Execution;
 use Illuminate\Support\Facades\Log;
 
+use App\Flow\Traits\InteractsWithVariables;
+
 abstract class BaseAction implements ActionInterface
 {
+    use InteractsWithVariables;
+
     /**
      * Helper to log messages back to the execution trace.
      */
@@ -32,14 +36,17 @@ abstract class BaseAction implements ActionInterface
     /**
      * Helper to get consolidated settings from a node.
      * Merges 'form' into the main settings if it's not empty.
+     * Also automatically resolves {{ variables }} in the settings using the provided payload data.
      */
-    protected function getSettings(Node $node): array
+    protected function getSettings(Node $node, array $data = []): array
     {
         $settings = $node->settings ?? [];
         if (isset($settings['form']) && is_array($settings['form']) && !empty($settings['form'])) {
-            return array_merge($settings, $settings['form']);
+            $settings = array_merge($settings, $settings['form']);
         }
-        return $settings;
+        
+        // Resolve variables
+        return $this->resolveRawSettings($settings, $data);
     }
 
     public function getShop(Execution $execution)

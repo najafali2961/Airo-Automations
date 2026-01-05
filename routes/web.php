@@ -39,6 +39,13 @@ Route::middleware(['verify.shopify'])->group(function () {
     
     Route::get('/executions', [\App\Http\Controllers\ExecutionsController::class, 'index'])->name('executions.index');
     Route::get('/executions/{id}', [\App\Http\Controllers\ExecutionsController::class, 'show'])->name('executions.show');
+    
+    // Google Auth
+    Route::get('/auth/google/redirect', [\App\Http\Controllers\GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
+    Route::get('/auth/google/callback', [\App\Http\Controllers\GoogleAuthController::class, 'callback'])->name('auth.google.callback');
+
+    // Connectors
+    Route::get('/connectors', [\App\Http\Controllers\ConnectorController::class, 'index'])->name('connectors.index');
 });
 
 Route::middleware(['verify.shopify'])->group(function () {
@@ -50,7 +57,7 @@ Route::middleware(['verify.shopify'])->group(function () {
 Route::post('/webhooks/shopify-automation', [\App\Http\Controllers\WebhookController::class, 'handle'])->name('webhooks.handle');
 Route::post('/shopify-webhooks/{any}', [\App\Http\Controllers\WebhookController::class, 'handle'])->where('any', '.*');
 
-Route::get('logs', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
+Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
 
 // make test route
 Route::get('/test/shopify', [DashboardController::class, 'handleShopifyCall']);
