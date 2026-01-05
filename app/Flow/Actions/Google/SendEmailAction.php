@@ -85,4 +85,12 @@ class SendEmailAction extends BaseAction
             $this->log($execution, $node->id, 'error', 'Failed to send email: ' . $e->getMessage());
         }
     }
+    }
+
+    protected function findCustomerEmail(array $payload)
+    {
+        return $payload['email'] ?? 
+               ($payload['customer']['email'] ?? 
+               ($payload['contact_email'] ?? null));
+    }
 }
