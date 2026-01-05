@@ -597,5 +597,49 @@ return [
                  ['name' => 'subject', 'label' => 'Subject', 'type' => 'text', 'required' => true, 'default' => 'New Event: {{ event }}'],
             ]
         ],
+        // Google Drive Actions
+        [
+            'key' => 'create_folder',
+            'label' => 'Create Drive Folder',
+            'description' => 'Create a new folder in Google Drive',
+            'category' => 'productivity',
+            'icon' => 'Folder',
+            'app' => 'google',
+            'fields' => [
+                 ['name' => 'name_source', 'label' => 'Name Strategy', 'type' => 'select', 'options' => [
+                    ['value' => 'custom', 'label' => 'Custom Name'],
+                    ['value' => 'order_name', 'label' => 'Order Name'],
+                    ['value' => 'product_title', 'label' => 'Product Title'],
+                    ['value' => 'customer_name', 'label' => 'Customer Name'],
+                 ], 'default' => 'custom'],
+                 ['name' => 'folder_name', 'label' => 'Folder Name (Custom)', 'type' => 'text', 'placeholder' => 'New Folder'],
+            ]
+        ],
+        [
+            'key' => 'upload_file',
+            'label' => 'Upload File to Drive',
+            'description' => 'Save a file from URL to Google Drive',
+            'category' => 'productivity',
+            'icon' => 'UploadCloud',
+            'app' => 'google',
+            'fields' => [
+                 ['name' => 'file_url', 'label' => 'File URL', 'type' => 'text', 'required' => true, 'placeholder' => 'https://...'],
+                 ['name' => 'file_name', 'label' => 'File Name', 'type' => 'text', 'required' => true],
+                 ['name' => 'folder_id', 'label' => 'Parent Folder ID (Optional)', 'type' => 'text'],
+            ]
+        ],
+        [
+            'key' => 'create_text_file',
+            'label' => 'Create Text File',
+            'description' => 'Create a plain text file in Drive',
+            'category' => 'productivity',
+            'icon' => 'File',
+            'app' => 'google',
+            'fields' => [
+                 ['name' => 'file_name', 'label' => 'File Name', 'type' => 'text', 'required' => true, 'placeholder' => 'log.txt'],
+                 ['name' => 'content', 'label' => 'Content', 'type' => 'textarea', 'required' => true],
+                 ['name' => 'folder_id', 'label' => 'Parent Folder ID (Optional)', 'type' => 'text'],
+            ]
+        ],
     ],
 ];

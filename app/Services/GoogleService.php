@@ -25,6 +25,7 @@ class GoogleService
         $this->client->addScope(Gmail::GMAIL_SEND);
         $this->client->addScope(Sheets::SPREADSHEETS);
         $this->client->addScope(Docs::DOCUMENTS);
+        $this->client->addScope(\Google\Service\Drive::DRIVE);
         $this->client->addScope('email');
     }
 
