@@ -79,9 +79,29 @@ export default function Sidebar({ definitions }) {
             };
         }
 
+        // Check if there is a matching connector app definition
+        const connectorMatch = connectorApps.find(
+            (ca) => ca.name.toLowerCase() === app.name.toLowerCase()
+        );
+
+        if (connectorMatch) {
+            return {
+                ...app,
+                color: app.color || connectorMatch.color,
+                iconUrl: app.iconUrl || connectorMatch.iconUrl,
+            };
+        }
+
         return app;
     });
-    const allApps = [...apps, ...connectorApps];
+
+    // Filter out connectorApps that are already present in apps (to avoid duplicates)
+    const uniqueConnectorApps = connectorApps.filter(
+        (ca) =>
+            !apps.some((a) => a.name.toLowerCase() === ca.name.toLowerCase())
+    );
+
+    const allApps = [...apps, ...uniqueConnectorApps];
 
     const searchResults = useMemo(() => {
         if (!searchQuery) return null;
