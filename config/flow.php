@@ -529,7 +529,12 @@ return [
             'icon' => 'Mail',
             'app' => 'google',
             'fields' => [
-                 ['name' => 'to', 'label' => 'To', 'type' => 'text', 'required' => true, 'placeholder' => 'example@email.com'],
+                 ['name' => 'recipient_type', 'label' => 'Recipient Strategy', 'type' => 'select', 'options' => [
+                    ['value' => 'custom', 'label' => 'Custom Email (Use "To" field)'],
+                    ['value' => 'customer_email', 'label' => 'Customer Email (from Trigger)'],
+                    ['value' => 'shop_email', 'label' => 'My Shop Email'],
+                 ], 'default' => 'custom'],
+                 ['name' => 'to', 'label' => 'To (Custom)', 'type' => 'text', 'placeholder' => 'example@email.com'],
                  ['name' => 'subject', 'label' => 'Subject', 'type' => 'text', 'required' => true],
                  ['name' => 'body', 'label' => 'Body (HTML)', 'type' => 'textarea', 'required' => true],
             ]
@@ -555,7 +560,12 @@ return [
             'icon' => 'FileText',
             'app' => 'google',
             'fields' => [
-                 ['name' => 'title', 'label' => 'Document Title', 'type' => 'text', 'required' => true],
+                 ['name' => 'title_source', 'label' => 'Title Strategy', 'type' => 'select', 'options' => [
+                    ['value' => 'custom', 'label' => 'Custom Title'],
+                    ['value' => 'product_title', 'label' => 'Product Title (from Trigger)'],
+                    ['value' => 'order_name', 'label' => 'Order Name (from Trigger)'],
+                 ], 'default' => 'custom'],
+                 ['name' => 'title', 'label' => 'Document Title (Custom)', 'type' => 'text'],
                  ['name' => 'content', 'label' => 'Content', 'type' => 'textarea'],
             ]
         ],
@@ -567,7 +577,12 @@ return [
             'icon' => 'Table',
             'app' => 'google',
             'fields' => [
-                 ['name' => 'title', 'label' => 'Sheet Title', 'type' => 'text', 'required' => true, 'placeholder' => 'Project {{ product.title }}'],
+                 ['name' => 'title_source', 'label' => 'Title Strategy', 'type' => 'select', 'options' => [
+                    ['value' => 'custom', 'label' => 'Custom Title'],
+                    ['value' => 'product_title', 'label' => 'Product Title (from Trigger)'],
+                    ['value' => 'order_name', 'label' => 'Order Name (from Trigger)'],
+                 ], 'default' => 'custom'],
+                 ['name' => 'title', 'label' => 'Sheet Title (Custom)', 'type' => 'text', 'placeholder' => 'Project {{ product.title }}'],
             ]
         ],
         [

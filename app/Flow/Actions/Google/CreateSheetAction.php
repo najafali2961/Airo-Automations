@@ -23,7 +23,16 @@ class CreateSheetAction extends BaseAction
     {
         try {
             $settings = $this->getSettings($node, $payload);
-            $title = $settings['title'] ?? 'New Spreadsheet';
+            $titleSource = $settings['title_source'] ?? 'custom';
+            $title = 'New Spreadsheet';
+
+            if ($titleSource === 'product_title') {
+                $title = $payload['title'] ?? ($payload['product']['title'] ?? 'Unknown Product');
+            } elseif ($titleSource === 'order_name') {
+                $title = $payload['name'] ?? 'Unknown Order';
+            } else {
+                $title = $settings['title'] ?? 'New Spreadsheet';
+            }
 
             $client = $this->googleService->getClient($execution->flow->user);
             $service = new Sheets($client);

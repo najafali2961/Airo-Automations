@@ -21,7 +21,16 @@ class CreateDocAction extends BaseAction
     {
         try {
             $settings = $this->getSettings($node, $payload);
-            $title = $settings['title'] ?? 'Untitled Doc';
+            $titleSource = $settings['title_source'] ?? 'custom';
+            $title = 'New Document';
+
+            if ($titleSource === 'product_title') {
+                $title = $payload['title'] ?? ($payload['product']['title'] ?? 'Unknown Product');
+            } elseif ($titleSource === 'order_name') {
+                $title = $payload['name'] ?? 'Unknown Order';
+            } else {
+                $title = $settings['title'] ?? 'New Document';
+            }
             $content = $settings['content'] ?? '';
 
             $client = $this->googleService->getClient($execution->flow->user);

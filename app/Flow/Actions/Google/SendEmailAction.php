@@ -26,6 +26,22 @@ class SendEmailAction extends BaseAction
             $subject = $settings['subject'] ?? 'No Subject';
             $body = $settings['body'] ?? '';
 
+            $recipientType = $settings['recipient_type'] ?? 'custom';
+
+            if ($recipientType === 'customer_email') {
+                // Try to find customer email in payload
+                $to = $this->findCustomerEmail($payload);
+                if (!$to) {
+                     $this->log($execution, $node->id, 'error', 'Could not find customer email in trigger data.');
+                     return;
+                }
+            } elseif ($recipientType === 'shop_email') {
+                $to = \Illuminate\Support\Facades\Auth::user()->email ?? $execution->flow->user->email;
+            } else {
+                // Custom
+                $to = $settings['to'] ?? null;
+            }
+
             if (!$to) {
                 $this->log($execution, $node->id, 'error', 'Missing "to" email address.');
                 return;
