@@ -52,7 +52,10 @@ export default function Connectors({ connectors }) {
     // ============================================================================================
     useEffect(() => {
         const handleMessage = (event) => {
-            if (event.data === "google_auth_success") {
+            if (
+                event.data === "google_auth_success" ||
+                event.data === "slack_auth_success"
+            ) {
                 router.reload({
                     onSuccess: () => {
                         setToastMessage("Successfully connected!");
@@ -93,14 +96,14 @@ export default function Connectors({ connectors }) {
                 );
 
                 // Fetch signed URL if needed
-                if (connector.key === "google") {
-                    const response = await window.axios.get(
-                        `/api/google/auth-url?host=${host}`
-                    );
+                if (connector.key === "google" || connector.key === "slack") {
+                    const apiUrl = `/api/${connector.key}/auth-url?host=${host}`;
+
+                    const response = await window.axios.get(apiUrl);
                     if (response.data.url) {
                         window.open(
                             response.data.url,
-                            "google_auth_popup",
+                            `${connector.key}_auth_popup`,
                             "width=600,height=700,status=yes,scrollbars=yes"
                         );
                     } else {

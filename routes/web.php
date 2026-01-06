@@ -66,7 +66,7 @@ Route::middleware(['verify.shopify'])->group(function () {
     Route::get('/api/smtp/config', [\App\Http\Controllers\SmtpController::class, 'show'])->name('smtp.show');
 
     // Slack
-    Route::get('/slack/auth', [\App\Http\Controllers\SlackController::class, 'redirect'])->name('slack.auth');
+    Route::get('/api/slack/auth-url', [\App\Http\Controllers\SlackController::class, 'generateAuthUrl'])->name('slack.auth.url');
 });
 
 // Slack Callback (Public)
@@ -75,6 +75,7 @@ Route::get('/slack/callback', [\App\Http\Controllers\SlackController::class, 'ca
 // Redirect endpoint - MUST be outside verify.shopify to allow popup opening (params expire), but protected by signed URL
 Route::middleware(['signed'])->group(function () {
     Route::get('/auth/google/redirect', [\App\Http\Controllers\GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
+    Route::get('/slack/auth', [\App\Http\Controllers\SlackController::class, 'redirect'])->name('slack.auth.redirect');
 });
 
 // Google Auth Callback (Public)
