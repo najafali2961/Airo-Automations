@@ -661,5 +661,18 @@ return [
                  ['name' => 'body', 'label' => 'Body (HTML)', 'type' => 'textarea', 'required' => true, 'placeholder' => '<h1>New Order: {{ order.name }}</h1><p>Total: {{ order.total_price }}</p>'],
             ]
         ],
+        // Slack Actions
+        [
+            'key' => 'send_slack_message',
+            'label' => 'Send Slack Message',
+            'description' => 'Send a message to a Slack channel',
+            'category' => 'communication',
+            'icon' => 'MessageSquare',
+            'app' => 'slack',
+            'fields' => [
+                 ['name' => 'channel', 'label' => 'Channel (ID or Name)', 'type' => 'text', 'placeholder' => '#general or C12345'],
+                 ['name' => 'message', 'label' => 'Message', 'type' => 'textarea', 'required' => true, 'placeholder' => 'Hello {{ order.name }}'],
+            ]
+        ],
     ],
 ];

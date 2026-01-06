@@ -127,4 +127,12 @@ class User extends Authenticatable implements IShopModel
     {
         return $this->hasOne(SmtpConfig::class);
     }
+
+    /**
+     * Get Slack Credentials
+     */
+    public function slackCredential()
+    {
+        return $this->hasOne(SlackCredential::class);
+    }
 }

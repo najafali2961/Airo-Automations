@@ -28,7 +28,9 @@ return [
         'title' => 'Slack',
         'description' => 'Integrate Shopify events seamlessly with Slack.',
         'icon' => 'https://cdn-icons-png.flaticon.com/512/2111/2111615.png',
-        'auth_type' => 'coming_soon',
-        'is_active' => false,
+        'auth_type' => 'oauth',
+        'auth_route' => 'slack.auth',
+        'connected_check' => 'slackCredential',
+        'is_active' => true,
     ],
 ];
