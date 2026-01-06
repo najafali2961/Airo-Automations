@@ -143,6 +143,8 @@ class SendSmtpEmailAction implements ActionInterface
         if (isset($payload['name'])) $flattened['order.name'] = $payload['name'];
         if (isset($payload['id'])) $flattened['id'] = $payload['id'];
         
+        Log::info("Available Variables for Replacement: " . implode(', ', array_keys($flattened)));
+        
         foreach ($flattened as $key => $value) {
             if (is_array($value) || is_object($value)) continue;
             if (is_bool($value)) $value = $value ? 'true' : 'false';
