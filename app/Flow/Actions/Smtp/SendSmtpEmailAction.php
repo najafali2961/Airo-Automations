@@ -14,6 +14,11 @@ class SendSmtpEmailAction implements ActionInterface
 {
     public function handle(Node $node, array $payload, Execution $execution): void
     {
+        Log::info("--- START SMTP ACTION (VERSION 5.0 - DEBUG) ---");
+        // Debugging Node Structure to settle 'data' vs 'settings' debate
+        Log::info("Node Settings Keys: " . implode(',', array_keys($node->settings ?? [])));
+        Log::info("Node Data Keys (if any): " . implode(',', array_keys($node['data'] ?? [])));
+        
         $user = $execution->flow->user;
         
         if (!$user) {
@@ -77,11 +82,12 @@ class SendSmtpEmailAction implements ActionInterface
         $to = $this->resolveToAddress($node, $payload, $user);
         
         if (empty($to)) {
-             throw new \Exception("No recipient email address resolved for this action. Strategy: " . ($node['data']['settings']['recipient_type'] ?? 'unknown'));
+             $strat = $node->settings['recipient_type'] ?? 'NULL';
+             throw new \Exception("No recipient email address resolved. Strategy: {$strat}. Settings Count: " . count($node->settings ?? []));
         }
 
-        $subject = $node['data']['settings']['subject'] ?? 'No Subject';
-        $body = $node['data']['settings']['body'] ?? '';
+        $subject = $node['settings']['subject'] ?? 'No Subject';
+        $body = $node['settings']['body'] ?? '';
 
         try {
             // Re-attempt with HTML if possible for rich body
@@ -108,15 +114,19 @@ class SendSmtpEmailAction implements ActionInterface
 
     private function resolveToAddress($node, $payload, $user = null)
     {
-        $settings = $node['data']['settings'] ?? [];
-        $strategy = $settings['recipient_type'] ?? 'custom';
+        // Use object syntax for Eloquent model to be safe
+        $settings = $node->settings ?? [];
+        
+        // Default to 'shop_email' if empty.
+        $strategy = $settings['recipient_type'] ?? 'shop_email';
 
         Log::info("SMTP Address Resolution Strategy: {$strategy}");
 
         if ($strategy === 'custom') {
             $email = $settings['to'] ?? '';
-            // Handle comma-separated list - take first for now or Validate
-            return trim(explode(',', $email)[0]);
+            $email = trim(explode(',', $email)[0]);
+            if (!empty($email)) return $email;
+            Log::warning("Strategy 'custom' selected but 'to' field is empty.");
         }
 
         if ($strategy === 'customer_email') {
@@ -137,7 +147,13 @@ class SendSmtpEmailAction implements ActionInterface
              Log::warning("Strategy 'shop_email' failed. User object missing or has no email.");
         }
 
-        // Final Fallback for cases where UI settings might be legacy
+        // Final Fallback: If no strategy is set OR if custom/customer logic yielded nothing.
+        // We defaults to Shop Email (Admin) to prevent crashes.
+        if ($user && !empty($user->email)) {
+             Log::warning("Resolution Fallback: Primary strategy '{$strategy}' yielded no email. Defaulting to Shop Admin Email: {$user->email}");
+             return $user->email;
+        }
+
         return $settings['to'] ?? '';
     }
 
