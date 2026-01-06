@@ -641,5 +641,23 @@ return [
                  ['name' => 'folder_id', 'label' => 'Parent Folder ID (Optional)', 'type' => 'text'],
             ]
         ],
+        // SMTP Actions
+        [
+            'key' => 'send_smtp_email',
+            'label' => 'Send SMTP Email',
+            'description' => 'Send an email using your custom SMTP server',
+            'category' => 'communication',
+            'icon' => 'Mail',
+            'app' => 'smtp',
+            'fields' => [
+                 ['name' => 'recipient_type', 'label' => 'Recipient Strategy', 'type' => 'select', 'options' => [
+                    ['value' => 'custom', 'label' => 'Custom Email (Use "To" field)'],
+                    ['value' => 'customer_email', 'label' => 'Customer Email (from Trigger)'],
+                 ], 'default' => 'custom'],
+                 ['name' => 'to', 'label' => 'To (Custom)', 'type' => 'text', 'placeholder' => 'recipient@example.com'],
+                 ['name' => 'subject', 'label' => 'Subject', 'type' => 'text', 'required' => true],
+                 ['name' => 'body', 'label' => 'Body (HTML)', 'type' => 'textarea', 'required' => true],
+            ]
+        ],
     ],
 ];

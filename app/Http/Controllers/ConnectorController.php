@@ -23,6 +23,10 @@ class ConnectorController extends Controller
                 if ($user->$field) {
                     $isConnected = true;
                 }
+            } elseif ($config['auth_type'] === 'basic' && $key === 'smtp') {
+                if ($user->smtpConfig()->exists()) {
+                   $isConnected = true;
+                }
             }
             
             $connectors[] = [

@@ -41,13 +41,21 @@ class FlowController extends Controller
              ];
          }
 
-         $shopifyActions = [];
-         $googleActions = [];
+         $apps = [];
+         
+         // 1. Initialize Shopify App (as it has triggers too)
+         $apps['shopify'] = [
+             'name' => 'Shopify',
+             'icon' => 'shopify',
+             'triggers' => $shopifyTriggers,
+             'actions' => []
+         ];
 
+         // 2. Group Actions dynamically
          foreach ($flowConfig['actions'] as $action) {
              $actionDef = [
                  'type' => 'action',
-                 'n8nType' => 'shopifyAction', // keeping n8nType consistent for now or generic? frontend likely uses it for icon/node style
+                 'n8nType' => 'shopifyAction',
                  'label' => $action['label'],
                  'description' => $action['description'],
                  'settings' => [
@@ -58,28 +66,35 @@ class FlowController extends Controller
                  'fields' => $action['fields'] ?? []
              ];
 
-             if (isset($action['app']) && $action['app'] === 'google') {
-                 $googleActions[] = $actionDef;
-             } else {
-                 $shopifyActions[] = $actionDef;
+             $appName = $action['app'] ?? 'shopify';
+             $appName = strtolower($appName);
+
+             if (!isset($apps[$appName])) {
+                 $apps[$appName] = [
+                     'name' => ucfirst($appName), // 'google' -> 'Google'
+                     'icon' => $appName,
+                     'triggers' => [],
+                     'actions' => []
+                 ];
              }
+
+             $apps[$appName]['actions'][] = $actionDef;
+         }
+         
+         // 3. Format for Frontend
+         // Ensure Shopify is first if desired, or just array_values
+         // We might want to enforce case for specific known apps if ucfirst isn't enough (e.g. SMTP)
+         
+         $formattedApps = [];
+         foreach ($apps as $key => $appData) {
+             if ($key === 'smtp') $appData['name'] = 'SMTP';
+             // if ($key === 'shopify') $appData['name'] = 'Shopify'; // Already set
+             
+             $formattedApps[] = $appData;
          }
          
          $definitions = [
-             'apps' => [
-                 [
-                     'name' => 'Shopify',
-                     'icon' => 'shopify', 
-                     'triggers' => $shopifyTriggers,
-                     'actions' => $shopifyActions
-                 ],
-                 [
-                     'name' => 'Google',
-                     'icon' => 'google', 
-                     'triggers' => [], // No google triggers yet
-                     'actions' => $googleActions
-                 ]
-             ]
+             'apps' => $formattedApps
          ];
 
          return Inertia::render('Workflows/Editor', [

@@ -50,6 +50,9 @@ class ActionRegistry
         'create_folder' => \App\Flow\Actions\Google\CreateFolderAction::class,
         'upload_file' => \App\Flow\Actions\Google\UploadFileAction::class,
         'create_text_file' => \App\Flow\Actions\Google\CreateTextFileAction::class,
+            
+            // SMTP
+            'send_smtp_email' => \App\Flow\Actions\Smtp\SendSmtpEmailAction::class,
     ];
 
 

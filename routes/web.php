@@ -59,6 +59,11 @@ Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'i
 Route::middleware(['verify.shopify'])->group(function () {
     Route::post('/auth/google/disconnect', [\App\Http\Controllers\GoogleAuthController::class, 'disconnect'])->name('auth.google.disconnect');
     Route::get('/api/google/auth-url', [\App\Http\Controllers\GoogleAuthController::class, 'generateAuthUrl'])->name('auth.google.url');
+
+    // SMTP
+    Route::post('/smtp/save', [\App\Http\Controllers\SmtpController::class, 'store'])->name('smtp.save');
+    Route::post('/smtp/disconnect', [\App\Http\Controllers\SmtpController::class, 'disconnect'])->name('smtp.disconnect');
+    Route::get('/api/smtp/config', [\App\Http\Controllers\SmtpController::class, 'show'])->name('smtp.show');
 });
 
 // Redirect endpoint - MUST be outside verify.shopify to allow popup opening (params expire), but protected by signed URL

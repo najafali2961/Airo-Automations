@@ -14,8 +14,8 @@ return [
         'title' => 'SMTP',
         'description' => 'Connect external email hosting provider.',
         'icon' => 'https://cdn-icons-png.flaticon.com/512/732/732200.png',
-        'auth_type' => 'coming_soon',
-        'is_active' => false,
+        'auth_type' => 'basic', // changed from coming_soon
+        'is_active' => true,
     ],
     'twilio' => [
         'title' => 'Twilio',

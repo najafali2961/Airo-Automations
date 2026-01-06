@@ -119,4 +119,12 @@ class User extends Authenticatable implements IShopModel
     {
         return !$this->isFreemium() && $this->plan_id !== null;
     }
+
+    /**
+     * Get SMTP Configuration
+     */
+    public function smtpConfig()
+    {
+        return $this->hasOne(SmtpConfig::class);
+    }
 }
