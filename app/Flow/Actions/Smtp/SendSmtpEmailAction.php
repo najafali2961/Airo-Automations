@@ -17,12 +17,30 @@ class SendSmtpEmailAction implements ActionInterface
         $user = $execution->flow->user;
         
         if (!$user) {
-             // Fallback if relation fails
-             $user = \App\Models\User::find($execution->flow->shop_id);
+             $shopId = $execution->flow->shop_id; // Try explicit ID from Flow model
+             
+             if ($shopId) {
+                  // Fallback 1: Normal Find
+                  $user = \App\Models\User::find($shopId);
+                  
+                  // Fallback 2: Soft Deletes (if installed/uninstalled quickly)
+                  if (!$user && method_exists(\App\Models\User::class, 'withTrashed')) {
+                       $user = \App\Models\User::withTrashed()->find($shopId);
+                       if ($user) Log::warning("User found via soft-delete lookup for Shop ID: $shopId");
+                  }
+             }
+             
+             if ($user) {
+                  Log::warning("Recovered User Context manually for Shop ID: " . $shopId);
+             }
         }
 
         if (!$user) {
-             throw new \Exception("User not found for execution context (Flow ID: " . $execution->flow_id . ")");
+             $flowId = $execution->flow_id;
+             $shopIdFromFlow = $execution->flow->shop_id ?? 'NULL';
+             // Log full context for debugging
+             Log::error("CRITICAL: User Context Failure. Flow ID: {$flowId}, Shop ID: {$shopIdFromFlow}. Execution Payload keys: " . implode(',', array_keys($payload)));
+             throw new \Exception("User not found for execution context (Flow ID: {$flowId}, Shop ID: {$shopIdFromFlow}). Please check if the Shop User exists in DB.");
         }
 
         $smtpConfig = $user->smtpConfig;
@@ -54,27 +72,19 @@ class SendSmtpEmailAction implements ActionInterface
         Config::set('mail.from.name', $smtpConfig->from_name);
 
         $mailer = $factory->mailer('smtp_dynamic');
+        
+        // Pass $user to resolution logic for 'shop_email' fallback
+        $to = $this->resolveToAddress($node, $payload, $user);
+        
+        if (empty($to)) {
+             throw new \Exception("No recipient email address resolved for this action. Strategy: " . ($node['data']['settings']['recipient_type'] ?? 'unknown'));
+        }
 
-        $to = $this->resolveToAddress($node, $payload);
         $subject = $node['data']['settings']['subject'] ?? 'No Subject';
         $body = $node['data']['settings']['body'] ?? '';
 
         try {
-            $mailer->raw($body, function ($message) use ($to, $subject, $smtpConfig) {
-                $message->to($to)
-                        ->subject($subject)
-                        ->from($smtpConfig->from_address, $smtpConfig->from_name);
-                
-                // HTML Support: 'raw' sends plain text. For HTML use 'html' if defined or 'send' with view.
-                // But mailer->html() is available in newer Laravel.
-                // If not, we can use ->html($body, ...) or provide a simple view.
-                // Let's try explicit html method if available, or fallback to text.
-                // Actually, safest is ->send([], [], function($m) use ($body) { $m->html($body); });
-                // But ->html() method exists in most recent versions.
-            });
-            
             // Re-attempt with HTML if possible for rich body
-            // Since we used raw above, let's fix it to support HTML properly.
              $mailer->send([], [], function ($message) use ($to, $subject, $body, $smtpConfig) {
                 $message->to($to)
                         ->subject($subject)
@@ -96,36 +106,68 @@ class SendSmtpEmailAction implements ActionInterface
         }
     }
 
-    private function resolveToAddress($node, $payload)
+    private function resolveToAddress($node, $payload, $user = null)
     {
         $settings = $node['data']['settings'] ?? [];
         $strategy = $settings['recipient_type'] ?? 'custom';
 
+        Log::info("SMTP Address Resolution Strategy: {$strategy}");
+
         if ($strategy === 'custom') {
-            return $settings['to'] ?? '';
+            $email = $settings['to'] ?? '';
+            // Handle comma-separated list - take first for now or Validate
+            return trim(explode(',', $email)[0]);
         }
 
         if ($strategy === 'customer_email') {
-            return $this->findCustomerEmail($payload);
+            $email = $this->findCustomerEmail($payload);
+            if ($email) {
+                 Log::info("Resolved Customer Email: {$email}");
+                 return $email;
+            }
+            Log::warning("Strategy 'customer_email' failed. No email found in payload.");
         }
 
         if ($strategy === 'shop_email') {
-             // We'd need current shop email. 
-             // Assuming we can get it from payload or execution context.
-             // For now fallback to custom.
-             return 'admin@example.com'; 
+             if ($user && !empty($user->email)) {
+                  Log::info("Resolved Shop Admin Email: {$user->email}");
+                  return $user->email;
+             }
+             // Fallback to a safe default? Or fail.
+             Log::warning("Strategy 'shop_email' failed. User object missing or has no email.");
         }
 
+        // Final Fallback for cases where UI settings might be legacy
         return $settings['to'] ?? '';
     }
 
     private function findCustomerEmail($payload)
     {
-        // Try top level
-        if (isset($payload['email'])) return $payload['email'];
-        if (isset($payload['customer']['email'])) return $payload['customer']['email'];
-        if (isset($payload['order']['email'])) return $payload['order']['email'];
+        // 1. Direct Top-Level Checks (Fast Path)
+        if (!empty($payload['email']) && filter_var($payload['email'], FILTER_VALIDATE_EMAIL)) return $payload['email'];
+        if (!empty($payload['customer']['email']) && filter_var($payload['customer']['email'], FILTER_VALIDATE_EMAIL)) return $payload['customer']['email'];
+        if (!empty($payload['order']['email']) && filter_var($payload['order']['email'], FILTER_VALIDATE_EMAIL)) return $payload['order']['email'];
         
+        // 2. Recursive Search (Deep Path) - beneficial for weird webhooks
+        // Limit depth to avoid performance hit
+        return $this->recursiveFindEmail($payload, 0, 3);
+    }
+    
+    private function recursiveFindEmail($data, $depth = 0, $maxDepth = 3) {
+        if ($depth > $maxDepth) return null;
+        if (!is_array($data) && !is_object($data)) return null;
+        
+        foreach ($data as $key => $value) {
+            if ($key === 'email' && is_string($value) && filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                return $value;
+            }
+            
+            if (is_array($value) || is_object($value)) {
+                $found = $this->recursiveFindEmail((array)$value, $depth + 1, $maxDepth);
+                if ($found) return $found;
+            }
+        }
         return null;
     }
 }
+
