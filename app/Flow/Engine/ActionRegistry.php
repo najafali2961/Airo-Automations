@@ -53,6 +53,9 @@ class ActionRegistry
             
             // SMTP
             'send_smtp_email' => \App\Flow\Actions\Smtp\SendSmtpEmailAction::class,
+
+            // Slack
+            'send_slack_message' => \App\Flow\Actions\Slack\SendSlackMessageAction::class,
     ];
 
 
@@ -60,11 +63,17 @@ class ActionRegistry
     {
         $class = self::$actions[$key] ?? null;
 
-        if ($class && class_exists($class)) {
-            return app($class);
+        if (!$class) {
+            \Illuminate\Support\Facades\Log::error("ActionRegistry: Key not found: $key");
+            return null;
         }
 
-        return null;
+        if (!class_exists($class)) {
+            \Illuminate\Support\Facades\Log::error("ActionRegistry: Class does not exist: $class for key: $key");
+            return null;
+        }
+
+        return app($class);
     }
 
     public static function register(string $key, string $class)
