@@ -91,9 +91,6 @@ class VariableService
                  $aliases['cart.email'] = $fallbackEmail;
                  $aliases['checkout.email'] = $fallbackEmail;
                  $aliases['customer.email'] = $fallbackEmail;
-                 Log::info("[VariableService_v2.5] Email Fallback applied: $fallbackEmail");
-             } else {
-                 Log::info("[VariableService_v2.5] Email Fallback FAILED. No email found in payload.");
              }
         }
         
@@ -122,8 +119,6 @@ class VariableService
             $template = str_replace("{{ " . $key . " }}", $valString, $template);
             $template = str_replace("{{" . $key . "}}", $valString, $template);
         }
-        
-        Log::info("[VariableService_v3] Template processed -> " . substr($template, 0, 100) . "...");
 
         return $template;
     }
