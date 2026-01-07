@@ -144,4 +144,16 @@ class KlaviyoController extends Controller
             return redirect()->route('home')->with('error', 'An error occurred connecting to Klaviyo.');
         }
     }
+
+    public function disconnect(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            KlaviyoCredential::where('user_id', $user->id)->delete();
+            return redirect()->back()->with('success', 'Klaviyo disconnected successfully.');
+        } catch (\Exception $e) {
+            Log::error('Klaviyo Disconnect Error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to disconnect: ' . $e->getMessage());
+        }
+    }
 }
