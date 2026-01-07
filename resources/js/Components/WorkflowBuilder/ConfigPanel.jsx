@@ -9,9 +9,18 @@ import {
     Button,
     InlineStack,
     Divider,
+    Banner,
 } from "@shopify/polaris";
+import VariableInput from "./VariableInput";
 
-export default function ConfigPanel({ node, definitions, onUpdate, onClose }) {
+export default function ConfigPanel({
+    node,
+    definitions,
+    onUpdate,
+    onClose,
+    connectors,
+    triggerVariables,
+}) {
     const [settings, setSettings] = useState(node.data.settings || {});
 
     // Find the definition for this node
@@ -54,6 +63,36 @@ export default function ConfigPanel({ node, definitions, onUpdate, onClose }) {
 
     if (!node) return null;
 
+    // Validation Logic
+    const isConnected = useMemo(() => {
+        if (!definition || !connectors) return true;
+        // Determine app name from definition group or explicit app property (not always set in frontend defs)
+        // Backend maps 'google', 'slack' to group names or app property.
+        // My FlowController adds 'app' implicitly via group logic?
+        // Wait, definition in FlowController sets 'group'.
+        // But I can infer from category or label.
+        // Actually, FlowController sets 'n8nType' and 'group'.
+        // Let's rely on 'group' (category) often matching app name or being 'communication' etc.
+        // Better: Check definition.icon or name?
+        // Code in FlowController: $actionDef['group'] = $action['category'], $actionDef['fields']...
+        // It DOES NOT pass 'app' key explicitly to the action definition in the final array.
+        // However, I grouped them into 'apps' array by name.
+        // But ConfigPanel just searches `definitions.apps`.
+
+        // Find which app this definition belongs to
+        const parentApp = definitions.apps.find(
+            (app) =>
+                app.actions?.some((a) => a.label === definition.label) ||
+                app.triggers?.some((t) => t.label === definition.label)
+        );
+
+        if (parentApp) {
+            const appName = parentApp.name.toLowerCase(); // 'google', 'slack', 'smtp'
+            if (connectors[appName] === false) return false;
+        }
+        return true;
+    }, [definition, connectors, definitions]);
+
     const renderFields = () => {
         // If it's a condition node, use hardcoded logic for now (it's a standard node)
         if (node.type === "condition") {
@@ -87,6 +126,15 @@ export default function ConfigPanel({ node, definitions, onUpdate, onClose }) {
 
         return (
             <BlockStack gap="400">
+                {!isConnected && (
+                    <Banner tone="critical" title="Connection Required">
+                        <p>
+                            You must connect {definition.group || "this app"} in
+                            the Connectors page before using this action.
+                        </p>
+                    </Banner>
+                )}
+
                 {definition.description && (
                     <Text variant="bodySm" tone="subdued">
                         {definition.description}
@@ -105,10 +153,11 @@ export default function ConfigPanel({ node, definitions, onUpdate, onClose }) {
                                 onChange={(val) =>
                                     updateSetting(field.name, val)
                                 }
+                                disabled={!isConnected}
                                 required={field.required}
                             />
                         ) : (
-                            <TextField
+                            <VariableInput
                                 label={field.label}
                                 value={settings[field.name] || ""}
                                 onChange={(val) =>
@@ -121,7 +170,9 @@ export default function ConfigPanel({ node, definitions, onUpdate, onClose }) {
                                 type={
                                     field.type === "number" ? "number" : "text"
                                 }
+                                disabled={!isConnected}
                                 required={field.required}
+                                variables={triggerVariables || []}
                             />
                         )}
                     </div>

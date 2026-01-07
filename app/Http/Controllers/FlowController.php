@@ -37,7 +37,8 @@ class FlowController extends Controller
                  'description' => $trigger['description'],
                  'settings' => ['topic' => $trigger['topic']],
                  'group' => $trigger['category'],
-                 'icon' => $trigger['icon']
+                 'icon' => $trigger['icon'],
+                 'variables' => $trigger['variables'] ?? []
              ];
          }
 
@@ -97,9 +98,18 @@ class FlowController extends Controller
              'apps' => $formattedApps
          ];
 
+         // Fetch Connector Status for Validation
+         $user = auth()->user();
+         $connectors = [
+             'google' => !empty($user->google_access_token), // Check column directly
+             'slack' => $user->slackCredential()->whereNotNull('access_token')->exists(),
+             'smtp' => $user->smtpConfig()->exists(),
+         ];
+
          return Inertia::render('Workflows/Editor', [
              'flow' => $flow,
-             'definitions' => $definitions
+             'definitions' => $definitions,
+             'connectors' => $connectors
          ]);
     }
 

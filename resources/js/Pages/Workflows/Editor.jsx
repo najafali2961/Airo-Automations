@@ -22,7 +22,12 @@ import Builder from "../../Components/WorkflowBuilder/Canvas";
 import ConfigPanel from "../../Components/WorkflowBuilder/ConfigPanel";
 import NodeSelector from "../../Components/WorkflowBuilder/NodeSelector";
 
-export default function WorkflowEditor({ shop, flow, definitions }) {
+export default function WorkflowEditor({
+    shop,
+    flow,
+    definitions,
+    connectors,
+}) {
     const shopify = useAppBridge();
     const [saving, setSaving] = useState(false);
     const [isDirty, setIsDirty] = useState(false);
@@ -218,6 +223,38 @@ export default function WorkflowEditor({ shop, flow, definitions }) {
         }
     };
 
+    // Live Update of Variables
+    // When selectedNode changes, find the trigger in the LIVE flow to get variables
+    const [availableVariables, setAvailableVariables] = useState([]);
+    useEffect(() => {
+        // If we have a builderRef, use it to find the trigger.
+        // Otherwise fall back to initialNodes (DB state) if builder isn't ready.
+        const nodes = builderRef.current
+            ? builderRef.current.getFlow().nodes
+            : initialNodes;
+
+        const triggerNode = nodes.find((n) => n.type === "trigger");
+
+        if (!triggerNode) {
+            setAvailableVariables([]);
+            return;
+        }
+
+        // Find definition
+        for (const app of definitions.apps) {
+            const t = app.triggers?.find(
+                (tr) =>
+                    tr.settings?.topic === triggerNode.data.settings?.topic ||
+                    tr.label === triggerNode.data.label
+            );
+            if (t) {
+                setAvailableVariables(t.variables || []);
+                return;
+            }
+        }
+        setAvailableVariables([]);
+    }, [selectedNode, definitions, initialNodes]);
+
     // Auto-focus name input when editing starts
     useEffect(() => {
         if (isEditingName && nameInputRef.current) {
@@ -395,6 +432,8 @@ export default function WorkflowEditor({ shop, flow, definitions }) {
                         <ConfigPanel
                             node={selectedNode}
                             definitions={definitions}
+                            connectors={connectors} // Pass directly
+                            triggerVariables={availableVariables}
                             onUpdate={(id, data) => {
                                 if (builderRef.current) {
                                     builderRef.current.updateNode(id, data);

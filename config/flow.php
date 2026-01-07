@@ -19,6 +19,17 @@ return [
             'topic' => 'ORDERS_CREATE',
             'category' => 'orders',
             'icon' => 'ShoppingBag',
+            'variables' => [
+                ['label' => 'Order Name', 'value' => 'order.name'],
+                ['label' => 'Order ID', 'value' => 'order.id'],
+                ['label' => 'Total Price', 'value' => 'order.total_price'],
+                ['label' => 'Subtotal', 'value' => 'order.subtotal_price'],
+                ['label' => 'Currency', 'value' => 'order.currency'],
+                ['label' => 'Customer Email', 'value' => 'order.email'],
+                ['label' => 'Customer First Name', 'value' => 'order.customer.first_name'],
+                ['label' => 'Customer Last Name', 'value' => 'order.customer.last_name'],
+                ['label' => 'Detail Link', 'value' => 'order.order_status_url'],
+            ],
         ],
         [
             'key' => 'orders_updated',
@@ -69,6 +80,14 @@ return [
             'topic' => 'PRODUCTS_CREATE',
             'category' => 'products',
             'icon' => 'Package',
+            'variables' => [
+                ['label' => 'Product Title', 'value' => 'product.title'],
+                ['label' => 'Product ID', 'value' => 'product.id'],
+                ['label' => 'Product Handle', 'value' => 'product.handle'],
+                ['label' => 'Product Type', 'value' => 'product.product_type'],
+                ['label' => 'Vendor', 'value' => 'product.vendor'],
+                ['label' => 'Status', 'value' => 'product.status'],
+            ],
         ],
         [
             'key' => 'products_update',

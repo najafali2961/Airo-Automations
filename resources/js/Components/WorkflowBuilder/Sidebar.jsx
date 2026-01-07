@@ -209,16 +209,18 @@ export default function Sidebar({ definitions }) {
                             tone="inherit"
                         />
                     </div>
-                    <BlockStack gap="050" minWidth="0">
-                        <Text fontWeight="bold" variant="bodySm" truncate>
-                            {node.label}
-                        </Text>
-                        {node.description && (
-                            <Text variant="bodyXs" tone="subdued" truncate>
-                                {node.description}
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                        <BlockStack gap="050">
+                            <Text fontWeight="bold" variant="bodySm" truncate>
+                                {node.label}
                             </Text>
-                        )}
-                    </BlockStack>
+                            {node.description && (
+                                <Text variant="bodyXs" tone="subdued" truncate>
+                                    {node.description}
+                                </Text>
+                            )}
+                        </BlockStack>
+                    </div>
                 </InlineStack>
             </div>
         </div>

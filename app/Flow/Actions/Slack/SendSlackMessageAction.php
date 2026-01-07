@@ -81,7 +81,17 @@ class SendSlackMessageAction implements ActionInterface
         
         $flattened = \Illuminate\Support\Arr::dot($payload);
         
-        // Convenience keys
+        // Smart Aliasing: Map root keys to common resource prefixes
+        // This allows {{ order.id }} to resolve even if payload is just { id: ... }
+        $aliases = [];
+        foreach ($flattened as $key => $value) {
+            $aliases["order.$key"] = $value;
+            $aliases["product.$key"] = $value;
+            $aliases["customer.$key"] = $value;
+        }
+        $flattened = array_merge($flattened, $aliases);
+        
+        // Explicit Overrides (if needed)
         if (isset($payload['title'])) $flattened['product.title'] = $payload['title'];
         if (isset($payload['name'])) $flattened['order.name'] = $payload['name'];
         if (isset($payload['id'])) $flattened['id'] = $payload['id'];
