@@ -20,6 +20,7 @@ class SendSlackMessageAction implements ActionInterface
 
     public function handle(Node $node, array $payload, Execution $execution): void
     {
+        Log::info("[SlackAction_v2.5] Handling Slack Action...");
         Log::info("--- START SLACK ACTION ---");
         
         $user = $execution->flow->user;

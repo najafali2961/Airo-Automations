@@ -19,6 +19,7 @@ class SendSmtpEmailAction implements ActionInterface
 
     public function handle(Node $node, array $payload, Execution $execution): void
     {
+        Log::info("[SmtpAction_v2.5] Handling SMTP Action...");
         Log::info("--- START SMTP ACTION (VERSION 5.3 - GLOBAL VARS) ---");
         // ... (Keep existing user retrieval logic) ...
         $user = $execution->flow->user;
