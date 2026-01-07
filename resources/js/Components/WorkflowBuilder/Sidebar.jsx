@@ -56,6 +56,14 @@ export default function Sidebar({ definitions }) {
             triggers: [],
             actions: [],
         },
+        {
+            name: "Klaviyo",
+            color: "#25D366", // Klaviyo Green
+            iconUrl:
+                "https://www.klaviyo.com/application-assets/klaviyo/production/static-assets/favicon.png",
+            triggers: [],
+            actions: [],
+        },
     ];
 
     const standardNodes = [

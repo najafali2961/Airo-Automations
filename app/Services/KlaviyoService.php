@@ -106,7 +106,128 @@ class KlaviyoService
 
         return Http::withHeaders([
             'Authorization' => 'Bearer ' . $credential->access_token,
-            'Revision' => '2024-02-15' // Use a recent API revision
+            'Revision' => '2024-02-15',
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
         ])->baseUrl($this->baseUrl);
+    }
+    
+    // --- Helper Methods for Actions ---
+
+    /**
+     * Get all lists (segments not included usually)
+     */
+    public function getLists($credential) {
+        return $this->getClient($credential)->get('/api/lists');
+    }
+
+    /**
+     * Get Profile ID by Email (Create or Update to ensure it exists)
+     */
+    public function getProfileIdByEmail($credential, $email) {
+        // We try to create/update profile to get ID
+        $response = $this->getClient($credential)->post('/api/profiles', [
+            'data' => [
+                'type' => 'profile',
+                'attributes' => [
+                    'email' => $email
+                ]
+            ]
+        ]);
+
+        if ($response->successful()) {
+            return $response->json()['data']['id'];
+        }
+
+        // If 409, it means it exists, but the response might not return ID in V3 for native 409?
+        // Klaviyo V3 returns 409 conflict if exists. The error *usually* contains the ID?
+        // Or we should search for it.
+        
+        // Let's try searching if create fails
+        $searchResponse = $this->getClient($credential)->get('/api/profiles', [
+            'filter' => "equals(email,\"$email\")"
+        ]);
+        
+        if ($searchResponse->successful()) {
+            $data = $searchResponse->json()['data'];
+            if (!empty($data)) {
+                return $data[0]['id'];
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Add profile to a list
+     */
+    public function addProfileToList($credential, $listId, $profileId) {
+        // V3: POST /api/lists/{list_id}/relationships/profiles
+        /*
+          {
+            "data": [
+              { "type": "profile", "id": "PROFILE_ID" }
+            ]
+          }
+        */
+        return $this->getClient($credential)->post("/api/lists/{$listId}/relationships/profiles", [
+            'data' => [
+                ['type' => 'profile', 'id' => $profileId]
+            ]
+        ]);
+    }
+
+    /**
+     * Track Event (Metric)
+     */
+    public function trackEvent($credential, $eventName, $profileProperties, $eventProperties) {
+        /*
+          V3: POST /api/events
+          {
+            "data": {
+              "type": "event",
+              "attributes": {
+                "properties": { ... },
+                "metric": {
+                  "data": {
+                    "type": "metric",
+                    "attributes": { "name": "Placed Order" }
+                  }
+                },
+                "profile": {
+                  "data": {
+                    "type": "profile",
+                    "attributes": { "email": "..." }
+                  }
+                }
+              }
+            }
+          }
+        */
+        
+        $payload = [
+            'data' => [
+                'type' => 'event',
+                'attributes' => [
+                    'properties' => $eventProperties,
+                    'metric' => [
+                        'data' => [
+                            'type' => 'metric',
+                            'attributes' => [
+                                'name' => $eventName
+                            ]
+                        ]
+                    ],
+                    'profile' => [
+                        'data' => [
+                            'type' => 'profile',
+                            'attributes' => $profileProperties
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        return $this->getClient($credential)->post('/api/events', $payload);
     }
 }

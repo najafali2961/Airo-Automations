@@ -745,6 +745,32 @@ return [
                  ['name' => 'first_name', 'label' => 'First Name', 'type' => 'text', 'placeholder' => '{{ customer.first_name }}'],
                  ['name' => 'last_name', 'label' => 'Last Name', 'type' => 'text', 'placeholder' => '{{ customer.last_name }}'],
                  ['name' => 'phone_number', 'label' => 'Phone Number', 'type' => 'text', 'placeholder' => '{{ customer.phone }}'],
+            ],
+        ],
+        [
+            'key' => 'add_to_klaviyo_list',
+            'label' => 'Add to Klaviyo List',
+            'description' => 'Subscribe a profile to a specific Klaviyo list',
+            'category' => 'marketing',
+            'icon' => 'List',
+            'app' => 'klaviyo',
+            'fields' => [
+                 ['name' => 'list_id', 'label' => 'List ID', 'type' => 'text', 'required' => true, 'placeholder' => 'e.g. XyZ123'],
+                 ['name' => 'email', 'label' => 'Email', 'type' => 'text', 'required' => true, 'placeholder' => '{{ customer.email }}'],
+            ]
+        ],
+        [
+            'key' => 'track_klaviyo_event',
+            'label' => 'Track Klaviyo Event',
+            'description' => 'Track a custom event (metric) in Klaviyo',
+            'category' => 'marketing',
+            'icon' => 'Activity',
+            'app' => 'klaviyo',
+            'fields' => [
+                 ['name' => 'event_name', 'label' => 'Event Name', 'type' => 'text', 'required' => true, 'placeholder' => 'e.g. Order Delivered'],
+                 ['name' => 'email', 'label' => 'Customer Email', 'type' => 'text', 'required' => true, 'placeholder' => '{{ customer.email }}'],
+                 ['name' => 'properties', 'label' => 'Event Properties (JSON)', 'type' => 'textarea', 'placeholder' => '{"OrderId": "{{ order.id }}", "Status": "Delivered"}'],
+                 ['name' => 'value', 'label' => 'Value', 'type' => 'number', 'placeholder' => '100.00'],
             ]
         ],
     ],

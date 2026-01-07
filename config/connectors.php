@@ -20,7 +20,7 @@ return [
     'klaviyo' => [
         'title' => 'Klaviyo',
         'description' => 'Sync Shopify customers and events with Klaviyo.',
-        'icon' => 'https://cdn.worldvectorlogo.com/logos/klaviyo.svg',
+        'icon' => 'https://www.klaviyo.com/application-assets/klaviyo/production/static-assets/favicon.png',
         'auth_type' => 'oauth',
         'auth_route' => 'klaviyo.auth.url',
         'connected_check' => 'klaviyoCredential',
