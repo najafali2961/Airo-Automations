@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 
 class AddProfileToKlaviyoAction extends BaseAction
 {
+    use HasShopifyCustomerFallback;
+
     protected $klaviyoService;
     protected $variableService;
 
@@ -32,14 +34,22 @@ class AddProfileToKlaviyoAction extends BaseAction
 
             $settings = $this->getSettings($node, $payload);
 
-            // Process Variables
-            $email = $this->variableService->replace($settings['email'] ?? '', $payload);
+            // Process Variables with Fallback
+            $email = $this->resolveEmail($user, $payload, $settings['email'] ?? '', $this->variableService);
+
+            // Other variables
             $firstName = $this->variableService->replace($settings['first_name'] ?? '', $payload);
             $lastName = $this->variableService->replace($settings['last_name'] ?? '', $payload);
             $phone = $this->variableService->replace($settings['phone_number'] ?? '', $payload);
 
+            // Clean up unresolved variables (if they contain mustache braces)
+            if (!empty($email) && str_contains($email, '{{')) $email = null;
+            if (!empty($phone) && str_contains($phone, '{{')) $phone = null;
+            if (!empty($firstName) && str_contains($firstName, '{{')) $firstName = null;
+            if (!empty($lastName) && str_contains($lastName, '{{')) $lastName = null;
+
             if (empty($email) && empty($phone)) {
-                $this->log($execution, $node->id, 'error', 'Email or Phone Number is required to create a profile.');
+                $this->log($execution, $node->id, 'error', 'Email or Phone Number is required to create a profile (Email could not be resolved from payload or Shopify).');
                 return;
             }
 

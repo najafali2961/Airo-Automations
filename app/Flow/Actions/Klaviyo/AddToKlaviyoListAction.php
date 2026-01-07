@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 
 class AddToKlaviyoListAction extends BaseAction
 {
+    use HasShopifyCustomerFallback;
+
     protected $klaviyoService;
     protected $variableService;
 
@@ -34,7 +36,13 @@ class AddToKlaviyoListAction extends BaseAction
 
             // Process Variables
             $listId = $this->variableService->replace($settings['list_id'] ?? '', $payload);
-            $email = $this->variableService->replace($settings['email'] ?? '', $payload);
+            
+            // Resolve Email with Fallback
+            $email = $this->resolveEmail($user, $payload, $settings['email'] ?? '', $this->variableService);
+
+            // Clean up
+            if (!empty($listId) && str_contains($listId, '{{')) $listId = null;
+            if (!empty($email) && str_contains($email, '{{')) $email = null;
 
             if (empty($listId)) {
                 $this->log($execution, $node->id, 'error', 'List ID is required.');
@@ -42,7 +50,7 @@ class AddToKlaviyoListAction extends BaseAction
             }
 
             if (empty($email)) {
-                $this->log($execution, $node->id, 'error', 'Email is required.');
+                $this->log($execution, $node->id, 'error', 'Email is required (could not be resolved from payload or Shopify).');
                 return;
             }
 

@@ -56,6 +56,11 @@ class ActionRegistry
 
             // Slack
             'send_slack_message' => \App\Flow\Actions\Slack\SendSlackMessageAction::class,
+
+            // Klaviyo
+            'add_profile_to_klaviyo' => \App\Flow\Actions\Klaviyo\AddProfileToKlaviyoAction::class,
+            'add_to_klaviyo_list' => \App\Flow\Actions\Klaviyo\AddToKlaviyoListAction::class,
+            'track_klaviyo_event' => \App\Flow\Actions\Klaviyo\TrackKlaviyoEventAction::class,
     ];
 
 

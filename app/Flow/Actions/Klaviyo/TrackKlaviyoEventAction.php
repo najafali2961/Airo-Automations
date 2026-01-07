@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 
 class TrackKlaviyoEventAction extends BaseAction
 {
+    use HasShopifyCustomerFallback;
+
     protected $klaviyoService;
     protected $variableService;
 
@@ -34,19 +36,26 @@ class TrackKlaviyoEventAction extends BaseAction
 
             // Process Variables
             $eventName = $this->variableService->replace($settings['event_name'] ?? '', $payload);
-            $email = $this->variableService->replace($settings['email'] ?? '', $payload);
+            
+            // Resolve Email with Fallback
+            $email = $this->resolveEmail($user, $payload, $settings['email'] ?? '', $this->variableService);
+            
             $value = $this->variableService->replace($settings['value'] ?? '', $payload);
             
             // For JSON properties, we substitute vars first, then json_decode
             $propertiesRaw = $this->variableService->replace($settings['properties'] ?? '', $payload);
             
+            // Clean up
+            if (!empty($eventName) && str_contains($eventName, '{{')) $eventName = null;
+            if (!empty($email) && str_contains($email, '{{')) $email = null;
+
             if (empty($eventName)) {
                 $this->log($execution, $node->id, 'error', 'Event Name is required.');
                 return;
             }
 
             if (empty($email)) {
-                $this->log($execution, $node->id, 'error', 'Email is required.');
+                $this->log($execution, $node->id, 'error', 'Email is required (could not be resolved from payload or Shopify).');
                 return;
             }
 

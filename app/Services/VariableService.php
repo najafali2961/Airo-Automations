@@ -123,7 +123,7 @@ class VariableService
             $template = str_replace("{{" . $key . "}}", $valString, $template);
         }
         
-        Log::info("[VariableService_v2.5] Template processed -> " . substr($template, 0, 100) . "...");
+        Log::info("[VariableService_v3] Template processed -> " . substr($template, 0, 100) . "...");
 
         return $template;
     }
