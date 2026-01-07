@@ -102,8 +102,6 @@ class VariableService
         // Merge aliases (keeping original keys too)
         $variables = array_merge($flattened, $aliases);
         
-        Log::info("[VariableService_v2.5] AVAILABLE KEYS: " . implode(', ', array_keys($variables)));
-        
         // Explicitly sort by key length (descending) to avoid partial replacement issues
         // e.g. ensuring {{ order.id }} is replaced before {{ id }} if braces were missing, 
         // though strictly with braces it's less of an issue, it's safer.
