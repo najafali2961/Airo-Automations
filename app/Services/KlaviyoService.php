@@ -38,9 +38,10 @@ class KlaviyoService
         $scopes = [
             'accounts:read',
             'lists:read',
+            'lists:write',
             'profiles:read',
             'profiles:write',
-            'events:write' 
+            'events:write'
         ];
 
         $query = http_build_query([
