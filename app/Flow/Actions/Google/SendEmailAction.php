@@ -9,22 +9,29 @@ use App\Services\GoogleService;
 use Google\Service\Gmail;
 use Google\Service\Gmail\Message;
 
+use App\Services\VariableService; // Add Import
+
 class SendEmailAction extends BaseAction
 {
     protected $googleService;
+    protected $variableService;
 
-    public function __construct(GoogleService $googleService)
+    public function __construct(GoogleService $googleService, VariableService $variableService)
     {
         $this->googleService = $googleService;
+        $this->variableService = $variableService;
     }
 
     public function handle(Node $node, array $payload, Execution $execution): void
     {
         try {
             $settings = $this->getSettings($node, $payload);
+            
+            // Process Variables
+            $subject = $this->variableService->replace($settings['subject'] ?? 'No Subject', $payload);
+            $body = $this->variableService->replace($settings['body'] ?? '', $payload);
+            
             $to = $settings['to'] ?? null;
-            $subject = $settings['subject'] ?? 'No Subject';
-            $body = $settings['body'] ?? '';
 
             $recipientType = $settings['recipient_type'] ?? 'custom';
 
