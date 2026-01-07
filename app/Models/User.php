@@ -135,4 +135,12 @@ class User extends Authenticatable implements IShopModel
     {
         return $this->hasOne(SlackCredential::class);
     }
+
+    /**
+     * Get Klaviyo Credentials
+     */
+    public function klaviyoCredential()
+    {
+        return $this->hasOne(KlaviyoCredential::class);
+    }
 }

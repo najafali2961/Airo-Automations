@@ -732,5 +732,20 @@ return [
                  ['name' => 'message', 'label' => 'Message', 'type' => 'textarea', 'required' => true, 'placeholder' => 'Hello {{ order.name }}'],
             ]
         ],
+        // Klaviyo Actions
+        [
+            'key' => 'add_profile_to_klaviyo',
+            'label' => 'Add Profile to Klaviyo',
+            'description' => 'Create or update a profile in Klaviyo',
+            'category' => 'marketing',
+            'icon' => 'UserPlus',
+            'app' => 'klaviyo',
+            'fields' => [
+                 ['name' => 'email', 'label' => 'Email', 'type' => 'text', 'required' => true, 'placeholder' => '{{ customer.email }}'],
+                 ['name' => 'first_name', 'label' => 'First Name', 'type' => 'text', 'placeholder' => '{{ customer.first_name }}'],
+                 ['name' => 'last_name', 'label' => 'Last Name', 'type' => 'text', 'placeholder' => '{{ customer.last_name }}'],
+                 ['name' => 'phone_number', 'label' => 'Phone Number', 'type' => 'text', 'placeholder' => '{{ customer.phone }}'],
+            ]
+        ],
     ],
 ];

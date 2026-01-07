@@ -67,15 +67,20 @@ Route::middleware(['verify.shopify'])->group(function () {
 
     // Slack
     Route::get('/api/slack/auth-url', [\App\Http\Controllers\SlackController::class, 'generateAuthUrl'])->name('slack.auth.url');
+    // Klaviyo
+    Route::get('/api/klaviyo/auth-url', [\App\Http\Controllers\KlaviyoController::class, 'generateAuthUrl'])->name('klaviyo.auth.url');
 });
 
 // Slack Callback (Public)
 Route::get('/slack/callback', [\App\Http\Controllers\SlackController::class, 'callback'])->name('slack.callback');
+// Klaviyo Callback
+Route::get('/klaviyo/callback', [\App\Http\Controllers\KlaviyoController::class, 'callback'])->name('klaviyo.callback');
 
 // Redirect endpoint - MUST be outside verify.shopify to allow popup opening (params expire), but protected by signed URL
 Route::middleware(['signed'])->group(function () {
     Route::get('/auth/google/redirect', [\App\Http\Controllers\GoogleAuthController::class, 'redirect'])->name('auth.google.redirect');
     Route::get('/slack/auth', [\App\Http\Controllers\SlackController::class, 'redirect'])->name('slack.auth.redirect');
+    Route::get('/klaviyo/auth', [\App\Http\Controllers\KlaviyoController::class, 'redirect'])->name('klaviyo.auth.redirect');
 });
 
 // Google Auth Callback (Public)

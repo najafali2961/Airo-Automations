@@ -17,12 +17,14 @@ return [
         'auth_type' => 'basic', // changed from coming_soon
         'is_active' => true,
     ],
-    'twilio' => [
-        'title' => 'Twilio',
-        'description' => 'Send messages through SMS or WhatsApp.',
-        'icon' => 'https://cdn-icons-png.flaticon.com/512/5968/5968841.png',
-        'auth_type' => 'coming_soon',
-        'is_active' => false,
+    'klaviyo' => [
+        'title' => 'Klaviyo',
+        'description' => 'Sync Shopify customers and events with Klaviyo.',
+        'icon' => 'https://cdn.worldvectorlogo.com/logos/klaviyo.svg',
+        'auth_type' => 'oauth',
+        'auth_route' => 'klaviyo.auth.url',
+        'connected_check' => 'klaviyoCredential',
+        'is_active' => true,
     ],
     'slack' => [
         'title' => 'Slack',
