@@ -9,9 +9,17 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 class SendSmtpEmailAction implements ActionInterface
 {
+    protected $variableService;
+
+    public function __construct(\App\Services\VariableService $variableService) 
+    {
+        $this->variableService = $variableService;
+    }
+
+
     public function handle(Node $node, array $payload, Execution $execution): void
     {
-        Log::info("--- START SMTP ACTION (VERSION 5.2 - AUTO FIX) ---");
+        Log::info("--- START SMTP ACTION (VERSION 5.3 - GLOBAL VARS) ---");
         // ... (Keep existing user retrieval logic) ...
         $user = $execution->flow->user;
         
@@ -56,8 +64,8 @@ class SendSmtpEmailAction implements ActionInterface
         $rawSubject = $node->settings['subject'] ?? 'No Subject';
         $rawBody = $node->settings['body'] ?? '';
         
-        $subject = $this->replaceVariables($rawSubject, $payload);
-        $body = $this->replaceVariables($rawBody, $payload);
+        $subject = $this->variableService->replace($rawSubject, $payload);
+        $body = $this->variableService->replace($rawBody, $payload);
         try {
              $mailer->send([], [], function ($message) use ($to, $subject, $body, $smtpConfig) {
                 $message->to($to)
@@ -90,7 +98,7 @@ class SendSmtpEmailAction implements ActionInterface
         if ($strategy === 'custom') {
             $email = $settings['to'] ?? '';
             // Support variables in 'To' field too!
-            $email = $this->replaceVariables($email, $payload);
+            $email = $this->variableService->replace($email, $payload);
             $email = trim(explode(',', $email)[0]);
             if (!empty($email)) return $email;
         }
@@ -131,27 +139,5 @@ class SendSmtpEmailAction implements ActionInterface
             }
         }
         return null;
-    }
-    private function replaceVariables($text, $payload)
-    {
-        if (empty($text)) return '';
-        
-        $flattened = \Illuminate\Support\Arr::dot($payload);
-        
-        // Add some convenience keys
-        if (isset($payload['title'])) $flattened['product.title'] = $payload['title'];
-        if (isset($payload['name'])) $flattened['order.name'] = $payload['name'];
-        if (isset($payload['id'])) $flattened['id'] = $payload['id'];
-        
-        Log::info("Available Variables for Replacement: " . implode(', ', array_keys($flattened)));
-        
-        foreach ($flattened as $key => $value) {
-            if (is_array($value) || is_object($value)) continue;
-            if (is_bool($value)) $value = $value ? 'true' : 'false';
-            
-            $text = str_replace("{{ " . $key . " }}", (string)$value, $text);
-            $text = str_replace("{{" . $key . "}}", (string)$value, $text);
-        }
-        return $text;
     }
 }

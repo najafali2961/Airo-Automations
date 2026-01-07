@@ -10,11 +10,12 @@ use Illuminate\Support\Facades\Log;
 
 class SendSlackMessageAction implements ActionInterface
 {
-    protected $slackService;
+    protected $variableService;
 
-    public function __construct(SlackService $slackService)
+    public function __construct(SlackService $slackService, \App\Services\VariableService $variableService)
     {
         $this->slackService = $slackService;
+        $this->variableService = $variableService;
     }
 
     public function handle(Node $node, array $payload, Execution $execution): void
@@ -58,7 +59,7 @@ class SendSlackMessageAction implements ActionInterface
             throw new \Exception("Slack Message cannot be empty.");
         }
 
-        $message = $this->replaceVariables($rawMessage, $payload);
+        $message = $this->variableService->replace($rawMessage, $payload);
 
         try {
             $this->slackService->sendMessage(
@@ -73,36 +74,5 @@ class SendSlackMessageAction implements ActionInterface
             Log::error("Slack Action Error: " . $e->getMessage());
             throw $e;
         }
-    }
-
-    private function replaceVariables($text, $payload)
-    {
-        if (empty($text)) return '';
-        
-        $flattened = \Illuminate\Support\Arr::dot($payload);
-        
-        // Smart Aliasing: Map root keys to common resource prefixes
-        // This allows {{ order.id }} to resolve even if payload is just { id: ... }
-        $aliases = [];
-        foreach ($flattened as $key => $value) {
-            $aliases["order.$key"] = $value;
-            $aliases["product.$key"] = $value;
-            $aliases["customer.$key"] = $value;
-        }
-        $flattened = array_merge($flattened, $aliases);
-        
-        // Explicit Overrides (if needed)
-        if (isset($payload['title'])) $flattened['product.title'] = $payload['title'];
-        if (isset($payload['name'])) $flattened['order.name'] = $payload['name'];
-        if (isset($payload['id'])) $flattened['id'] = $payload['id'];
-        
-        foreach ($flattened as $key => $value) {
-            if (is_array($value) || is_object($value)) continue;
-            if (is_bool($value)) $value = $value ? 'true' : 'false';
-            
-            $text = str_replace("{{ " . $key . " }}", (string)$value, $text);
-            $text = str_replace("{{" . $key . "}}", (string)$value, $text);
-        }
-        return $text;
     }
 }
