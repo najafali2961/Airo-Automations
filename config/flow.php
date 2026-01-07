@@ -300,6 +300,14 @@ return [
                 ['label' => 'Created At', 'value' => 'cart.created_at'],
             ],
         ],
+        [
+            'key' => 'carts_update',
+            'label' => 'Cart Updated',
+            'description' => 'Starts when a cart is updated',
+            'topic' => 'CARTS_UPDATE',
+            'category' => 'carts',
+            'icon' => 'ShoppingCart',
+        ],
 
         // App
         [

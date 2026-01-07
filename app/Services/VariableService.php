@@ -34,10 +34,18 @@ class VariableService
             // This is "optimistic" and "global" as requested.
             // It means {{ product.id }} will output the ID of whatever triggered this, 
             // effectively making it a polymorphic ID.
-            $aliases["order.$key"] = $value;
-            $aliases["product.$key"] = $value;
-            $aliases["customer.$key"] = $value;
-            $aliases["shop.$key"] = $value;
+            // Map common payload keys to resource prefixes
+            // This allows {{ product.id }} to work even if the payload is just { id: 123... }
+            $resources = [
+                'order', 'product', 'customer', 'shop', 'cart', 'checkout', 
+                'fulfillment', 'refund', 'draft_order', 'collection', 
+                'transaction', 'inventory_level', 'inventory_item', 
+                'location', 'theme'
+            ];
+
+            foreach ($resources as $resource) {
+                $aliases["{$resource}.$key"] = $value;
+            }
         }
 
         // Merge aliases (keeping original keys too)
