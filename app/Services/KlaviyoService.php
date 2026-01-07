@@ -58,14 +58,14 @@ class KlaviyoService
 
     public function fetchAccessToken($code, $codeVerifier)
     {
-        $response = Http::asForm()->post($this->tokenUrl, [
-            'grant_type' => 'authorization_code',
-            'code' => $code,
-            'redirect_uri' => $this->redirectUri,
-            'client_id' => $this->clientId,
-            'client_secret' => $this->clientSecret,
-            'code_verifier' => $codeVerifier
-        ]);
+        $response = Http::asForm()
+            ->withBasicAuth($this->clientId, $this->clientSecret)
+            ->post($this->tokenUrl, [
+                'grant_type' => 'authorization_code',
+                'code' => $code,
+                'redirect_uri' => $this->redirectUri,
+                'code_verifier' => $codeVerifier
+            ]);
 
         if ($response->failed()) {
             throw new \Exception('Failed to fetch token: ' . $response->body());
@@ -76,17 +76,17 @@ class KlaviyoService
 
     public function refreshAccessToken(KlaviyoCredential $credential)
     {
-        $response = Http::asForm()->post($this->tokenUrl, [
-            'grant_type' => 'refresh_token',
-            'refresh_token' => $credential->refresh_token,
-            'client_id' => $this->clientId,
-            'client_secret' => $this->clientSecret,
-        ]);
+        $response = Http::asForm()
+            ->withBasicAuth($this->clientId, $this->clientSecret)
+            ->post($this->tokenUrl, [
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $credential->refresh_token,
+            ]);
 
         if ($response->failed()) {
             throw new \Exception('Failed to refresh token: ' . $response->body());
         }
-
+        
         $data = $response->json();
         
         $credential->update([

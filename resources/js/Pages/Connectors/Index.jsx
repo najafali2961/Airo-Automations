@@ -54,7 +54,8 @@ export default function Connectors({ connectors }) {
         const handleMessage = (event) => {
             if (
                 event.data === "google_auth_success" ||
-                event.data === "slack_auth_success"
+                event.data === "slack_auth_success" ||
+                event.data === "klaviyo_auth_success"
             ) {
                 router.reload({
                     onSuccess: () => {
@@ -96,7 +97,11 @@ export default function Connectors({ connectors }) {
                 );
 
                 // Fetch signed URL if needed
-                if (connector.key === "google" || connector.key === "slack") {
+                if (
+                    connector.key === "google" ||
+                    connector.key === "slack" ||
+                    connector.key === "klaviyo"
+                ) {
                     const apiUrl = `/api/${connector.key}/auth-url?host=${host}`;
 
                     const response = await window.axios.get(apiUrl);
