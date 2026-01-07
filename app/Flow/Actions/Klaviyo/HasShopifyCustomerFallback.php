@@ -49,29 +49,57 @@ trait HasShopifyCustomerFallback
         }
 
         try {
-            // Fetch from Shopify
-            // Reverting to full path as relative path caused errors. 
-            // Adding explicit fields to ensure we get email.
-            $response = $user->api()->rest('GET', "/admin/api/2024-04/customers/{$customerId}.json", ['fields' => 'id,email,first_name,last_name,phone']);
+            // Fetch from Shopify using GraphQL (more reliable for fields)
+            $gid = "gid://shopify/Customer/{$customerId}";
+            $query = <<<gql
+            query {
+                customer(id: "$gid") {
+                    email
+                }
+            }
+gql;
+
+            // Log attempt
+            // Log::info("Fetching customer email via GraphQL: $gid");
+
+            $response = $user->api()->graph($query);
             
             if (!$response['errors']) {
-                 $body = $response['body'];
+                 $body = $response['body']; // Graph response body
                  
-                 // Log the structure to be sure
-                 // Log::info("Shopify Customer Response: " . json_encode($body));
+                 // GraphQL structure: data -> customer -> email
+                 $data = $body['data']['customer'] ?? null; // accessing array from decoded body
+
+                 // Note: Osiset graph() return body might be object. Convert to array if needed.
+                 // Usually it returns an array response.
                  
-                 $fetchedEmail = $body['customer']['email'] ?? null;
+                 // Using json_decode/encode trick if it's an object, or direct access.
+                 // Let's assume array access is safe or cast.
+                 $fetchedEmail = null;
+                 if (is_array($data)) {
+                     $fetchedEmail = $data['email'] ?? null;
+                 } elseif (is_object($data)) {
+                     $fetchedEmail = $data->email ?? null;
+                 } else {
+                     // Try accessing via array on body if it was already array
+                     // If body is object:
+                     if (is_object($body) && isset($body->data->customer->email)) {
+                         $fetchedEmail = $body->data->customer->email;
+                     } elseif (is_array($body) && isset($body['data']['customer']['email'])) {
+                         $fetchedEmail = $body['data']['customer']['email'];
+                     }
+                 }
                  
                  if ($fetchedEmail) {
-                     Log::info("Successfully fetched email from Shopify: $fetchedEmail");
+                     Log::info("Successfully fetched email from Shopify (GraphQL): $fetchedEmail");
                      return $fetchedEmail;
                  }
                  
-                 Log::warning("Fetched customer but email was null/missing from Shopify response (Customer ID: $customerId).");
+                 Log::warning("Fetched customer via GraphQL but email was null/missing. GID: $gid");
             } else {
-                Log::error("Shopify API Error fetching customer: " . json_encode($response['errors']));
+                Log::error("Shopify GraphQL Error fetching customer: " . json_encode($response['errors']));
             }
-            
+
         } catch (\Exception $e) {
             Log::error("Exception fetching customer from Shopify: " . $e->getMessage());
         }
