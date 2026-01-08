@@ -233,7 +233,7 @@ export default function ConfigPanel({
     };
 
     const { icon, color, isUrl } = getIconAndColor(
-        node.data.label || node.type
+        node.data.appName || node.data.label || node.type
     );
 
     return (

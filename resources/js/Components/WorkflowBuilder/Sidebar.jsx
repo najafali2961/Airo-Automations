@@ -20,6 +20,7 @@ import {
     PersonIcon,
     OrderIcon,
     ProductIcon,
+    XIcon,
 } from "@shopify/polaris-icons";
 
 export default function Sidebar({ definitions, connectors, onNodeClick }) {
@@ -73,6 +74,14 @@ export default function Sidebar({ definitions, connectors, onNodeClick }) {
             icon: CheckIcon,
             color: "#E29100",
             description: "Branch workflow logic",
+            group: "Logic",
+        },
+        {
+            type: "stopper",
+            label: "Stopper",
+            icon: XIcon,
+            color: "#D82C0D",
+            description: "End workflow",
             group: "Logic",
         },
     ];

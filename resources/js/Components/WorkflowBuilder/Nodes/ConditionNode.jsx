@@ -16,6 +16,7 @@ export default memo(({ data, selected }) => {
                 label={data.label || "Condition"}
                 selected={selected}
                 type="condition"
+                className="!min-w-[200px]" // Make it slightly more compact than standard 240px
                 subtext={
                     data.settings?.rules?.length
                         ? `${data.settings.rules.length} rule(s) (${
@@ -27,7 +28,7 @@ export default memo(({ data, selected }) => {
                 <div className="mt-4 flex justify-between items-center bg-gray-50 rounded-lg p-2 border border-gray-100">
                     <div className="relative flex-1 flex flex-col items-center">
                         <Text variant="bodyXs" tone="success" fontWeight="bold">
-                            YES
+                            Then
                         </Text>
                         <Handle
                             type="source"
@@ -44,7 +45,7 @@ export default memo(({ data, selected }) => {
                             tone="critical"
                             fontWeight="bold"
                         >
-                            NO
+                            Otherwise
                         </Text>
                         <Handle
                             type="source"

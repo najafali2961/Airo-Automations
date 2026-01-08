@@ -24,6 +24,7 @@ import ConfigPanel from "./ConfigPanel";
 import TriggerNode from "./Nodes/TriggerNode";
 import ActionNode from "./Nodes/ActionNode";
 import ConditionNode from "./Nodes/ConditionNode";
+import StopperNode from "./Nodes/StopperNode"; // Import StopperNode
 import CustomEdge from "./CustomEdge";
 
 const initialNodesDefault = [
@@ -202,6 +203,7 @@ const InnerBuilder = ({
             trigger: TriggerNode,
             action: ActionNode,
             condition: ConditionNode,
+            stopper: StopperNode, // Register StopperNode
             shopifyTrigger: TriggerNode,
         }),
         []

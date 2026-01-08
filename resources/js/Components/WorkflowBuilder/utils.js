@@ -64,6 +64,15 @@ export const getIconAndColor = (label = "") => {
             border: "border-amber-200"
         };
 
+    if (lower.includes("stop") || lower.includes("cancel"))
+        return {
+            icon: "🛑",
+            isUrl: false,
+            color: "bg-red-500",
+            tone: "text-red-700",
+            border: "border-red-200"
+        };
+
     if (lower.includes("delay") || lower.includes("wait"))
         return {
             icon: "⏳",

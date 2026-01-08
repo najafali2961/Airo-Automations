@@ -9,6 +9,7 @@ export default function NodeCard({
     children,
     type = "action",
     appName,
+    className = "", // Add className prop
 }) {
     const { icon, color, isUrl } = getIconAndColor(appName || label || type);
     const isTrigger = type === "trigger";
@@ -23,6 +24,7 @@ export default function NodeCard({
                         ? "ring-2 ring-offset-2 ring-blue-600 shadow-xl scale-[1.02]"
                         : "border border-gray-200/60 shadow-md hover:shadow-lg hover:-translate-y-0.5"
                 }
+                ${className}
             `}
         >
             {/* Header Stripe */}
