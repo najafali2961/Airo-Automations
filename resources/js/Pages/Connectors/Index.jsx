@@ -150,6 +150,7 @@ export default function Connectors({ connectors }) {
         if (connectorKey === "google") url = "/auth/google/disconnect";
         if (connectorKey === "smtp") url = "/smtp/disconnect";
         if (connectorKey === "klaviyo") url = "/api/klaviyo/disconnect";
+        if (connectorKey === "slack") url = "/api/slack/disconnect";
 
         if (!url) {
             setIsDisconnectingKey(null);

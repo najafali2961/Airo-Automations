@@ -67,6 +67,7 @@ Route::middleware(['verify.shopify'])->group(function () {
 
     // Slack
     Route::get('/api/slack/auth-url', [\App\Http\Controllers\SlackController::class, 'generateAuthUrl'])->name('slack.auth.url');
+    Route::post('/api/slack/disconnect', [\App\Http\Controllers\SlackController::class, 'disconnect'])->name('slack.disconnect');
     // Klaviyo
     Route::get('/api/klaviyo/auth-url', [\App\Http\Controllers\KlaviyoController::class, 'generateAuthUrl'])->name('klaviyo.auth.url');
     Route::post('/api/klaviyo/disconnect', [\App\Http\Controllers\KlaviyoController::class, 'disconnect'])->name('klaviyo.disconnect');

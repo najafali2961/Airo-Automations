@@ -53,7 +53,7 @@ class SlackController extends Controller
             ]);
             $state = base64_encode($statePayload);
 
-            $scopes = 'chat:write,chat:write.public,channels:read';
+            $scopes = 'chat:write,chat:write.public,channels:read,groups:read';
             $redirectUri = config('services.slack.redirect');
             $clientId = config('services.slack.client_id');
             
@@ -125,6 +125,23 @@ class SlackController extends Controller
         } catch (\Exception $e) {
             Log::error('Slack Callback Exception: ' . $e->getMessage());
             return redirect()->route('home')->with('error', 'An error occurred connecting to Slack.');
+        }
+    }
+    public function disconnect(Request $request)
+    {
+        try {
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            
+            // Optionally call Slack's auth.revoke API if you want to invalidate the token on their side too
+            // but for now, just removing from our DB is enough to force re-auth flow.
+            
+            SlackCredential::where('user_id', $user->id)->delete();
+            
+            return redirect()->back()->with('success', 'Slack account disconnected.');
+        } catch (\Exception $e) {
+            Log::error('Slack Disconnect Failed: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to disconnect'], 500);
         }
     }
 }
