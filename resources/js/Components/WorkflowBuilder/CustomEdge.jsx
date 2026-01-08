@@ -32,29 +32,14 @@ export default function CustomEdge({
     };
 
     return (
-        <>
-            <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} />
-            <EdgeLabelRenderer>
-                <div
-                    style={{
-                        position: "absolute",
-                        transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-                        fontSize: 12,
-                        pointerEvents: "all",
-                    }}
-                    className="nodrag nopan"
-                >
-                    <button
-                        className="flex items-center justify-center w-6 h-6 bg-white border border-gray-300 rounded-full shadow-sm hover:bg-blue-50 hover:border-blue-500 transition-colors"
-                        onClick={onEdgeClick}
-                        title="Add step"
-                    >
-                        <div style={{ width: 14 }}>
-                            <Icon source={PlusIcon} tone="base" />
-                        </div>
-                    </button>
-                </div>
-            </EdgeLabelRenderer>
-        </>
+        <BaseEdge
+            path={edgePath}
+            markerEnd={markerEnd}
+            style={{
+                strokeWidth: 2,
+                stroke: "#94a3b8",
+                ...style,
+            }}
+        />
     );
 }

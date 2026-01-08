@@ -202,6 +202,9 @@ const InnerBuilder = ({
             const n8nType = event.dataTransfer.getData(
                 "application/reactflow/n8nType"
             );
+            const appName = event.dataTransfer.getData(
+                "application/reactflow/appName"
+            );
             const defaultsStr = event.dataTransfer.getData(
                 "application/reactflow/defaults"
             );
@@ -226,6 +229,7 @@ const InnerBuilder = ({
                 position,
                 data: {
                     label: label,
+                    appName: appName,
                     n8nType: n8nType,
                     settings: defaults,
                 },
@@ -277,7 +281,7 @@ const InnerBuilder = ({
                 onPaneClick={onPaneClick}
                 fitView
             >
-                <Background variant="dots" gap={12} size={1} />
+                <Background variant="dots" gap={20} size={2} color="#cbd5e1" />
                 <Controls />
                 <MiniMap />
             </ReactFlow>

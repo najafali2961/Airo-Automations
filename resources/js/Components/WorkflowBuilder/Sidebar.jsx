@@ -22,7 +22,7 @@ import {
     ProductIcon,
 } from "@shopify/polaris-icons";
 
-export default function Sidebar({ definitions }) {
+export default function Sidebar({ definitions, connectors }) {
     const [view, setView] = useState("categories"); // categories | app | search
     const [selectedApp, setSelectedApp] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
@@ -178,6 +178,10 @@ export default function Sidebar({ definitions }) {
     const onDragStart = (event, node) => {
         event.dataTransfer.setData("application/reactflow", node.type);
         event.dataTransfer.setData("application/reactflow/label", node.label);
+        event.dataTransfer.setData(
+            "application/reactflow/appName",
+            node.category || node.name
+        ); // Pass app name
         if (node.n8nType) {
             event.dataTransfer.setData(
                 "application/reactflow/n8nType",
@@ -260,60 +264,104 @@ export default function Sidebar({ definitions }) {
                             </Text>
                             <Box className="grid grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-1">
                                 {/* Changed to vertical grid */}
-                                {allApps.map((app) => (
-                                    <div
-                                        key={app.name}
-                                        onClick={() => handleAppClick(app)}
-                                        className="cursor-pointer group"
-                                    >
-                                        <div className="bg-white border-2 border-gray-100 rounded-2xl p-4 flex flex-col items-center gap-2 transition-all group-hover:border-blue-500 group-hover:shadow-sm h-full justify-center">
+                                {allApps.map((app) => {
+                                    // Determine connection status
+                                    const isConnected = !connectors // If connectors not loaded, assume true or hide
+                                        ? true
+                                        : app.name === "Shopify" // Shopify always connected
+                                        ? true
+                                        : connectors[app.name.toLowerCase()] !==
+                                          false;
+
+                                    return (
+                                        <div
+                                            key={app.name}
+                                            onClick={() => handleAppClick(app)}
+                                            className="cursor-pointer group"
+                                        >
                                             <div
-                                                style={{
-                                                    width: "32px",
-                                                    height: "32px",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                }}
+                                                className={`
+                                                    bg-white border-2 rounded-2xl p-4 flex flex-col items-center gap-2 transition-all h-full justify-center relative
+                                                    ${
+                                                        isConnected
+                                                            ? "border-gray-100 group-hover:border-blue-500 group-hover:shadow-sm"
+                                                            : "border-orange-100 bg-orange-50/30 group-hover:border-orange-300"
+                                                    }
+                                                `}
                                             >
-                                                {app.iconUrl ? (
-                                                    <img
-                                                        src={app.iconUrl}
-                                                        alt={app.name}
-                                                        className="w-full h-full object-contain"
-                                                    />
-                                                ) : (
-                                                    <div
-                                                        style={{
-                                                            color:
-                                                                app.color ||
-                                                                "#95a5a6",
-                                                        }}
-                                                    >
-                                                        <Icon
-                                                            source={
-                                                                app.name ===
-                                                                "Shopify"
-                                                                    ? StoreIcon
-                                                                    : AppsIcon
-                                                            }
-                                                            tone="inherit"
+                                                {/* Status Dot */}
+                                                <div
+                                                    className={`
+                                                        absolute top-3 right-3 w-2.5 h-2.5 rounded-full border border-white
+                                                        ${
+                                                            isConnected
+                                                                ? "bg-emerald-400"
+                                                                : "bg-orange-400 animate-pulse"
+                                                        }
+                                                    `}
+                                                    title={
+                                                        isConnected
+                                                            ? "Connected"
+                                                            : "Setup Required"
+                                                    }
+                                                />
+
+                                                <div
+                                                    style={{
+                                                        width: "32px",
+                                                        height: "32px",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent:
+                                                            "center",
+                                                    }}
+                                                >
+                                                    {app.iconUrl ? (
+                                                        <img
+                                                            src={app.iconUrl}
+                                                            alt={app.name}
+                                                            className={`w-full h-full object-contain ${
+                                                                !isConnected &&
+                                                                "grayscale opacity-80"
+                                                            }`}
                                                         />
-                                                    </div>
-                                                )}
+                                                    ) : (
+                                                        <div
+                                                            style={{
+                                                                color:
+                                                                    app.color ||
+                                                                    "#95a5a6",
+                                                            }}
+                                                        >
+                                                            <Icon
+                                                                source={
+                                                                    app.name ===
+                                                                    "Shopify"
+                                                                        ? StoreIcon
+                                                                        : AppsIcon
+                                                                }
+                                                                tone="inherit"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <Text
+                                                    variant="bodyXs"
+                                                    fontWeight="bold"
+                                                    alignment="center"
+                                                    tone={
+                                                        isConnected
+                                                            ? "subdued"
+                                                            : "caution"
+                                                    }
+                                                    truncate
+                                                >
+                                                    {app.name}
+                                                </Text>
                                             </div>
-                                            <Text
-                                                variant="bodyXs"
-                                                fontWeight="bold"
-                                                alignment="center"
-                                                tone="subdued"
-                                                truncate
-                                            >
-                                                {app.name}
-                                            </Text>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </Box>
                         </BlockStack>
 

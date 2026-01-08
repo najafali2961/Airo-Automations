@@ -46,16 +46,33 @@ export default function WorkflowEditor({
     // Transform DB nodes/edges to React Flow format
     const initialNodes = useMemo(() => {
         if (!flow?.nodes) return [];
-        return flow.nodes.map((n) => ({
-            id: String(n.id),
-            type: n.type,
-            position: { x: n.position_x || 0, y: n.position_y || 0 },
-            data: {
-                label: n.label,
-                settings: n.settings,
-            },
-        }));
-    }, [flow]);
+        return flow.nodes.map((n) => {
+            // Infer app name for existing nodes
+            let appName = null;
+            if (definitions?.apps) {
+                const parentApp = definitions.apps.find(
+                    (app) =>
+                        app.triggers?.some((t) => t.label === n.label) ||
+                        app.actions?.some((a) => a.label === n.label)
+                );
+                if (parentApp) {
+                    appName = parentApp.name.toLowerCase();
+                    // Fix for Shopify casing if needed, though 'shopify' is standard
+                }
+            }
+
+            return {
+                id: String(n.id),
+                type: n.type,
+                position: { x: n.position_x || 0, y: n.position_y || 0 },
+                data: {
+                    label: n.label,
+                    settings: n.settings,
+                    appName: appName,
+                },
+            };
+        });
+    }, [flow, definitions]);
 
     const initialEdges = useMemo(() => {
         if (!flow?.edges) return [];
@@ -396,7 +413,10 @@ export default function WorkflowEditor({
                         overflowY: "auto",
                     }}
                 >
-                    <Sidebar definitions={definitions} />
+                    <Sidebar
+                        definitions={definitions}
+                        connectors={connectors}
+                    />
                 </div>
 
                 {/* Canvas */}

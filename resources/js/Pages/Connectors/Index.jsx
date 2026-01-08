@@ -22,7 +22,10 @@ import {
     TextField,
     FormLayout,
     Select,
+    Card,
+    Grid,
 } from "@shopify/polaris";
+import { getIconAndColor } from "../../Components/WorkflowBuilder/utils";
 
 export default function Connectors({ connectors }) {
     const [activeToast, setActiveToast] = useState(false);
@@ -127,8 +130,21 @@ export default function Connectors({ connectors }) {
         }
     };
 
-    const handleDisconnect = (connectorKey) => {
+    // Disconnect Modal State
+    const [disconnectModalOpen, setDisconnectModalOpen] = useState(false);
+    const [itemToDisconnect, setItemToDisconnect] = useState(null);
+
+    const openDisconnectModal = (key) => {
+        setItemToDisconnect(key);
+        setDisconnectModalOpen(true);
+    };
+
+    const confirmDisconnect = () => {
+        if (!itemToDisconnect) return;
+
+        const connectorKey = itemToDisconnect;
         setIsDisconnectingKey(connectorKey);
+        setDisconnectModalOpen(false);
 
         let url = "";
         if (connectorKey === "google") url = "/auth/google/disconnect";
@@ -148,6 +164,7 @@ export default function Connectors({ connectors }) {
                     setToastMessage("Disconnected successfully");
                     setActiveToast(true);
                     setIsDisconnectingKey(null);
+                    setItemToDisconnect(null);
                     if (connectorKey === "smtp") {
                         setSmtpConfig({
                             host: "",
@@ -164,6 +181,7 @@ export default function Connectors({ connectors }) {
                     setToastMessage("Failed to disconnect");
                     setActiveToast(true);
                     setIsDisconnectingKey(null);
+                    setItemToDisconnect(null);
                 },
             }
         );
@@ -408,73 +426,103 @@ export default function Connectors({ connectors }) {
         return value;
     }
 
-    const StatusBadge = ({ status }) => {
-        let tone = "subdued";
-        if (status === "Connected") tone = "success";
-        else if (status === "Disconnected") tone = "critical";
-        return <Badge tone={tone}>{status.toUpperCase()}</Badge>;
-    };
-
-    const rowMarkup = filteredConnectors.map((connector, index) => {
-        const { key, title, description, icon, status, is_active } = connector;
-        const isSelected = selectedResources.includes(key);
+    const renderConnectorCard = (connector) => {
+        const { key, title, description, status, is_active } = connector;
+        const isConnected = status === "Connected";
+        const { icon, color, isUrl } = getIconAndColor(key); // Use utility for consistent icon/color
 
         return (
-            <IndexTable.Row
-                id={key}
-                key={key}
-                selected={isSelected}
-                position={index}
-            >
-                <IndexTable.Cell>
-                    <InlineStack gap="300" blockAlign="center">
-                        <Avatar source={icon} alt={title} size="medium" />
-                        <BlockStack>
-                            <Text fontWeight="bold" as="span">
+            <div key={key} className="relative group">
+                <div
+                    className={`
+                        bg-white rounded-2xl border transition-all duration-300 overflow-hidden flex flex-col h-full
+                        ${
+                            isConnected
+                                ? "border-gray-200 shadow-sm hover:border-blue-300 hover:shadow-md"
+                                : "border-gray-200 shadow-sm hover:border-gray-300"
+                        }
+                    `}
+                >
+                    {/* Header Stripe */}
+                    <div className={`h-1.5 w-full ${color}`} />
+
+                    <div className="p-5 flex flex-col h-full">
+                        <div className="flex justify-between items-start mb-4">
+                            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 p-2">
+                                {isUrl ? (
+                                    <img
+                                        src={icon}
+                                        alt=""
+                                        className="w-full h-full object-contain"
+                                    />
+                                ) : (
+                                    <span className="text-2xl">{icon}</span>
+                                )}
+                            </div>
+                            <div
+                                className={`
+                                px-2 py-1 rounded-full text-xs font-bold border
+                                ${
+                                    isConnected
+                                        ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                                        : "bg-gray-50 text-gray-600 border-gray-100"
+                                }
+                            `}
+                            >
+                                {isConnected ? "Active" : "Disconnected"}
+                            </div>
+                        </div>
+
+                        <div className="mb-4 flex-1">
+                            <Text variant="headingMd" as="h3">
                                 {title}
                             </Text>
-                            <Text variant="bodySm" tone="subdued" as="span">
+                            <Text variant="bodySm" tone="subdued" as="p">
                                 {description}
                             </Text>
-                        </BlockStack>
-                    </InlineStack>
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                    <StatusBadge status={status} />
-                </IndexTable.Cell>
-                <IndexTable.Cell>
-                    {status === "Disconnected" && is_active && (
-                        <Button
-                            variant="primary"
-                            onClick={() => handleConnect(connector)}
-                        >
-                            {key === "smtp" ? "Configure" : "Connect"}
-                        </Button>
-                    )}
-                    {status === "Connected" && (
-                        <InlineStack gap="200">
-                            {key === "smtp" && (
+                        </div>
+
+                        <div className="mt-auto pt-4 border-t border-gray-50">
+                            {isConnected ? (
+                                <InlineStack gap="200">
+                                    {key === "smtp" && (
+                                        <Button
+                                            onClick={() =>
+                                                handleConnect(connector)
+                                            }
+                                            size="slim"
+                                        >
+                                            Edit Config
+                                        </Button>
+                                    )}
+                                    <Button
+                                        variant="plain"
+                                        tone="critical"
+                                        onClick={() => openDisconnectModal(key)}
+                                        loading={isDisconnectingKey === key}
+                                        size="slim"
+                                    >
+                                        Disconnect
+                                    </Button>
+                                </InlineStack>
+                            ) : (
                                 <Button
+                                    variant="primary"
+                                    fullWidth
                                     onClick={() => handleConnect(connector)}
+                                    disabled={!is_active}
                                 >
-                                    Edit
+                                    {key === "smtp"
+                                        ? "Configure"
+                                        : "Connect App"}
                                 </Button>
                             )}
-                            <Button
-                                variant="primary"
-                                tone="critical"
-                                loading={isDisconnectingKey === key}
-                                onClick={() => handleDisconnect(key)}
-                            >
-                                Disconnect
-                            </Button>
-                        </InlineStack>
-                    )}
-                    {!is_active && <Button disabled>Coming Soon</Button>}
-                </IndexTable.Cell>
-            </IndexTable.Row>
+                        </div>
+                    </div>
+                </div>
+            </div>
         );
-    });
+    };
 
     return (
         <Frame>
@@ -515,27 +563,42 @@ export default function Connectors({ connectors }) {
                                 mode={mode}
                                 setMode={setMode}
                             />
-                            <IndexTable
-                                condensed={useBreakpoints().smDown}
-                                resourceName={resourceName}
-                                itemCount={filteredConnectors.length}
-                                selectedItemsCount={
-                                    allResourcesSelected
-                                        ? "All"
-                                        : selectedResources.length
-                                }
-                                onSelectionChange={handleSelectionChange}
-                                headings={[
-                                    { title: "App" },
-                                    { title: "Status" },
-                                    { title: "Actions" },
-                                ]}
-                            >
-                                {rowMarkup}
-                            </IndexTable>
+                            <div className="p-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {filteredConnectors.map(
+                                        renderConnectorCard
+                                    )}
+                                </div>
+                            </div>
                         </LegacyCard>
                     </Layout.Section>
                 </Layout>
+
+                {/* Disconnect Confirmation Modal */}
+                <Modal
+                    open={disconnectModalOpen}
+                    onClose={() => setDisconnectModalOpen(false)}
+                    title="Disconnect App?"
+                    primaryAction={{
+                        content: "Disconnect",
+                        onAction: confirmDisconnect,
+                        destructive: true,
+                        loading: !!isDisconnectingKey,
+                    }}
+                    secondaryActions={[
+                        {
+                            content: "Cancel",
+                            onAction: () => setDisconnectModalOpen(false),
+                        },
+                    ]}
+                >
+                    <Modal.Section>
+                        <Text>
+                            Are you sure you want to disconnect? This might
+                            break active workflows using this connection.
+                        </Text>
+                    </Modal.Section>
+                </Modal>
 
                 {/* SMTP Configuration Modal */}
                 <Modal
