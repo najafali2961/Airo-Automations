@@ -428,6 +428,13 @@ export default function WorkflowEditor({
                         </Button>
 
                         <Button
+                            size="slim"
+                            onClick={() => builderRef.current?.autoLayout()}
+                        >
+                            Format Flow
+                        </Button>
+
+                        <Button
                             variant="primary"
                             onClick={handleExecute}
                             disabled={isDirty || saving}
