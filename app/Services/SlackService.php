@@ -33,4 +33,27 @@ class SlackService
 
         return $data;
     }
+    public function getChannels($token)
+    {
+        // Fetch public and private channels
+        $response = Http::withToken($token)->get('https://slack.com/api/conversations.list', [
+            'types' => 'public_channel,private_channel',
+            'limit' => 1000,
+            'exclude_archived' => true
+        ]);
+
+        if (!$response->successful()) {
+            Log::error("Slack API Error (Channels): " . $response->body());
+            throw new \Exception("Slack API Request Failed: " . $response->status());
+        }
+
+        $data = $response->json();
+        
+        if (!$data['ok']) {
+            Log::error("Slack API Error (Channels Logic): " . json_encode($data));
+            throw new \Exception("Failed to fetch channels: " . ($data['error'] ?? 'Unknown error'));
+        }
+
+        return $data['channels'] ?? [];
+    }
 }

@@ -70,6 +70,9 @@ Route::middleware(['verify.shopify'])->group(function () {
     // Klaviyo
     Route::get('/api/klaviyo/auth-url', [\App\Http\Controllers\KlaviyoController::class, 'generateAuthUrl'])->name('klaviyo.auth.url');
     Route::post('/api/klaviyo/disconnect', [\App\Http\Controllers\KlaviyoController::class, 'disconnect'])->name('klaviyo.disconnect');
+    
+    // Universal Resource Fetcher
+    Route::get('/api/integrations/{service}/{resource}', [\App\Http\Controllers\IntegrationResourceController::class, 'index'])->name('integrations.resources');
 });
 
 // Slack Callback (Public)

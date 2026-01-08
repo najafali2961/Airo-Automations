@@ -13,6 +13,7 @@ import {
 } from "@shopify/polaris";
 import { router } from "@inertiajs/react";
 import VariableInput from "./VariableInput";
+import ResourceSelect from "./ResourceSelect";
 import { getIconAndColor } from "./utils";
 
 export default function ConfigPanel({
@@ -197,6 +198,51 @@ export default function ConfigPanel({
                                 onChange={(val) =>
                                     updateSetting(field.name, val)
                                 }
+                                disabled={!isConnected}
+                                required={field.required}
+                            />
+                        ) : field.type === "resource_select" ? (
+                            <ResourceSelect
+                                label={field.label}
+                                value={settings[field.name] || ""}
+                                onChange={(val) =>
+                                    updateSetting(field.name, val)
+                                }
+                                service={(function () {
+                                    // 1. Try explicit app name from node data or definition
+                                    if (node.data.appName)
+                                        return node.data.appName;
+                                    if (
+                                        definition.app &&
+                                        definition.app !== "shopify"
+                                    )
+                                        return definition.app;
+
+                                    // 2. Fallback based on group/category mappings
+                                    const group = definition.group;
+                                    if (group === "marketing") return "klaviyo";
+                                    if (group === "productivity")
+                                        return "google";
+                                    if (group === "communication") {
+                                        if (definition.icon === "MessageSquare")
+                                            return "slack";
+                                        if (
+                                            definition.icon === "Mail" &&
+                                            definition.label.includes("Gmail")
+                                        )
+                                            return "google";
+                                        if (
+                                            definition.icon === "Mail" &&
+                                            definition.label.includes("SMTP")
+                                        )
+                                            return "smtp";
+                                    }
+
+                                    // 3. Last resort
+                                    return group;
+                                })()}
+                                resource={field.resource}
+                                placeholder={field.placeholder}
                                 disabled={!isConnected}
                                 required={field.required}
                             />

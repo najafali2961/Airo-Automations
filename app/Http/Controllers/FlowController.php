@@ -64,6 +64,7 @@ class FlowController extends Controller
                  ],
                  'group' => $action['category'],
                  'icon' => $action['icon'],
+                 'app' => $action['app'] ?? 'shopify',
                  'fields' => $action['fields'] ?? []
              ];
 

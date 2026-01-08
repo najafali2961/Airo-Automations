@@ -79,4 +79,31 @@ class GoogleService
 
         return $this->client;
     }
+    public function getFiles($user = null, $mimeType = null)
+    {
+        $client = $this->getClient($user);
+        $service = new \Google\Service\Drive($client);
+        
+        $optParams = [
+            'pageSize' => 100,
+            'fields' => 'nextPageToken, files(id, name, mimeType)',
+            'q' => "trashed = false",
+        ];
+
+        if ($mimeType) {
+            if ($mimeType === 'folder') {
+                $optParams['q'] .= " and mimeType = 'application/vnd.google-apps.folder'";
+            } elseif ($mimeType === 'sheet') {
+                 $optParams['q'] .= " and mimeType = 'application/vnd.google-apps.spreadsheet'";
+            }
+        }
+
+        $results = $service->files->listFiles($optParams);
+
+        if (count($results->getFiles()) == 0) {
+            return [];
+        }
+
+        return $results->getFiles();
+    }
 }

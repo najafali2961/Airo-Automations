@@ -605,7 +605,7 @@ return [
             'icon' => 'Table',
             'app' => 'google',
             'fields' => [
-                 ['name' => 'spreadsheet_id', 'label' => 'Spreadsheet ID', 'type' => 'text', 'required' => true],
+                 ['name' => 'spreadsheet_id', 'label' => 'Spreadsheet', 'type' => 'resource_select', 'resource' => 'google_sheets', 'required' => true, 'placeholder' => 'Select a sheet...'],
                  ['name' => 'range', 'label' => 'Range', 'type' => 'text', 'default' => 'Sheet1!A1'],
                  ['name' => 'values', 'label' => 'Values (Comma Separated)', 'type' => 'textarea', 'required' => true, 'placeholder' => 'Val1, Val2, Val3'],
             ]
@@ -683,7 +683,7 @@ return [
             'fields' => [
                  ['name' => 'file_url', 'label' => 'File URL', 'type' => 'text', 'required' => true, 'placeholder' => 'https://...'],
                  ['name' => 'file_name', 'label' => 'File Name', 'type' => 'text', 'required' => true],
-                 ['name' => 'folder_id', 'label' => 'Parent Folder ID (Optional)', 'type' => 'text'],
+                 ['name' => 'folder_id', 'label' => 'Parent Folder', 'type' => 'resource_select', 'resource' => 'drive_folders', 'placeholder' => 'Select folder (optional)...'],
             ]
         ],
         [
@@ -696,7 +696,7 @@ return [
             'fields' => [
                  ['name' => 'file_name', 'label' => 'File Name', 'type' => 'text', 'required' => true, 'placeholder' => 'log.txt'],
                  ['name' => 'content', 'label' => 'Content', 'type' => 'textarea', 'required' => true],
-                 ['name' => 'folder_id', 'label' => 'Parent Folder ID (Optional)', 'type' => 'text'],
+                 ['name' => 'folder_id', 'label' => 'Parent Folder', 'type' => 'resource_select', 'resource' => 'drive_folders', 'placeholder' => 'Select folder (optional)...'],
             ]
         ],
         // SMTP Actions
@@ -728,7 +728,7 @@ return [
             'icon' => 'MessageSquare',
             'app' => 'slack',
             'fields' => [
-                 ['name' => 'channel', 'label' => 'Channel (ID or Name)', 'type' => 'text', 'placeholder' => '#general or C12345'],
+                 ['name' => 'channel', 'label' => 'Channel', 'type' => 'resource_select', 'resource' => 'channels', 'required' => true, 'placeholder' => 'Select a channel...'],
                  ['name' => 'message', 'label' => 'Message', 'type' => 'textarea', 'required' => true, 'placeholder' => 'Hello {{ order.name }}'],
             ]
         ],
@@ -755,7 +755,7 @@ return [
             'icon' => 'List',
             'app' => 'klaviyo',
             'fields' => [
-                 ['name' => 'list_id', 'label' => 'List ID', 'type' => 'text', 'required' => true, 'placeholder' => 'e.g. XyZ123'],
+                 ['name' => 'list_id', 'label' => 'List', 'type' => 'resource_select', 'resource' => 'lists', 'required' => true, 'placeholder' => 'Select a list...'],
                  ['name' => 'email', 'label' => 'Email', 'type' => 'text', 'required' => true, 'placeholder' => '{{ customer.email }}'],
             ]
         ],
