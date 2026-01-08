@@ -16,10 +16,13 @@ export default memo(({ data, selected }) => {
                 selected={selected}
                 type="action"
                 appName={data.appName}
+                isValid={data.isValid}
+                validationMessage={data.validationMessage}
+                onDelete={data.onDelete}
                 subtext={
                     data.settings?.action
                         ? `Action: ${data.settings.action}`
-                        : "Configure reaction..."
+                        : "Select action..."
                 }
             />
 

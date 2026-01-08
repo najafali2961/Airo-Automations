@@ -10,6 +10,9 @@ export default memo(({ data, selected }) => {
                 selected={selected}
                 type="trigger"
                 appName={data.appName}
+                isValid={data.isValid}
+                validationMessage={data.validationMessage}
+                onDelete={data.onDelete}
                 subtext={
                     data.settings?.topic
                         ? `On: ${data.settings.topic}`

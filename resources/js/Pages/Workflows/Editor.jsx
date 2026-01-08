@@ -91,6 +91,17 @@ export default function WorkflowEditor({
     const handleSave = async () => {
         setSaving(true);
         if (builderRef.current) {
+            // Validate before saving
+            const isValid = builderRef.current.validate();
+            if (!isValid) {
+                shopify.toast.show(
+                    "Cannot save: Layout has errors (check red nodes)",
+                    { isError: true }
+                );
+                setSaving(false);
+                return;
+            }
+
             const { nodes, edges } = builderRef.current.getFlow();
 
             try {

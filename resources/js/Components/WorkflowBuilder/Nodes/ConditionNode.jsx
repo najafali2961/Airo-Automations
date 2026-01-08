@@ -17,6 +17,9 @@ export default memo(({ data, selected }) => {
                 selected={selected}
                 type="condition"
                 className="!min-w-[200px]" // Make it slightly more compact than standard 240px
+                isValid={data.isValid}
+                validationMessage={data.validationMessage}
+                onDelete={data.onDelete}
                 subtext={
                     data.settings?.rules?.length
                         ? `${data.settings.rules.length} rule(s) (${

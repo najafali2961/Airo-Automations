@@ -17,6 +17,8 @@ import {
     useReactFlow,
     ReactFlowProvider,
     MiniMap,
+    getIncomers,
+    getOutgoers,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -24,7 +26,7 @@ import ConfigPanel from "./ConfigPanel";
 import TriggerNode from "./Nodes/TriggerNode";
 import ActionNode from "./Nodes/ActionNode";
 import ConditionNode from "./Nodes/ConditionNode";
-import StopperNode from "./Nodes/StopperNode"; // Import StopperNode
+import StopperNode from "./Nodes/StopperNode";
 import CustomEdge from "./CustomEdge";
 
 const initialNodesDefault = [
@@ -49,12 +51,147 @@ const InnerBuilder = ({
     forwardedRef,
 }) => {
     const reactFlowWrapper = useRef(null);
-    const { screenToFlowPosition } = useReactFlow();
+    const { screenToFlowPosition, getNodes, getEdges } = useReactFlow();
 
+    // Lift state up or manage generic validation here
+    // For simplicity, we write validation status directly into node data
     const [nodes, setNodes, onNodesChange] = useNodesState(
         initialNodes || initialNodesDefault
     );
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges || []);
+
+    // -------------------------------------------------------------------------
+    // Validation Logic
+    // -------------------------------------------------------------------------
+    const validateFlow = useCallback((currentNodes, currentEdges) => {
+        let allValid = true;
+
+        const updatedNodes = currentNodes.map((node) => {
+            const incomers = getIncomers(node, currentNodes, currentEdges);
+            const outgoers = getOutgoers(node, currentNodes, currentEdges);
+
+            let isValid = true;
+            let message = "";
+
+            if (node.type === "trigger") {
+                if (outgoers.length === 0) {
+                    isValid = false;
+                    message = "Trigger must be connected to an action";
+                }
+            } else if (node.type === "action") {
+                if (incomers.length === 0) {
+                    isValid = false;
+                    message = "Action is disconnected";
+                }
+            } else if (node.type === "condition") {
+                if (outgoers.length === 0) {
+                    isValid = false;
+                    message = "Condition must have at least one path";
+                } else if (incomers.length === 0) {
+                    isValid = false;
+                    message = "Condition is disconnected";
+                }
+            } else if (node.type === "stopper") {
+                if (incomers.length === 0) {
+                    isValid = false;
+                    message = "Stopper is disconnected";
+                }
+            }
+
+            if (!isValid) allValid = false;
+
+            // Only update if changed to avoid loop
+            if (
+                node.data.isValid !== isValid ||
+                node.data.validationMessage !== message
+            ) {
+                return {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        isValid,
+                        validationMessage: message,
+                    },
+                };
+            }
+            return node;
+        });
+
+        // If we found changes in validation state, we need to return them
+        // But we can't simply setNodes here if we are inside a state update loop.
+        // So we return the new nodes, and the caller (useEffect) handles the update?
+        // Actually, best pattern is to run this effect when nodes/edges structure changes.
+        return { updatedNodes, allValid };
+    }, []);
+
+    // We run validation in a useEffect that watches the structure (ids/connections),
+    // BUT we need to be careful not to cycle endlessly.
+    // We'll trust that 'validateFlow' returns stable objects if nothing changed.
+    useEffect(() => {
+        // We need a stable check. JSON stringify is expensive but comprehensive for small graphs.
+        // A better way is checking if 'updatedNodes' is different ref or deep equal.
+        // Let's rely on the manual check inside validateFlow
+
+        const { updatedNodes, allValid } = validateFlow(nodes, edges);
+
+        const hasChanges = updatedNodes.some((n, i) => {
+            return (
+                n.data.isValid !== nodes[i].data.isValid ||
+                n.data.validationMessage !== nodes[i].data.validationMessage
+            );
+        });
+
+        if (hasChanges) {
+            setNodes(updatedNodes);
+        }
+    }, [nodes.length, edges.length, JSON.stringify(edges), validateFlow]);
+    // ^ Dependency is tricky. length + edge structure.
+    // If we include 'nodes' it loops because we setNodes.
+    // We depend on nodes.length and edge connections to trigger re-validation.
+
+    // -------------------------------------------------------------------------
+    // Deletion Logic
+    // -------------------------------------------------------------------------
+    const handleDeleteNode = useCallback(
+        (nodeId) => {
+            setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+            setEdges((eds) =>
+                eds.filter((e) => e.source !== nodeId && e.target !== nodeId)
+            );
+            if (onFlowChange) onFlowChange();
+            if (onNodeSelect) onNodeSelect(null); // Deselect if deleted
+        },
+        [setNodes, setEdges, onFlowChange, onNodeSelect]
+    );
+
+    // Prepare node with handlers
+    // We need to inject 'onDelete' and validation props into data.
+    // But 'data' is static in the node object unless we update it.
+    // We already update nodes for validation. Let's also ensure onDelete is there.
+    // Wait, we can't store functions in 'data' if we persistence (save to DB).
+    // ReactFlow warns about functions in data if not careful, but for runtime it's fine.
+    // When saving, we strip it.
+
+    // Instead of putting onDelete in data (which causes serialization issues or updates),
+    // let's pass it via a custom Node Wrapper or use `onNodeClick` and a separate UI.
+    // BUT the requirement is "trash icon at the right side of the node".
+    // So the Node component needs the callback.
+    // We can inject it in `useNodesState` or a `useEffect`.
+
+    useEffect(() => {
+        setNodes((nds) =>
+            nds.map((node) => {
+                if (node.data.onDelete) return node; // already has it
+                return {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        onDelete: () => handleDeleteNode(node.id),
+                    },
+                };
+            })
+        );
+    }, [handleDeleteNode, setNodes, nodes.length]); // Run when nodes are added
 
     // Custom change handlers to track dirty state
     const handleNodesChange = useCallback(
@@ -91,11 +228,25 @@ const InnerBuilder = ({
     );
 
     useEffect(() => {
-        if (initialNodes) setNodes(initialNodes);
+        if (initialNodes) {
+            // Hydrate with method
+            const hydrated = initialNodes.map((n) => ({
+                ...n,
+                data: { ...n.data, onDelete: () => handleDeleteNode(n.id) },
+            }));
+            setNodes(hydrated);
+        }
         if (initialEdges) {
             setEdges(initialEdges.map((e) => prepareEdge(e)));
         }
-    }, [initialNodes, initialEdges, prepareEdge, setNodes, setEdges]);
+    }, [
+        initialNodes,
+        initialEdges,
+        prepareEdge,
+        setNodes,
+        setEdges,
+        handleDeleteNode,
+    ]);
 
     const onConnect = useCallback(
         (params) => {
@@ -110,9 +261,25 @@ const InnerBuilder = ({
     );
 
     useImperativeHandle(forwardedRef, () => ({
-        getFlow: () => ({ nodes, edges }),
+        getFlow: () => {
+            // Return pure data stripping functions
+            const cleanNodes = nodes.map((n) => {
+                const { onDelete, ...restData } = n.data;
+                return { ...n, data: restData };
+            });
+            return { nodes: cleanNodes, edges };
+        },
+        validate: () => {
+            const { allValid } = validateFlow(nodes, edges);
+            return allValid;
+        },
         setFlow: (newNodes, newEdges) => {
-            setNodes(newNodes);
+            setNodes(
+                newNodes.map((n) => ({
+                    ...n,
+                    data: { ...n.data, onDelete: () => handleDeleteNode(n.id) },
+                }))
+            );
             setEdges(newEdges.map((e) => prepareEdge(e)));
         },
         updateNode: (id, data) => {
@@ -133,7 +300,6 @@ const InnerBuilder = ({
             if (!sourceNode || !targetNode) return;
 
             const newNodeId = getId();
-            // Simple positioning: halfway + slight offset to avoid strict overlap if layout is weird
             const position = {
                 x: (sourceNode.position.x + targetNode.position.x) / 2,
                 y: (sourceNode.position.y + targetNode.position.y) / 2,
@@ -147,16 +313,13 @@ const InnerBuilder = ({
                     label: nodeDef.label,
                     settings: nodeDef.settings || {},
                     n8nType: nodeDef.n8nType,
+                    onDelete: () => handleDeleteNode(newNodeId),
                 },
             };
 
-            // Remove old edge
             setEdges((eds) => eds.filter((e) => e.id !== edgeId));
-
-            // Add new node
             setNodes((nds) => nds.concat(newNode));
 
-            // Add two new edges
             const edge1 = prepareEdge({
                 id: `e${source}-${newNodeId}`,
                 source: source,
@@ -176,9 +339,6 @@ const InnerBuilder = ({
         },
         addNode: (nodeDef) => {
             const newNodeId = getId();
-            // Default to center-ish or offset from last node
-            // Ideally we'd use getViewport() but we can start with a safe default
-            // or modify this to accept a position if passed
             const position = { x: 250, y: 100 + nodes.length * 50 };
 
             const newNode = {
@@ -187,9 +347,10 @@ const InnerBuilder = ({
                 position,
                 data: {
                     label: nodeDef.label,
-                    appName: nodeDef.category || nodeDef.name, // Ensure appName is passed
+                    appName: nodeDef.category || nodeDef.name,
                     settings: nodeDef.settings || {},
                     n8nType: nodeDef.n8nType,
+                    onDelete: () => handleDeleteNode(newNodeId),
                 },
             };
 
@@ -203,7 +364,7 @@ const InnerBuilder = ({
             trigger: TriggerNode,
             action: ActionNode,
             condition: ConditionNode,
-            stopper: StopperNode, // Register StopperNode
+            stopper: StopperNode,
             shopifyTrigger: TriggerNode,
         }),
         []
@@ -247,8 +408,9 @@ const InnerBuilder = ({
                 y: event.clientY,
             });
 
+            const newNodeId = getId();
             const newNode = {
-                id: getId(),
+                id: newNodeId,
                 type,
                 position,
                 data: {
@@ -256,13 +418,14 @@ const InnerBuilder = ({
                     appName: appName,
                     n8nType: n8nType,
                     settings: defaults,
+                    onDelete: () => handleDeleteNode(newNodeId),
                 },
             };
 
             setNodes((nds) => nds.concat(newNode));
             if (onFlowChange) onFlowChange();
         },
-        [screenToFlowPosition, setNodes, onFlowChange]
+        [screenToFlowPosition, setNodes, onFlowChange, handleDeleteNode]
     );
 
     const onDragOver = useCallback((event) => {
@@ -294,7 +457,6 @@ const InnerBuilder = ({
                 onEdgesChange={handleEdgesChange}
                 onConnect={onConnect}
                 onInit={(instance) => {
-                    // Fit view initially if needed
                     instance.fitView();
                 }}
                 onDrop={onDrop}

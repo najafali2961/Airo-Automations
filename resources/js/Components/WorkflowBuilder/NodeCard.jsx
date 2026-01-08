@@ -1,5 +1,6 @@
 import React from "react";
-import { Text } from "@shopify/polaris";
+import { Text, Icon } from "@shopify/polaris";
+import { DeleteIcon, AlertCircleIcon } from "@shopify/polaris-icons";
 import { getIconAndColor } from "./utils";
 
 export default function NodeCard({
@@ -9,7 +10,10 @@ export default function NodeCard({
     children,
     type = "action",
     appName,
-    className = "", // Add className prop
+    className = "",
+    onDelete,
+    isValid = true,
+    validationMessage = "",
 }) {
     const { icon, color, isUrl } = getIconAndColor(appName || label || type);
     const isTrigger = type === "trigger";
@@ -27,6 +31,31 @@ export default function NodeCard({
                 ${className}
             `}
         >
+            {/* Validation Badge */}
+            {!isValid && (
+                <div
+                    className="absolute -top-3 -left-3 z-10 bg-red-100 text-red-600 rounded-full p-1 border border-red-200 shadow-sm"
+                    title={validationMessage}
+                >
+                    <Icon source={AlertCircleIcon} tone="critical" />
+                </div>
+            )}
+
+            {/* Delete Button */}
+            {onDelete && (
+                <div
+                    className="absolute -top-2 -right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete();
+                    }}
+                >
+                    <div className="bg-white rounded-full p-1.5 shadow-md border border-gray-200 hover:bg-red-50 hover:text-red-600 cursor-pointer">
+                        <Icon source={DeleteIcon} tone="critical" />
+                    </div>
+                </div>
+            )}
+
             {/* Header Stripe */}
             <div className={`h-1.5 w-full rounded-t-xl ${color}`} />
 
@@ -64,8 +93,14 @@ export default function NodeCard({
 
                 {/* Content/Status */}
                 <div className="bg-gray-50/50 rounded-lg p-2.5 border border-gray-100/50">
-                    <Text variant="bodySm" tone="subdued" breakWord>
-                        {subtext || "Configure this step..."}
+                    <Text
+                        variant="bodySm"
+                        tone={!isValid ? "critical" : "subdued"}
+                        breakWord
+                    >
+                        {!isValid
+                            ? validationMessage
+                            : subtext || "Configure this step..."}
                     </Text>
                 </div>
 
