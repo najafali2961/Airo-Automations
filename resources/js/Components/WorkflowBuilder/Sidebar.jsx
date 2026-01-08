@@ -22,7 +22,7 @@ import {
     ProductIcon,
 } from "@shopify/polaris-icons";
 
-export default function Sidebar({ definitions, connectors }) {
+export default function Sidebar({ definitions, connectors, onNodeClick }) {
     const [view, setView] = useState("categories"); // categories | app | search
     const [selectedApp, setSelectedApp] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
@@ -200,6 +200,7 @@ export default function Sidebar({ definitions, connectors }) {
             key={`${node.category}-${node.label}`}
             draggable
             onDragStart={(e) => onDragStart(e, node)}
+            onClick={() => onNodeClick && onNodeClick(node)}
             className="cursor-grab"
         >
             <div className="bg-white border-2 border-gray-100 rounded-2xl p-4 transition-all hover:border-blue-500 hover:shadow-sm">

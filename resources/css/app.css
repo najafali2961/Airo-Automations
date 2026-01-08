@@ -27,3 +27,18 @@
 .animate-spin-slow {
     animation: spin-slow 12s linear infinite;
 }
+
+@keyframes dashdraw {
+    from {
+        stroke-dashoffset: 25;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.flow-animation {
+
+    stroke-dasharray: 5;
+    animation: dashdraw 0.5s linear infinite;
+}

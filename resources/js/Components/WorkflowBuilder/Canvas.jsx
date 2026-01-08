@@ -173,6 +173,28 @@ const InnerBuilder = ({
             setEdges((eds) => [...eds, edge1, edge2]);
             if (onFlowChange) onFlowChange();
         },
+        addNode: (nodeDef) => {
+            const newNodeId = getId();
+            // Default to center-ish or offset from last node
+            // Ideally we'd use getViewport() but we can start with a safe default
+            // or modify this to accept a position if passed
+            const position = { x: 250, y: 100 + nodes.length * 50 };
+
+            const newNode = {
+                id: newNodeId,
+                type: nodeDef.type,
+                position,
+                data: {
+                    label: nodeDef.label,
+                    appName: nodeDef.category || nodeDef.name, // Ensure appName is passed
+                    settings: nodeDef.settings || {},
+                    n8nType: nodeDef.n8nType,
+                },
+            };
+
+            setNodes((nds) => nds.concat(newNode));
+            if (onFlowChange) onFlowChange();
+        },
     }));
 
     const nodeTypes = useMemo(

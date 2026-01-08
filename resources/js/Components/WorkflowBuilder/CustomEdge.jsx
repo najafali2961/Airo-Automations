@@ -36,10 +36,11 @@ export default function CustomEdge({
             path={edgePath}
             markerEnd={markerEnd}
             style={{
-                strokeWidth: 2,
-                stroke: "#94a3b8",
+                strokeWidth: 3,
+                stroke: "#b1b1b7",
                 ...style,
             }}
+            className="flow-animation"
         />
     );
 }

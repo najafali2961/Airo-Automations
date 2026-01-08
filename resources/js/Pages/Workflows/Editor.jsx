@@ -12,7 +12,10 @@ import {
     Button,
     Modal,
     Text,
+    Badge,
+    Icon,
 } from "@shopify/polaris";
+import { ArrowLeftIcon } from "@shopify/polaris-icons";
 import { Head, router } from "@inertiajs/react";
 import { SaveBar, useAppBridge } from "@shopify/app-bridge-react";
 import axios from "axios";
@@ -149,6 +152,13 @@ export default function WorkflowEditor({
         },
         [insertContext]
     );
+
+    const handleSidebarNodeClick = useCallback((nodeDef) => {
+        if (builderRef.current) {
+            builderRef.current.addNode(nodeDef);
+            setIsDirty(true);
+        }
+    }, []);
 
     const handleExecute = async () => {
         if (!flow?.id || isDirty) {
@@ -333,71 +343,88 @@ export default function WorkflowEditor({
                 onSelect={handleNodeSelect}
             />
 
-            <div
-                style={{
-                    flex: "0 0 auto",
-                    borderBottom: "1px solid #e1e3e5",
-                    background: "white",
-                    padding: "1rem",
-                }}
-            >
-                <BlockStack gap="400">
-                    <InlineStack align="space-between" blockAlign="center">
-                        <div className="flex items-center gap-2">
-                            {isEditingName ? (
-                                <input
-                                    ref={nameInputRef}
-                                    type="text"
-                                    value={workflowName}
-                                    onChange={(e) =>
-                                        setWorkflowName(e.target.value)
+            <div className="flex-none border-b border-gray-200 bg-white/80 backdrop-blur-md z-20 px-6 py-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() =>
+                                router.visit(
+                                    `/workflows${window.location.search}`
+                                )
+                            }
+                            className="p-2 -ml-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
+                        >
+                            <Icon source={ArrowLeftIcon} />
+                        </button>
+
+                        <div className="h-6 w-px bg-gray-200 mx-2" />
+
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                                {isEditingName ? (
+                                    <input
+                                        ref={nameInputRef}
+                                        type="text"
+                                        value={workflowName}
+                                        onChange={(e) =>
+                                            setWorkflowName(e.target.value)
+                                        }
+                                        onBlur={() => setIsEditingName(false)}
+                                        onKeyDown={(e) =>
+                                            e.key === "Enter" &&
+                                            setIsEditingName(false)
+                                        }
+                                        className="text-lg font-bold bg-transparent border-none p-0 focus:ring-0 text-gray-900 placeholder-gray-400"
+                                    />
+                                ) : (
+                                    <h1
+                                        onClick={() => setIsEditingName(true)}
+                                        className="text-lg font-bold text-gray-900 cursor-pointer hover:text-gray-600 transition-colors flex items-center gap-2 group"
+                                    >
+                                        {workflowName}
+                                        <span className="opacity-0 group-hover:opacity-100 text-gray-400 text-xs font-normal">
+                                            Edit
+                                        </span>
+                                    </h1>
+                                )}
+                                <Badge
+                                    tone={
+                                        flow?.active ? "success" : "attention"
                                     }
-                                    onBlur={() => setIsEditingName(false)}
-                                    onKeyDown={(e) =>
-                                        e.key === "Enter" &&
-                                        setIsEditingName(false)
-                                    }
-                                    className="text-xl font-bold border rounded px-2 py-1"
-                                />
-                            ) : (
-                                <div
-                                    onClick={() => setIsEditingName(true)}
-                                    className="text-xl font-bold cursor-pointer hover:bg-gray-50 px-2 py-1 rounded flex items-center gap-2 group"
                                 >
-                                    {workflowName}
-                                    <span className="opacity-0 group-hover:opacity-100 text-gray-400 text-sm">
-                                        ✎
-                                    </span>
-                                </div>
-                            )}
+                                    {flow?.active ? "Active" : "Draft"}
+                                </Badge>
+                            </div>
                         </div>
-                        <div className="flex gap-2">
-                            <Button
-                                onClick={handleToggleActive}
-                                tone={flow?.active ? "critical" : "success"}
-                                disabled={!flow?.id || isDirty}
-                            >
-                                {flow?.active ? "Deactivate" : "Activate"}
-                            </Button>
-                            <Button
-                                onClick={() =>
-                                    router.visit(
-                                        "/workflows" + window.location.search
-                                    )
-                                }
-                            >
-                                Back to App
-                            </Button>
-                            <Button
-                                variant="primary"
-                                onClick={handleExecute}
-                                disabled={isDirty || saving}
-                            >
-                                Run Test
-                            </Button>
-                        </div>
-                    </InlineStack>
-                </BlockStack>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500 font-medium mr-2">
+                            {saving
+                                ? "Saving..."
+                                : isDirty
+                                ? "Unsaved Changes"
+                                : "All changes saved"}
+                        </span>
+
+                        <Button
+                            size="slim"
+                            onClick={handleToggleActive}
+                            tone={flow?.active ? "critical" : "success"}
+                            disabled={!flow?.id || isDirty}
+                        >
+                            {flow?.active ? "Deactivate" : "Activate"}
+                        </Button>
+
+                        <Button
+                            variant="primary"
+                            onClick={handleExecute}
+                            disabled={isDirty || saving}
+                        >
+                            Run Test
+                        </Button>
+                    </div>
+                </div>
             </div>
 
             {/* Main Content Area */}
@@ -416,6 +443,7 @@ export default function WorkflowEditor({
                     <Sidebar
                         definitions={definitions}
                         connectors={connectors}
+                        onNodeClick={handleSidebarNodeClick}
                     />
                 </div>
 
