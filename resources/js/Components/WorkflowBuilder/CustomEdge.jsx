@@ -19,6 +19,10 @@ export default function CustomEdge({
     const [isEditing, setIsEditing] = useState(false);
     const [labelText, setLabelText] = useState(label || "then");
 
+    React.useEffect(() => {
+        setLabelText(label || "then");
+    }, [label]);
+
     const [edgePath, labelX, labelY] = getBezierPath({
         sourceX,
         sourceY,
