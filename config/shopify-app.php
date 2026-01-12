@@ -387,139 +387,139 @@ return [
     'webhooks' => [
         [
             'topic' => 'PRODUCTS_UPDATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/products-update'
+            'address' => env('APP_URL') . '/shopify-webhooks/products-update'
         ],
         [
             'topic' => 'PRODUCTS_DELETE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/products-delete'
+            'address' => env('APP_URL') . '/shopify-webhooks/products-delete'
         ],
         [
             'topic' => 'PRODUCTS_CREATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/products-create'
+            'address' => env('APP_URL') . '/shopify-webhooks/products-create'
         ],
         [
             'topic' => 'PRODUCT_PUBLICATIONS_CREATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/products-published'
+            'address' => env('APP_URL') . '/shopify-webhooks/products-published'
         ],
         [
             'topic' => 'PRODUCT_PUBLICATIONS_DELETE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/products-unpublished'
+            'address' => env('APP_URL') . '/shopify-webhooks/products-unpublished'
         ],
         [
             'topic' => 'ORDERS_CREATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-create'
+            'address' => env('APP_URL') . '/shopify-webhooks/orders-create'
         ],
         [
             'topic' => 'ORDERS_UPDATED',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-updated'
+            'address' => env('APP_URL') . '/shopify-webhooks/orders-updated'
         ],
         [
             'topic' => 'ORDERS_PAID',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-paid'
+            'address' => env('APP_URL') . '/shopify-webhooks/orders-paid'
         ],
         [
             'topic' => 'ORDERS_CANCELLED',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-cancelled'
+            'address' => env('APP_URL') . '/shopify-webhooks/orders-cancelled'
         ],
         [
             'topic' => 'ORDERS_FULFILLED',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-fulfilled'
+            'address' => env('APP_URL') . '/shopify-webhooks/orders-fulfilled'
         ],
         [
             'topic' => 'ORDERS_PARTIALLY_FULFILLED',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-partially-fulfilled'
+            'address' => env('APP_URL') . '/shopify-webhooks/orders-partially-fulfilled'
         ],
         [
             'topic' => 'ORDERS_DELETE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/orders-deleted'
+            'address' => env('APP_URL') . '/shopify-webhooks/orders-deleted'
         ],
         [
             'topic' => 'CUSTOMERS_CREATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/customers-create'
+            'address' => env('APP_URL') . '/shopify-webhooks/customers-create'
         ],
         [
             'topic' => 'CUSTOMERS_UPDATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/customers-update'
+            'address' => env('APP_URL') . '/shopify-webhooks/customers-update'
         ],
         [
             'topic' => 'CUSTOMERS_DELETE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/customers-delete'
+            'address' => env('APP_URL') . '/shopify-webhooks/customers-delete'
         ],
         [
             'topic' => 'COLLECTIONS_CREATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/collections-create'
+            'address' => env('APP_URL') . '/shopify-webhooks/collections-create'
         ],
         [
             'topic' => 'COLLECTIONS_UPDATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/collections-update'
+            'address' => env('APP_URL') . '/shopify-webhooks/collections-update'
         ],
         [
             'topic' => 'COLLECTIONS_DELETE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/collections-delete'
+            'address' => env('APP_URL') . '/shopify-webhooks/collections-delete'
         ],
         [
             'topic' => 'SHOP_UPDATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/shop-update'
+            'address' => env('APP_URL') . '/shopify-webhooks/shop-update'
         ],
         [
             'topic' => 'APP_UNINSTALLED',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/app-uninstalled'
+            'address' => env('APP_URL') . '/shopify-webhooks/app-uninstalled'
         ],
         [
             'topic' => 'DISCOUNTS_CREATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/discounts-create'
+            'address' => env('APP_URL') . '/shopify-webhooks/discounts-create'
         ],
         [
             'topic' => 'DISCOUNTS_UPDATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/discounts-update'
+            'address' => env('APP_URL') . '/shopify-webhooks/discounts-update'
         ],
         [
             'topic' => 'DISCOUNTS_DELETE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/discounts-delete'
+            'address' => env('APP_URL') . '/shopify-webhooks/discounts-delete'
         ],
         [
             'topic' => 'CHECKOUTS_CREATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/checkouts-create'
+            'address' => env('APP_URL') . '/shopify-webhooks/checkouts-create'
         ],
         [
             'topic' => 'CHECKOUTS_UPDATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/checkouts-update'
+            'address' => env('APP_URL') . '/shopify-webhooks/checkouts-update'
         ],
         [
             'topic' => 'CHECKOUTS_DELETE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/checkouts-delete'
+            'address' => env('APP_URL') . '/shopify-webhooks/checkouts-delete'
         ],
         [
             'topic' => 'INVENTORY_LEVELS_UPDATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/inventory-levels-update'
+            'address' => env('APP_URL') . '/shopify-webhooks/inventory-levels-update'
         ],
         [
             'topic' => 'INVENTORY_ITEMS_CREATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/inventory-items-create'
+            'address' => env('APP_URL') . '/shopify-webhooks/inventory-items-create'
         ],
         [
             'topic' => 'INVENTORY_ITEMS_UPDATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/inventory-items-update'
+            'address' => env('APP_URL') . '/shopify-webhooks/inventory-items-update'
         ],
         [
             'topic' => 'BULK_OPERATIONS_FINISH',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/bulk-operations-finish'
+            'address' => env('APP_URL') . '/shopify-webhooks/bulk-operations-finish'
         ],
        [
     'topic' => 'FULFILLMENT_ORDERS_CANCELLATION_REQUEST_SUBMITTED',
-    'address' => 'https://automation.omni-sync.com/shopify-webhooks/fulfillment-orders-cancellation-request'
+    'address' => env('APP_URL') . '/shopify-webhooks/fulfillment-orders-cancellation-request'
 ],
         [
             'topic' => 'CARTS_CREATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/carts-create'
+            'address' => env('APP_URL') . '/shopify-webhooks/carts-create'
         ],
         [
             'topic' => 'CARTS_UPDATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/carts-update'
+            'address' => env('APP_URL') . '/shopify-webhooks/carts-update'
         ],
         [
             'topic' => 'APP_SUBSCRIPTIONS_UPDATE',
-            'address' => 'https://automation.omni-sync.com/shopify-webhooks/app-subscriptions-update'
+            'address' => env('APP_URL') . '/shopify-webhooks/app-subscriptions-update'
         ],
         /*
             [
