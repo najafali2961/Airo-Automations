@@ -5,29 +5,6 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FlowController;
 
 Route::middleware(['verify.shopify'])->group(function () {
-    Route::get('/debug-queue', function () {
-        try {
-            $jobs = \Illuminate\Support\Facades\DB::table('jobs')->get();
-            $failed = \Illuminate\Support\Facades\DB::table('failed_jobs')->get();
-            $logs = \App\Models\ExecutionLog::latest()->limit(5)->get();
-            
-            // Try to run one job
-            $output = '';
-            if ($jobs->count() > 0) {
-                \Illuminate\Support\Facades\Artisan::call('queue:work', ['--once' => true]);
-                $output = \Illuminate\Support\Facades\Artisan::output();
-            }
-
-            return response()->json([
-                'jobs_count' => $jobs->count(),
-                'failed_count' => $failed->count(),
-                'latest_logs' => $logs,
-                'worker_output' => $output
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    });
 
     Route::get('/', [DashboardController::class, 'index'])->name('home');
     Route::get('/workflows', [FlowController::class, 'index'])->name('workflows.index');
@@ -46,6 +23,7 @@ Route::middleware(['verify.shopify'])->group(function () {
     
     // Connectors
     Route::get('/connectors', [\App\Http\Controllers\ConnectorController::class, 'index'])->name('connectors.index');
+    
 });
 
 Route::middleware(['verify.shopify'])->group(function () {
