@@ -77,6 +77,12 @@ GQL;
         $userErrors = $response['body']['data']['tagsAdd']['userErrors'] ?? [];
         if (!empty($userErrors)) {
             $this->log($execution, $node->id, 'error', "Shopify Error: " . json_encode($userErrors));
+        } elseif (isset($response['body']['errors'])) {
+             // Catch top-level GraphQL errors that might not be in userErrors
+             $this->log($execution, $node->id, 'error', "Shopify API Error: " . json_encode($response['body']['errors']));
+        } elseif (!isset($response['body']['data']['tagsAdd'])) {
+             // Catch unexpected response structure
+             $this->log($execution, $node->id, 'error', "Unexpected Shopify Response: " . json_encode($response['body']));
         } else {
             $this->log($execution, $node->id, 'info', "Successfully added tags to product.");
         }

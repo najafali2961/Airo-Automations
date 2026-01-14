@@ -22,7 +22,10 @@ class Node extends Model
     public function nextNodes($label = null) {
         $query = $this->edges();
         if ($label) {
-            $query->where('label', $label);
+            $query->where(function($q) use ($label) {
+                $q->where('source_handle', $label)
+                  ->orWhere('label', $label);
+            });
         }
         return $query->with('targetNode')->get()->pluck('targetNode');
     }
