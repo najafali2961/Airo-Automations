@@ -500,7 +500,7 @@ return [
         [
             'key' => 'send_webhook',
             'label' => 'Send Webhook',
-            'description' => 'Trigger an external webhook (e.g. n8n)',
+            'description' => 'Trigger an external webhook',
             'category' => 'system',
             'icon' => 'Zap',
             'fields' => [['name' => 'url', 'label' => 'Webhook URL', 'type' => 'text', 'required' => true]],

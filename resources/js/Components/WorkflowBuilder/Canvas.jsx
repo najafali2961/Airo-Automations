@@ -313,7 +313,6 @@ const InnerBuilder = ({
                 data: {
                     label: nodeDef.label,
                     settings: nodeDef.settings || {},
-                    n8nType: nodeDef.n8nType,
                     onDelete: () => handleDeleteNode(newNodeId),
                 },
             };
@@ -350,7 +349,6 @@ const InnerBuilder = ({
                     label: nodeDef.label,
                     appName: nodeDef.category || nodeDef.name,
                     settings: nodeDef.settings || {},
-                    n8nType: nodeDef.n8nType,
                     onDelete: () => handleDeleteNode(newNodeId),
                 },
             };
@@ -386,9 +384,6 @@ const InnerBuilder = ({
             const label = event.dataTransfer.getData(
                 "application/reactflow/label"
             );
-            const n8nType = event.dataTransfer.getData(
-                "application/reactflow/n8nType"
-            );
             const appName = event.dataTransfer.getData(
                 "application/reactflow/appName"
             );
@@ -418,7 +413,6 @@ const InnerBuilder = ({
                 data: {
                     label: label,
                     appName: appName,
-                    n8nType: n8nType,
                     settings: defaults,
                     onDelete: () => handleDeleteNode(newNodeId),
                 },

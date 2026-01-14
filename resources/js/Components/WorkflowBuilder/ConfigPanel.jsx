@@ -74,7 +74,7 @@ export default function ConfigPanel({
         // My FlowController adds 'app' implicitly via group logic?
         // Wait, definition in FlowController sets 'group'.
         // But I can infer from category or label.
-        // Actually, FlowController sets 'n8nType' and 'group'.
+        // Actually, FlowController sets 'group'.
         // Let's rely on 'group' (category) often matching app name or being 'communication' etc.
         // Better: Check definition.icon or name?
         // Code in FlowController: $actionDef['group'] = $action['category'], $actionDef['fields']...

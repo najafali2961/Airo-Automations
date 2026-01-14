@@ -191,16 +191,7 @@ export default function Sidebar({ definitions, connectors, onNodeClick }) {
             "application/reactflow/appName",
             node.category || node.name
         ); // Pass app name
-        if (node.n8nType) {
-            event.dataTransfer.setData(
-                "application/reactflow/n8nType",
-                node.n8nType
-            );
-            event.dataTransfer.setData(
-                "application/reactflow/defaults",
-                JSON.stringify(node.settings || {})
-            );
-        }
+
         event.dataTransfer.effectAllowed = "move";
     };
 

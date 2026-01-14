@@ -56,13 +56,7 @@ class User extends Authenticatable implements IShopModel
         'google_token_expires_at' => 'datetime',
     ];
 
-    /**
-     * Get workflows
-     */
-    public function workflows()
-    {
-        return $this->hasMany(Workflow::class, 'shop_id');
-    }
+
 
     /**
      * Get flows (New Automation Builder)

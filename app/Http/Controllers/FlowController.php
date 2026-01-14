@@ -32,7 +32,7 @@ class FlowController extends Controller
          foreach ($flowConfig['triggers'] as $trigger) {
              $shopifyTriggers[] = [
                  'type' => 'trigger',
-                 'n8nType' => 'shopifyTrigger',
+
                  'label' => $trigger['label'],
                  'description' => $trigger['description'],
                  'settings' => ['topic' => $trigger['topic']],
@@ -56,7 +56,7 @@ class FlowController extends Controller
          foreach ($flowConfig['actions'] as $action) {
              $actionDef = [
                  'type' => 'action',
-                 'n8nType' => 'shopifyAction',
+
                  'label' => $action['label'],
                  'description' => $action['description'],
                  'settings' => [
