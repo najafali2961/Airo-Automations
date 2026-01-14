@@ -244,7 +244,7 @@ const InnerBuilder = ({
             const newEdge = prepareEdge({
                 ...params,
                 id: `e${params.source}-${params.target}`,
-                label: "then",
+                label: params.sourceHandle || "then",
             });
             setEdges((eds) => addEdge(newEdge, eds));
             if (onFlowChange) onFlowChange();
