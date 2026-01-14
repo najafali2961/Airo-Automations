@@ -18,11 +18,11 @@ class AddTag extends BaseAction
         
         // Determine resource type from topic
         if (str_contains($topic, 'PRODUCT')) {
-            $action = new \App\Flow\Actions\Products\AddProductTag();
+            $action = app(\App\Flow\Actions\Products\AddProductTag::class);
         } elseif (str_contains($topic, 'ORDER')) {
-            $action = new \App\Flow\Actions\Orders\AddOrderTag();
+            $action = app(\App\Flow\Actions\Orders\AddOrderTag::class);
         } elseif (str_contains($topic, 'CUSTOMER')) {
-            $action = new \App\Flow\Actions\Customers\AddCustomerTag();
+            $action = app(\App\Flow\Actions\Customers\AddCustomerTag::class);
         } else {
             $this->log($execution, $node->id, 'error', "Cannot determine resource type from topic: {$topic}");
             return;

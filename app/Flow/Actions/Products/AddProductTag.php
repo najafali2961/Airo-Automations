@@ -5,9 +5,17 @@ namespace App\Flow\Actions\Products;
 use App\Flow\Actions\BaseAction;
 use App\Models\Node;
 use App\Models\Execution;
+use App\Services\VariableService;
 
 class AddProductTag extends BaseAction
 {
+    protected $variableService;
+
+    public function __construct(VariableService $variableService)
+    {
+        $this->variableService = $variableService;
+    }
+
     public function handle(Node $node, array $payload, Execution $execution): void
     {
         $shop = $this->getShop($execution);
@@ -35,6 +43,7 @@ class AddProductTag extends BaseAction
             return;
         }
 
+        $tagsToAdd = $this->variableService->replace($tagsToAdd, $payload);
         $tagsArray = array_filter(array_map('trim', explode(',', $tagsToAdd)));
 
         $this->log($execution, $node->id, 'info', "Adding tags to product {$productId}: " . implode(', ', $tagsArray));
