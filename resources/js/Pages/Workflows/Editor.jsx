@@ -85,6 +85,7 @@ export default function WorkflowEditor({
             target: String(e.target_node_id),
             type: "custom",
             label: e.label || "then",
+            sourceHandle: e.source_handle || e.sourceHandle || null,
         }));
     }, [flow]);
 

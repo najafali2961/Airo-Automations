@@ -172,7 +172,8 @@ class FlowController extends Controller
                     $flow->edges()->create([
                         'source_node_id' => $sourceId,
                         'target_node_id' => $targetId,
-                        'label' => $label
+                        'label' => $label,
+                        'source_handle' => $edgeData['sourceHandle'] ?? null
                     ]);
                     $savedEdges[] = $edgeKey;
                 }
