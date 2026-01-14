@@ -35,6 +35,7 @@ class DashboardController extends Controller
             
         // Recent Flows
         $recentFlows = Flow::where('shop_id', $shopId)
+            ->withCount('executions')
             ->orderBy('updated_at', 'desc')
             ->limit(5)
             ->get();

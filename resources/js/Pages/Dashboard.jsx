@@ -475,20 +475,51 @@ export default function Dashboard({
                                                 }
                                             >
                                                 <BlockStack gap="050">
-                                                    <Text
-                                                        fontWeight="bold"
-                                                        variant="bodyMd"
+                                                    <InlineStack
+                                                        align="start"
+                                                        blockAlign="center"
+                                                        gap="200"
                                                     >
-                                                        {flow.name}
-                                                    </Text>
-                                                    <Text
-                                                        variant="bodyXs"
-                                                        tone="subdued"
-                                                    >
-                                                        {new Date(
-                                                            flow.updated_at
-                                                        ).toLocaleDateString()}
-                                                    </Text>
+                                                        {flow.active ? (
+                                                            <div
+                                                                className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm flex-shrink-0 border border-emerald-200"
+                                                                title="Active"
+                                                            />
+                                                        ) : (
+                                                            <div
+                                                                className="w-2.5 h-2.5 rounded-full bg-gray-300 flex-shrink-0 border border-gray-200"
+                                                                title="Inactive"
+                                                            />
+                                                        )}
+                                                        <Text
+                                                            fontWeight="bold"
+                                                            variant="bodyMd"
+                                                            truncate
+                                                        >
+                                                            {flow.name}
+                                                        </Text>
+                                                    </InlineStack>
+                                                    <div className="pl-5">
+                                                        <Text
+                                                            variant="bodyXs"
+                                                            tone="subdued"
+                                                        >
+                                                            {flow.executions_count ||
+                                                                0}{" "}
+                                                            runs • Updated{" "}
+                                                            {new Date(
+                                                                flow.updated_at
+                                                            ).toLocaleDateString(
+                                                                undefined,
+                                                                {
+                                                                    month: "short",
+                                                                    day: "numeric",
+                                                                    hour: "2-digit",
+                                                                    minute: "2-digit",
+                                                                }
+                                                            )}
+                                                        </Text>
+                                                    </div>
                                                 </BlockStack>
                                                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <Icon
