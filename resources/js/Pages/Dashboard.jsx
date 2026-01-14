@@ -164,6 +164,14 @@ export default function Dashboard({
                 onAction: () =>
                     router.visit("/workflows/create" + window.location.search),
             }}
+            secondaryActions={[
+                {
+                    content: "Browse Templates",
+                    icon: LayoutColumns3Icon,
+                    onAction: () =>
+                        router.visit("/templates/" + window.location.search),
+                },
+            ]}
         >
             <Head title="Dashboard" />
 

@@ -55,6 +55,7 @@ createInertiaApp({
                         Home
                     </a>
                     <a href="/workflows">Workflows</a>
+                    <a href="/templates">Templates</a>
                     <a href="/executions">Executions</a>
                     <a href="/connectors">Connectors</a>
                 </NavMenu>

@@ -39,6 +39,10 @@ Route::middleware(['verify.shopify'])->group(function () {
     
     Route::get('/executions', [\App\Http\Controllers\ExecutionsController::class, 'index'])->name('executions.index');
     Route::get('/executions/{id}', [\App\Http\Controllers\ExecutionsController::class, 'show'])->name('executions.show');
+
+    // Templates
+    Route::get('/templates', [\App\Http\Controllers\TemplateController::class, 'index'])->name('templates.index');
+    Route::post('/templates/{template}/activate', [\App\Http\Controllers\TemplateController::class, 'activate'])->name('templates.activate');
     
     // Connectors
     Route::get('/connectors', [\App\Http\Controllers\ConnectorController::class, 'index'])->name('connectors.index');
