@@ -36,23 +36,61 @@ class SendSmtpEmailAction implements ActionInterface
         if (!$user) {
              throw new \Exception("User not found for execution context.");
         }
-        $smtpConfig = $user->smtpConfig;
-        if (!$smtpConfig) {
-             throw new \Exception("SMTP Configuration not found.");
+        // 1. Try UserConnector (New System)
+        $connector = $user->activeConnectors()->where('connector_slug', 'smtp')->first();
+        
+        $smtpHost = null;
+        $smtpPort = null;
+        $smtpUser = null;
+        $smtpPass = null;
+        $smtpEncryption = null;
+        $fromAddress = null;
+        $fromName = null;
+
+        if ($connector) {
+            $creds = $connector->credentials;
+            $meta = $connector->meta ?? [];
+            
+            $smtpHost = $creds['host'] ?? null;
+            $smtpPort = $creds['port'] ?? 587;
+            $smtpUser = $creds['username'] ?? null;
+            $smtpPass = $creds['password'] ?? null;
+            $smtpEncryption = $creds['encryption'] ?? 'tls';
+            
+            $fromAddress = $meta['from_address'] ?? config('mail.from.address');
+            $fromName = $meta['from_name'] ?? config('mail.from.name');
+        } else {
+            // 2. Fallback to Legacy
+            $smtpConfig = $user->smtpConfig;
+            if ($smtpConfig) {
+                $smtpHost = $smtpConfig->host;
+                $smtpPort = $smtpConfig->port;
+                $smtpUser = $smtpConfig->username;
+                $smtpPass = $smtpConfig->password;
+                $smtpEncryption = $smtpConfig->encryption;
+                $fromAddress = $smtpConfig->from_address;
+                $fromName = $smtpConfig->from_name;
+            }
         }
+
+        if (!$smtpHost || !$smtpUser || !$smtpPass) {
+             throw new \Exception("SMTP Configuration not found (Connector or Legacy).");
+        }
+
         $config = [
             'transport' => 'smtp',
-            'host' => $smtpConfig->host,
-            'port' => $smtpConfig->port,
-            'username' => $smtpConfig->username,
-            'password' => $smtpConfig->password,
-            'encryption' => $smtpConfig->encryption,
+            'host' => $smtpHost,
+            'port' => $smtpPort,
+            'username' => $smtpUser,
+            'password' => $smtpPass,
+            'encryption' => $smtpEncryption,
             'timeout' => null,
         ];
+        
         $factory = app('mail.manager');
         Config::set('mail.mailers.smtp_dynamic', $config);
-        Config::set('mail.from.address', $smtpConfig->from_address);
-        Config::set('mail.from.name', $smtpConfig->from_name);
+        Config::set('mail.from.address', $fromAddress);
+        Config::set('mail.from.name', $fromName);
         $mailer = $factory->mailer('smtp_dynamic');
         
         $to = $this->resolveToAddress($node, $payload, $user);
