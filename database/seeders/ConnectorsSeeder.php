@@ -66,6 +66,153 @@ class ConnectorsSeeder extends Seeder
             }
             $this->log("Connectors synced.");
 
+            // CRITICAL FIX: Explicitly define correct Product Trigger Data to override potential stale config
+            // This ensures that even if config/flow.php on the server is outdated, the DB gets the correct data.
+            $explicitTriggers = [
+                'products_update' => [
+                    'label' => 'Product Updated',
+                    'description' => 'Starts when a product is updated',
+                    'topic' => 'PRODUCTS_UPDATE',
+                    'category' => 'products',
+                    'icon' => 'Package',
+                    'variables' => [
+                        ['label' => 'Product Title', 'value' => 'product.title'],
+                        ['label' => 'Product ID', 'value' => 'product.id'],
+                        ['label' => 'Product Handle', 'value' => 'product.handle'],
+                        ['label' => 'Product Type', 'value' => 'product.product_type'],
+                        ['label' => 'Vendor', 'value' => 'product.vendor'],
+                        ['label' => 'Status', 'value' => 'product.status'],
+                        ['label' => 'Tags', 'value' => 'product.tags'],
+                    ]
+                ],
+                'products_create' => [
+                    'label' => 'Product Created',
+                    'description' => 'Starts when a product is created',
+                    'topic' => 'PRODUCTS_CREATE',
+                    'category' => 'products',
+                    'icon' => 'Package',
+                    'variables' => [
+                        ['label' => 'Product Title', 'value' => 'product.title'],
+                        ['label' => 'Product ID', 'value' => 'product.id'],
+                        ['label' => 'Product Handle', 'value' => 'product.handle'],
+                        ['label' => 'Product Type', 'value' => 'product.product_type'],
+                        ['label' => 'Vendor', 'value' => 'product.vendor'],
+                        ['label' => 'Status', 'value' => 'product.status'],
+                    ]
+                ],
+                'orders_updated' => [
+                    'label' => 'Order Updated',
+                    'description' => 'Starts when an order is updated',
+                    'topic' => 'ORDERS_UPDATED',
+                    'category' => 'orders',
+                    'icon' => 'ShoppingBag',
+                    'variables' => [] // Ensure no bleed from create
+                ],
+                'products_delete' => [
+                    'label' => 'Product Deleted',
+                    'description' => 'Starts when a product is removed',
+                    'topic' => 'PRODUCTS_DELETE',
+                    'category' => 'products',
+                    'icon' => 'Package',
+                    'variables' => []
+                ],
+                // FIXED: Customer Triggers
+                'customers_create' => [
+                    'label' => 'Customer Created',
+                    'description' => 'Starts when a customer is created',
+                    'topic' => 'CUSTOMERS_CREATE',
+                    'category' => 'customers',
+                    'icon' => 'Users',
+                    'variables' => [
+                        ['label' => 'First Name', 'value' => 'customer.first_name'],
+                        ['label' => 'Last Name', 'value' => 'customer.last_name'],
+                        ['label' => 'Email', 'value' => 'customer.email'],
+                        ['label' => 'Customer ID', 'value' => 'customer.id'],
+                        ['label' => 'Phone', 'value' => 'customer.phone'],
+                        ['label' => 'Total Spent', 'value' => 'customer.total_spent'],
+                        ['label' => 'Orders Count', 'value' => 'customer.orders_count'],
+                        ['label' => 'State', 'value' => 'customer.state'],
+                        ['label' => 'Tags', 'value' => 'customer.tags'],
+                    ]
+                ],
+                'customers_update' => [
+                    'label' => 'Customer Updated',
+                    'description' => 'Starts when a customer is updated',
+                    'topic' => 'CUSTOMERS_UPDATE',
+                    'category' => 'customers',
+                    'icon' => 'Users',
+                    'variables' => []
+                ],
+                'customers_delete' => [
+                    'label' => 'Customer Deleted',
+                    'description' => 'Starts when a customer is removed',
+                    'topic' => 'CUSTOMERS_DELETE',
+                    'category' => 'customers',
+                    'icon' => 'Users',
+                    'variables' => []
+                ]
+            ];
+
+            // Merge explicit triggers into the config triggers list
+            foreach ($explicitTriggers as $key => $data) {
+                // Find existing entry index
+                $found = false;
+                foreach ($triggers as $idx => $t) {
+                    if ($t['key'] === $key) {
+                        $triggers[$idx] = array_merge($t, $data); 
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    $data['key'] = $key;
+                    $data['app'] = 'shopify'; 
+                    $triggers[] = $data;
+                }
+            }
+
+            // B. Seed Triggers
+            $triggerCount = 0;
+            foreach ($triggers as $trigger) {
+                $appSlug = strtolower($trigger['app'] ?? 'shopify');
+                $connector = Connector::where('slug', $appSlug)->first();
+                
+                if (!$connector) {
+                    $this->log("Skipping trigger {$trigger['key']} - Connector $appSlug not found.", 'warn');
+                    continue;
+                }
+
+                $this->log("Seeding Trigger: {$trigger['key']} | Label: {$trigger['label']} | Desc: " . substr($trigger['description'] ?? 'N/A', 0, 30));
+
+                ConnectorTrigger::updateOrCreate(
+                    [
+                        'connector_id' => $connector->id,
+                        'key' => $trigger['key']
+                    ],
+                    [
+                        'label' => $trigger['label'],
+                        'description' => $trigger['description'] ?? null,
+                        'topic' => $trigger['topic'] ?? null,
+                        'type' => 'trigger',
+                        'category' => $trigger['category'] ?? 'general',
+                        'icon' => $trigger['icon'] ?? 'Zap',
+                        'variables' => $trigger['variables'] ?? [],
+                        'is_active' => true
+                    ]
+                );
+                $triggerCount++;
+            }
+            $this->log("Seeded $triggerCount triggers.");
+
+            // Verification Log
+            $this->log("--- VERIFICATION ---");
+            $verifyKeys = ['products_update', 'products_delete', 'customers_create', 'customers_delete'];
+            $results = ConnectorTrigger::whereIn('key', $verifyKeys)->get();
+            foreach($results as $r) {
+                 $this->log("DB Check [{$r->key}]: Label='{$r->label}', Desc='{$r->description}'");
+            }
+            $this->log("--------------------");
+
             // B. Seed Triggers
             $triggerCount = 0;
             foreach ($triggers as $trigger) {

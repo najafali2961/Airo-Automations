@@ -266,15 +266,49 @@ export default function WorkflowEditor({
     // When selectedNode changes, find the trigger in the LIVE flow to get variables
     const [availableVariables, setAvailableVariables] = useState([]);
     useEffect(() => {
-        // If we have a builderRef, use it to find the trigger.
-        // Otherwise fall back to initialNodes (DB state) if builder isn't ready.
-        const nodes = builderRef.current
-            ? builderRef.current.getFlow().nodes
-            : initialNodes;
+        if (!selectedNode) {
+            setAvailableVariables([]);
+            return;
+        }
 
-        const triggerNode = nodes.find((n) => n.type === "trigger");
+        const flow = builderRef.current
+            ? builderRef.current.getFlow()
+            : { nodes: initialNodes, edges: initialEdges || [] };
+        const { nodes, edges } = flow;
 
-        if (!triggerNode) {
+        // Traverse backwards to find the connected trigger
+        let currentId = selectedNode.id;
+        let connectedTrigger = null;
+
+        // If selected node is itself a trigger
+        if (selectedNode.type === "trigger") {
+            connectedTrigger = selectedNode;
+        } else {
+            // Simple Breadth-First/Path walking to find the root trigger
+            // For now, we assume a linear chain or simple tree upwards
+            const visited = new Set();
+            const queue = [currentId];
+
+            while (queue.length > 0) {
+                const id = queue.shift();
+                if (visited.has(id)) continue;
+                visited.add(id);
+
+                const node = nodes.find((n) => n.id === id);
+                if (node && node.type === "trigger") {
+                    connectedTrigger = node;
+                    break;
+                }
+
+                // Find edges where target is current id
+                const incomingEdges = edges.filter((e) => e.target === id);
+                for (const edge of incomingEdges) {
+                    queue.push(edge.source);
+                }
+            }
+        }
+
+        if (!connectedTrigger) {
             setAvailableVariables([]);
             return;
         }
@@ -283,8 +317,10 @@ export default function WorkflowEditor({
         for (const app of definitions.apps) {
             const t = app.triggers?.find(
                 (tr) =>
-                    tr.settings?.topic === triggerNode.data.settings?.topic ||
-                    tr.label === triggerNode.data.label
+                    (connectedTrigger.data.settings?.topic &&
+                        tr.settings?.topic ===
+                            connectedTrigger.data.settings?.topic) ||
+                    tr.label === connectedTrigger.data.label
             );
             if (t) {
                 setAvailableVariables(t.variables || []);

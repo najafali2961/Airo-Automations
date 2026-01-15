@@ -34,7 +34,9 @@ export default function ConfigPanel({
             if (node.type === "trigger") {
                 const trigger = app.triggers?.find(
                     (t) =>
-                        t.settings?.topic === settings.topic ||
+                        (settings.topic && t.topic === settings.topic) ||
+                        (settings.topic &&
+                            t.settings?.topic === settings.topic) ||
                         t.label === node.data.label
                 );
                 if (trigger) return trigger;
@@ -53,6 +55,24 @@ export default function ConfigPanel({
     useEffect(() => {
         setSettings(node.data.settings || {});
     }, [node]);
+
+    // Self-Healing Effect:
+    // If we matched a trigger definition (e.g. by label) but the node settings are missing the topic,
+    // auto-patch the settings to include the topic from the definition.
+    useEffect(() => {
+        if (
+            node.type === "trigger" &&
+            definition &&
+            definition.topic &&
+            !settings.topic
+        ) {
+            console.log(
+                "ConfigPanel: Auto-repairing missing topic",
+                definition.topic
+            );
+            updateSetting("topic", definition.topic);
+        }
+    }, [definition, settings.topic, node.type]);
 
     const updateSetting = (key, value) => {
         const newSettings = { ...settings, [key]: value };
@@ -336,7 +356,10 @@ function getAllTriggers(definitions) {
     const options = [{ label: "Select Event", value: "" }];
     definitions?.apps?.forEach((app) => {
         app.triggers?.forEach((t) => {
-            options.push({ label: t.label, value: t.settings.topic });
+            options.push({
+                label: t.label,
+                value: t.topic || t.settings?.topic,
+            });
         });
     });
     return options;

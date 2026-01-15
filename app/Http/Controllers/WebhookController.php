@@ -50,16 +50,24 @@ class WebhookController extends Controller
 
         // Query Flows: Active, Belongs to Shop, Has Trigger with matching topic
         // We check both the incoming topic and the normalized version
-        $flows = Flow::where('shop_id', $shop->id)
-            ->where('active', true)
-            ->whereHas('nodes', function ($query) use ($topic, $normalizedTopic) {
-                $query->where('type', 'trigger')
-                      ->where(function($q) use ($topic, $normalizedTopic) {
-                          $q->where('settings->topic', $topic)
-                            ->orWhere('settings->topic', $normalizedTopic);
-                      });
-            })
-            ->get();
+        // DEBUGGING: Fetch all flows and filter in PHP to see what's in DB
+        $allFlows = Flow::where('shop_id', $shop->id)->where('active', true)->with('nodes')->get();
+        Log::info("Found " . $allFlows->count() . " active flows for shop " . $shop->id);
+        
+        $flows = $allFlows->filter(function($flow) use ($topic, $normalizedTopic) {
+            $hasMatchingTrigger = false;
+            foreach ($flow->nodes as $node) {
+                if ($node->type === 'trigger') {
+                    $nodeTopic = $node->settings['topic'] ?? 'NULL';
+                    Log::info("Flow {$flow->id} Trigger Topic: " . json_encode($nodeTopic) . " (Expected: $topic or $normalizedTopic)");
+                    
+                    if ($nodeTopic === $topic || $nodeTopic === $normalizedTopic) {
+                        $hasMatchingTrigger = true;
+                    }
+                }
+            }
+            return $hasMatchingTrigger;
+        });
 
         if ($flows->isEmpty()) {
             Log::info("No active flows found for topic: $topic or $normalizedTopic");

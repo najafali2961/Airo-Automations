@@ -42,42 +42,103 @@ class GoogleService
         return $this->client->fetchAccessTokenWithAuthCode($code);
     }
 
-    public function getClient($user = null)
+    public function getClient($entity = null)
     {
-        /** @var \App\Models\User $user */
-        if (!$user) {
-            $user = Auth::user();
-        }
-        
-        if (!$user || !$user->google_access_token) {
-            throw new \Exception('User not connected to Google.');
+        if (!$entity) {
+            $entity = Auth::user();
         }
 
-        $this->client->setAccessToken($user->google_access_token);
+        if (!$entity) {
+            throw new \Exception('No user or connector provided for Google Client.');
+        }
 
-        if ($this->client->isAccessTokenExpired()) {
-            if ($user->google_refresh_token) {
-                $check = $this->client->fetchAccessTokenWithRefreshToken($user->google_refresh_token);
+        // Determine if we have a User or a UserConnector
+        $connector = null;
+        $user = null;
+
+        if ($entity instanceof \App\Models\UserConnector) {
+            $connector = $entity;
+            $user = $connector->user;
+        } elseif ($entity instanceof \App\Models\User) {
+            $user = $entity;
+            // Try to find the new connector first
+            $connector = $user->activeConnectors()->where('connector_slug', 'google')->first();
+        }
+
+        // 1. Try Connector Auth
+        if ($connector) {
+            $creds = $connector->credentials; // This is an array casted by model
+            $accessToken = $creds['access_token'] ?? null;
+            $refreshToken = $creds['refresh_token'] ?? null;
+            $expiresAt = $connector->expires_at; // Carbon or string
+
+            if (!$accessToken) {
+                // Check if maybe using legacy fields on connector? Unlikely if casted.
+                 throw new \Exception('Google Connector found but missing access_token.');
+            }
+
+            $this->client->setAccessToken($accessToken);
+
+            if ($this->client->isAccessTokenExpired()) {
+                if (!$refreshToken) {
+                     // Try to see if we can get a refresh token from somewhere else or if it's lost
+                     throw new \Exception('Google token expired and no refresh token available in connector.');
+                }
+
+                $check = $this->client->fetchAccessTokenWithRefreshToken($refreshToken);
                 
                 if (isset($check['error'])) {
-                     throw new \Exception('Error refreshing token: ' . json_encode($check));
+                     throw new \Exception('Error refreshing token (Connector): ' . json_encode($check));
                 }
 
                 if (!isset($check['access_token'])) {
-                    throw new \Exception('Failed to refresh token, response missing access_token. Response: ' . json_encode($check));
+                    throw new \Exception('Failed to refresh token (Connector), missing access_token. Resp: ' . json_encode($check));
                 }
+
+                // Update Connector
+                $creds['access_token'] = $check['access_token'];
+                $creds['expires_in'] = $check['expires_in'];
+                $creds['created'] = time(); // Google client expects this often
                 
-                // Update user token
-                $user->update([
-                    'google_access_token' => $check['access_token'],
-                    'google_token_expires_at' => now()->addSeconds($check['expires_in']),
-                ]);
-            } else {
-                 throw new \Exception('Google token expired and no refresh token available.');
+                $connector->credentials = $creds;
+                $connector->expires_at = now()->addSeconds($check['expires_in']);
+                $connector->save();
+                
+                // Update client with new token
+                $this->client->setAccessToken($check['access_token']);
             }
+
+            return $this->client;
         }
 
-        return $this->client;
+        // 2. Fallback: Legacy User Auth
+        if ($user && $user->google_access_token) {
+            $this->client->setAccessToken($user->google_access_token);
+
+            if ($this->client->isAccessTokenExpired()) {
+                if ($user->google_refresh_token) {
+                    $check = $this->client->fetchAccessTokenWithRefreshToken($user->google_refresh_token);
+                    
+                    if (isset($check['error'])) {
+                         throw new \Exception('Error refreshing token (Legacy): ' . json_encode($check));
+                    }
+
+                    if (!isset($check['access_token'])) {
+                        throw new \Exception('Failed to refresh token (Legacy).');
+                    }
+                    
+                    $user->update([
+                        'google_access_token' => $check['access_token'],
+                        'google_token_expires_at' => now()->addSeconds($check['expires_in']),
+                    ]);
+                } else {
+                     throw new \Exception('Google token expired (Legacy) and no refresh token.');
+                }
+            }
+            return $this->client;
+        }
+
+        throw new \Exception('User not connected to Google (No Connector or Legacy Token found).');
     }
     public function getFiles($user = null, $mimeType = null)
     {

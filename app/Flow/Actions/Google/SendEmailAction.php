@@ -57,17 +57,17 @@ class SendEmailAction extends BaseAction
             $flowUser = $execution->flow->user;
             
             if (!$flowUser) {
+                // Resilience: Manual find
                 $shopId = $execution->flow->shop_id;
-                $this->log($execution, $node->id, 'warning', 'Relation failed. Trying direct User::find(' . $shopId . ')');
                 $flowUser = \App\Models\User::find($shopId);
+                
+                if (!$flowUser) {
+                     $this->log($execution, $node->id, 'error', 'User not found for Google Action. Shop ID: ' . $shopId);
+                     throw new \Exception("User not found.");
+                }
             }
 
-            if (!$flowUser) {
-                $this->log($execution, $node->id, 'error', 'User not found even with direct find. Shop ID: ' . $execution->flow->shop_id);
-            } else {
-                 $this->log($execution, $node->id, 'info', 'User found (' . ($execution->flow->user ? 'relation' : 'direct') . '). ID: ' . $flowUser->id . ' | Token: ' . ($flowUser->google_access_token ? 'YES' : 'NO'));
-            }
-
+            // Trust the service to handle UserConnector vs Legacy
             $client = $this->googleService->getClient($flowUser);
             $service = new Gmail($client);
 

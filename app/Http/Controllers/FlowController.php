@@ -43,6 +43,7 @@ class FlowController extends Controller
              
              // Map Triggers
              $triggers = $connector->triggers->map(function($t) use ($connector) {
+                 \Log::info("FlowController Mapped: {$t->key} Topic: " . ($t->topic ?? 'NULL'));
                  return [
                      'type' => 'trigger',
                      'id' => $t->key,

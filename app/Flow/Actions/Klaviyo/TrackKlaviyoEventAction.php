@@ -27,8 +27,8 @@ class TrackKlaviyoEventAction extends BaseAction
         try {
             $user = $execution->flow->user;
             
-            if (!$user || !$user->klaviyoCredential) {
-                $this->log($execution, $node->id, 'error', 'User not connected to Klaviyo.');
+            if (!$user) {
+                $this->log($execution, $node->id, 'error', 'User context missing.');
                 return;
             }
 
@@ -79,7 +79,7 @@ class TrackKlaviyoEventAction extends BaseAction
             $profileProperties = ['email' => $email];
 
             $response = $this->klaviyoService->trackEvent(
-                $user->klaviyoCredential, 
+                $user, 
                 $eventName, 
                 $profileProperties, 
                 $properties

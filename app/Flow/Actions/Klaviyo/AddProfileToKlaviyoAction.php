@@ -27,8 +27,8 @@ class AddProfileToKlaviyoAction extends BaseAction
         try {
             $user = $execution->flow->user;
             
-            if (!$user || !$user->klaviyoCredential) {
-                $this->log($execution, $node->id, 'error', 'User not connected to Klaviyo.');
+            if (!$user) {
+                $this->log($execution, $node->id, 'error', 'User context missing.');
                 return;
             }
 
@@ -66,8 +66,8 @@ class AddProfileToKlaviyoAction extends BaseAction
                 ]
             ];
 
-            // Get Client (handles token refresh)
-            $client = $this->klaviyoService->getClient($user->klaviyoCredential);
+            // Get Client (handles token refresh & UserConnector resolution)
+            $client = $this->klaviyoService->getClient($user);
             
             $response = $client->post('/api/profiles', $body);
 

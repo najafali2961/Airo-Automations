@@ -387,6 +387,9 @@ const InnerBuilder = ({
             const appName = event.dataTransfer.getData(
                 "application/reactflow/appName"
             );
+            const description = event.dataTransfer.getData(
+                "application/reactflow/description"
+            );
             const defaultsStr = event.dataTransfer.getData(
                 "application/reactflow/defaults"
             );
@@ -413,6 +416,7 @@ const InnerBuilder = ({
                 data: {
                     label: label,
                     appName: appName,
+                    description: description,
                     settings: defaults,
                     onDelete: () => handleDeleteNode(newNodeId),
                 },

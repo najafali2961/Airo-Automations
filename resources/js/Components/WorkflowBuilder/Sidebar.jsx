@@ -166,6 +166,23 @@ export default function Sidebar({ definitions, connectors, onNodeClick }) {
             "application/reactflow/appName",
             node.category || node.name
         ); // Pass app name
+        event.dataTransfer.setData(
+            "application/reactflow/description",
+            node.description || ""
+        );
+
+        // Pass defaults (e.g. topic for triggers)
+        const defaults = {};
+        if (node.topic) {
+            defaults.topic = node.topic;
+        } else if (node.settings) {
+            Object.assign(defaults, node.settings);
+        }
+
+        event.dataTransfer.setData(
+            "application/reactflow/defaults",
+            JSON.stringify(defaults)
+        );
 
         event.dataTransfer.effectAllowed = "move";
     };

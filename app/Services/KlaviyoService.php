@@ -110,23 +110,53 @@ class KlaviyoService
         return $data['access_token'];
     }
 
-    public function getClient(UserConnector $connector)
+    public function getClient($entity = null)
     {
+        $connector = null;
+
+        // 1. Resolve Entity to Connector
+        if ($entity instanceof \App\Models\UserConnector) {
+            $connector = $entity;
+        } elseif ($entity instanceof \App\Models\User) {
+            $connector = $entity->activeConnectors()->where('connector_slug', 'klaviyo')->first();
+            // Legacy fallback? KlaviyoService was rewritten for OAuth, legacy might not be compatible.
+            // If legacy used API Keys, this service (OAuth) won't work anyway.
+            // We assume UserConnector is the way forward.
+        } elseif (!$entity && \Illuminate\Support\Facades\Auth::check()) {
+            $user = \Illuminate\Support\Facades\Auth::user();
+            $connector = $user->activeConnectors()->where('connector_slug', 'klaviyo')->first();
+        }
+
+        if (!$connector) {
+            // Check for legacy credential object (if passed directly as object from old controller)
+            if (is_object($entity) && isset($entity->access_token)) {
+                 // It's a legacy credential object, treat as such?
+                 // But refresh logic relies on UserConnector model updates.
+                 // We'll support it for read-only if valid, but warn.
+                 return Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $entity->access_token,
+                    'Revision' => '2024-02-15',
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ])->baseUrl($this->baseUrl);
+            }
+            throw new \Exception("Klaviyo Not Connected (No Connector Found).");
+        }
+
+        // 2. Refresh Logic
         if ($connector->expires_at && $connector->expires_at->isPast()) {
-            // This updates the model in DB automatically
             $newToken = $this->refreshAccessToken($connector);
-            // Refresh model instance data if needed, but array update above handles specific keys
-            // The connector instance's 'credentials' attribute might need reloading if encrypted casting behaves weirdly with partial updates?
-            // Actually, array_merge with update() is safe. PHP object in memory might be stale?
-            // Let's assume we use the returned token here if refreshed.
+            // $connector is updated by refreshAccessToken
         }
         
-        // Use fresh token from memory defaults or just refreshed one? 
-        // Simplest is to grab from credentials. If refreshed, we updated DB, but $connector->credentials (array) might need manual update in memory?
-        // Let's assume standard Eloquent behavior: update() syncs attributes.
+        $accessToken = $connector->credentials['access_token'] ?? null;
         
+        if (!$accessToken) {
+             throw new \Exception("Klaviyo Connector found but missing access_token.");
+        }
+
         return Http::withHeaders([
-            'Authorization' => 'Bearer ' . $connector->credentials['access_token'],
+            'Authorization' => 'Bearer ' . $accessToken,
             'Revision' => '2024-02-15',
             'Content-Type' => 'application/json',
             'Accept' => 'application/json'

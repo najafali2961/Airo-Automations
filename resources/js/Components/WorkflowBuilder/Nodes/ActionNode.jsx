@@ -20,9 +20,10 @@ export default memo(({ data, selected }) => {
                 validationMessage={data.validationMessage}
                 onDelete={data.onDelete}
                 subtext={
-                    data.settings?.action
+                    data.description ||
+                    (data.settings?.action
                         ? `Action: ${data.settings.action}`
-                        : "Select action..."
+                        : "Select action...")
                 }
             />
 

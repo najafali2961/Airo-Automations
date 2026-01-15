@@ -27,8 +27,8 @@ class AddToKlaviyoListAction extends BaseAction
         try {
             $user = $execution->flow->user;
             
-            if (!$user || !$user->klaviyoCredential) {
-                $this->log($execution, $node->id, 'error', 'User not connected to Klaviyo.');
+            if (!$user) {
+                $this->log($execution, $node->id, 'error', 'User context missing.');
                 return;
             }
 
@@ -55,7 +55,8 @@ class AddToKlaviyoListAction extends BaseAction
             }
 
             // 1. Get Profile ID (Create/Update if needs be)
-            $profileId = $this->klaviyoService->getProfileIdByEmail($user->klaviyoCredential, $email);
+            // Service handles User -> Connector resolution
+            $profileId = $this->klaviyoService->getProfileIdByEmail($user, $email);
 
             if (!$profileId) {
                 $this->log($execution, $node->id, 'error', "Could not find or create Klaviyo profile for email: $email");
@@ -63,7 +64,7 @@ class AddToKlaviyoListAction extends BaseAction
             }
 
             // 2. Add to List
-            $response = $this->klaviyoService->addProfileToList($user->klaviyoCredential, $listId, $profileId);
+            $response = $this->klaviyoService->addProfileToList($user, $listId, $profileId);
 
             if ($response->successful()) {
                 $this->log($execution, $node->id, 'info', "Added $email (ID: $profileId) to List $listId successfully.");

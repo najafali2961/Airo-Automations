@@ -40,16 +40,24 @@ class SendSlackMessageAction implements ActionInterface
              throw new \Exception("User not found for execution context.");
         }
 
-        $credential = $user->slackCredential;
-
-        if (!$credential || !$credential->access_token) {
-             throw new \Exception("Slack Credentials not found. Please connect Slack in Connectors.");
+        // 1. Resolve Auth & Default Channel
+        $connector = $user->activeConnectors()->where('connector_slug', 'slack')->first();
+        $defaultChannel = $connector->meta['default_channel_id'] ?? null;
+        
+        // Fallback to legacy
+        if (!$connector) {
+             $credential = $user->slackCredential;
+             if ($credential) {
+                  $defaultChannel = $credential->channel_id;
+             }
         }
+        
+        // Check if we have minimal auth requirement (Connector OR Legacy Credential)
+        // Note: We don't throw here strictly for auth, we let the Service throw if it can't resolve a token from $user.
+        // But for channel logic, we need to know.
 
         $settings = $node->settings ?? [];
-        
-        // Default to the channel chosen during OAuth if available
-        $channel = $settings['channel'] ?? $credential->channel_id;
+        $channel = $settings['channel'] ?? $defaultChannel;
         $rawMessage = $settings['message'] ?? '';
         
         if (empty($channel)) {
@@ -63,8 +71,9 @@ class SendSlackMessageAction implements ActionInterface
         $message = $this->variableService->replace($rawMessage, $payload);
 
         try {
+            // Pass $user to Service, it handles UserConnector vs Legacy resolution
             $this->slackService->sendMessage(
-                $credential->access_token,
+                $user,
                 $channel,
                 $message
             );

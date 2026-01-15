@@ -51,12 +51,8 @@ class IntegrationResourceController extends Controller
     protected function handleSlack($user, $resource)
     {
         if ($resource === 'channels') {
-            $credential = $user->slackCredential;
-            if (!$credential || !$credential->access_token) {
-                return response()->json(['error' => 'Slack not connected'], 400);
-            }
-
-            $channels = $this->slack->getChannels($credential->access_token);
+            // Service handles resolution
+            $channels = $this->slack->getChannels($user);
             
             return collect($channels)->map(function ($channel) {
                 return [
@@ -72,13 +68,8 @@ class IntegrationResourceController extends Controller
     protected function handleKlaviyo($user, $resource)
     {
         if ($resource === 'lists') {
-            $credential = $user->klaviyoCredential;
-            if (!$credential) {
-                return response()->json(['error' => 'Klaviyo not connected'], 400);
-            }
-
-            // getLists returns a generic HTTP response, we need to decode it
-            $response = $this->klaviyo->getLists($credential);
+            // Service handles resolution
+            $response = $this->klaviyo->getLists($user);
             
             if (!$response->successful()) {
                 throw new \Exception('Failed to fetch from Klaviyo: ' . $response->body());
@@ -100,10 +91,9 @@ class IntegrationResourceController extends Controller
 
     protected function handleGoogle($user, $resource)
     {
-        // Check if connected (basic check, service handles details)
-        if (!$user->google_access_token) {
-            return response()->json(['error' => 'Google not connected'], 400);
-        }
+        // Check if connected (Delegated to Service which handles UserConnector vs Legacy)
+        // if (!$user->google_access_token) { ... } REMOVED
+
 
         if ($resource === 'drive_folders') {
             $files = $this->google->getFiles($user, 'folder');
