@@ -26,7 +26,7 @@ class FlowController extends Controller
          if ($id && !$flow) abort(404);
 
          // Load from new flow.php config
-         $flowConfig = config('flow');
+         $flowConfig = config('flow') ?? ['triggers' => [], 'actions' => []];
 
          $shopifyTriggers = [];
          foreach ($flowConfig['triggers'] as $trigger) {
@@ -101,10 +101,13 @@ class FlowController extends Controller
 
          // Fetch Connector Status for Validation
          $user = auth()->user();
+         $activeSlugs = $user->activeConnectors()->pluck('connector_slug')->toArray();
+         
          $connectors = [
-             'google' => !empty($user->google_access_token), // Check column directly
-             'slack' => $user->slackCredential()->whereNotNull('access_token')->exists(),
-             'smtp' => $user->smtpConfig()->exists(),
+             'google' => in_array('google', $activeSlugs),
+             'slack' => in_array('slack', $activeSlugs),
+             'smtp' => in_array('smtp', $activeSlugs),
+             'klaviyo' => in_array('klaviyo', $activeSlugs),
          ];
 
          return Inertia::render('Workflows/Editor', [

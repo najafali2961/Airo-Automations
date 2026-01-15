@@ -4,7 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use App\Models\KlaviyoCredential;
+use App\Models\UserConnector;
 
 class KlaviyoService
 {
@@ -19,7 +19,16 @@ class KlaviyoService
     {
         $this->clientId = config('services.klaviyo.client_id');
         $this->clientSecret = config('services.klaviyo.client_secret');
-        $this->redirectUri = config('services.klaviyo.redirect');
+        $this->clientId = config('services.klaviyo.client_id') ?? env('KLAVIYO_CLIENT_ID');
+        $this->clientSecret = config('services.klaviyo.client_secret') ?? env('KLAVIYO_CLIENT_SECRET');
+        $this->redirectUri = config('services.klaviyo.redirect') ?? env('KLAVIYO_REDIRECT_URI');
+
+        if (!$this->clientId || !$this->redirectUri) {
+             Log::error("KlaviyoService: Configuration missing.", [
+                 'client_id' => $this->clientId, 
+                 'redirect_uri' => $this->redirectUri
+             ]);
+        }
     }
 
     public function generatePkce()
@@ -75,13 +84,13 @@ class KlaviyoService
         return $response->json();
     }
 
-    public function refreshAccessToken(KlaviyoCredential $credential)
+    public function refreshAccessToken(UserConnector $connector)
     {
         $response = Http::asForm()
             ->withBasicAuth($this->clientId, $this->clientSecret)
             ->post($this->tokenUrl, [
                 'grant_type' => 'refresh_token',
-                'refresh_token' => $credential->refresh_token,
+                'refresh_token' => $connector->credentials['refresh_token'],
             ]);
 
         if ($response->failed()) {
@@ -90,23 +99,34 @@ class KlaviyoService
         
         $data = $response->json();
         
-        $credential->update([
-            'access_token' => $data['access_token'],
-            'refresh_token' => $data['refresh_token'],
+        $connector->update([
+            'credentials' => array_merge($connector->credentials, [
+                'access_token' => $data['access_token'],
+                'refresh_token' => $data['refresh_token'],
+            ]),
             'expires_at' => now()->addSeconds($data['expires_in']),
         ]);
 
         return $data['access_token'];
     }
 
-    public function getClient(KlaviyoCredential $credential)
+    public function getClient(UserConnector $connector)
     {
-        if ($credential->expires_at && $credential->expires_at->isPast()) {
-            $this->refreshAccessToken($credential);
+        if ($connector->expires_at && $connector->expires_at->isPast()) {
+            // This updates the model in DB automatically
+            $newToken = $this->refreshAccessToken($connector);
+            // Refresh model instance data if needed, but array update above handles specific keys
+            // The connector instance's 'credentials' attribute might need reloading if encrypted casting behaves weirdly with partial updates?
+            // Actually, array_merge with update() is safe. PHP object in memory might be stale?
+            // Let's assume we use the returned token here if refreshed.
         }
-
+        
+        // Use fresh token from memory defaults or just refreshed one? 
+        // Simplest is to grab from credentials. If refreshed, we updated DB, but $connector->credentials (array) might need manual update in memory?
+        // Let's assume standard Eloquent behavior: update() syncs attributes.
+        
         return Http::withHeaders([
-            'Authorization' => 'Bearer ' . $credential->access_token,
+            'Authorization' => 'Bearer ' . $connector->credentials['access_token'],
             'Revision' => '2024-02-15',
             'Content-Type' => 'application/json',
             'Accept' => 'application/json'

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use App\Models\SlackCredential;
+// use App\Models\SlackCredential; // Removed legacy import
 
 class SlackController extends Controller
 {
@@ -55,7 +55,13 @@ class SlackController extends Controller
 
             $scopes = 'chat:write,chat:write.public,channels:read,groups:read';
             $redirectUri = config('services.slack.redirect');
-            $clientId = config('services.slack.client_id');
+            $redirectUri = config('services.slack.redirect') ?? env('SLACK_REDIRECT_URI');
+            $clientId = config('services.slack.client_id') ?? env('SLACK_CLIENT_ID');
+
+            if (!$clientId) {
+                \Log::error("SlackAuth: Client ID missing from config and env.");
+                return view('auth.popup-close', ['error' => 'Slack Configuration Error: Missing Client ID']);
+            }
             
             $url = "https://slack.com/oauth/v2/authorize?client_id={$clientId}&scope={$scopes}&redirect_uri={$redirectUri}&state={$state}";
             
@@ -95,11 +101,20 @@ class SlackController extends Controller
                  Auth::login($user);
             }
 
+            $clientId = config('services.slack.client_id') ?? env('SLACK_CLIENT_ID');
+            $clientSecret = config('services.slack.client_secret') ?? env('SLACK_CLIENT_SECRET');
+            $redirectUri = config('services.slack.redirect') ?? env('SLACK_REDIRECT_URI');
+
+            Log::info("SlackAuth: Exchanging code for token.", [
+                'client_id_prefix' => substr($clientId, 0, 5) . '...',
+                'redirect_uri' => $redirectUri
+            ]);
+
             $response = Http::asForm()->post('https://slack.com/api/oauth.v2.access', [
-                'client_id' => config('services.slack.client_id'),
-                'client_secret' => config('services.slack.client_secret'),
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
                 'code' => $code,
-                'redirect_uri' => config('services.slack.redirect'),
+                'redirect_uri' => $redirectUri,
             ]);
 
             $data = $response->json();
@@ -109,14 +124,21 @@ class SlackController extends Controller
                 return redirect()->route('home')->with('error', 'Failed to connect to Slack: ' . ($data['error'] ?? 'Unknown error'));
             }
 
-            SlackCredential::updateOrCreate(
-                ['user_id' => $user->id],
+            $user->activeConnectors()->updateOrCreate(
+                ['connector_slug' => 'slack'],
                 [
-                    'access_token' => $data['access_token'],
-                    'team_id' => $data['team']['id'],
-                    'team_name' => $data['team']['name'],
-                    'channel_id' => $data['incoming_webhook']['channel_id'] ?? null,
-                    'refresh_token' => null,
+                    'is_active' => true,
+                    'credentials' => [
+                        'access_token' => $data['access_token'],
+                        'team_id' => $data['team']['id'],
+                        'team_name' => $data['team']['name'],
+                        'channel_id' => $data['incoming_webhook']['channel_id'] ?? null,
+                        'refresh_token' => null,
+                        'bot_user_id' => $data['bot_user_id'] ?? null
+                    ],
+                    'meta' => [
+                        'scope' => $data['scope'] ?? null,
+                    ]
                 ]
             );
 
@@ -136,7 +158,7 @@ class SlackController extends Controller
             // Optionally call Slack's auth.revoke API if you want to invalidate the token on their side too
             // but for now, just removing from our DB is enough to force re-auth flow.
             
-            SlackCredential::where('user_id', $user->id)->delete();
+            $user->activeConnectors()->where('connector_slug', 'slack')->delete();
             
             return redirect()->back()->with('success', 'Slack account disconnected.');
         } catch (\Exception $e) {

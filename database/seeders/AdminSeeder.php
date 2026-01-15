@@ -17,7 +17,7 @@ class AdminSeeder extends Seeder
             ['email' => 'admin@airoapps.com'],
             [
                 'name' => 'Super Admin',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('1234'),
             ]
         );
     }

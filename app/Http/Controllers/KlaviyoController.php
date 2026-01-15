@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use App\Models\KlaviyoCredential;
+// use App\Models\KlaviyoCredential; // Removed legacy import
 use App\Services\KlaviyoService;
 
 class KlaviyoController extends Controller
@@ -125,11 +125,15 @@ class KlaviyoController extends Controller
             // We might need to make a "Me" call to get the Account ID (Public Key).
             // For now, let's just store the tokens.
 
-            KlaviyoCredential::updateOrCreate(
-                ['user_id' => $user->id],
+            $user->activeConnectors()->updateOrCreate(
+                ['connector_slug' => 'klaviyo'],
                 [
-                    'access_token' => $data['access_token'],
-                    'refresh_token' => $data['refresh_token'],
+                    'is_active' => true,
+                    'credentials' => [
+                        'access_token' => $data['access_token'],
+                        'refresh_token' => $data['refresh_token'],
+                        'public_key' => $data['public_key'] ?? null, 
+                    ],
                     'expires_at' => now()->addSeconds($data['expires_in']),
                 ]
             );
@@ -149,7 +153,7 @@ class KlaviyoController extends Controller
     {
         try {
             $user = Auth::user();
-            KlaviyoCredential::where('user_id', $user->id)->delete();
+            $user->activeConnectors()->where('connector_slug', 'klaviyo')->delete();
             return redirect()->back()->with('success', 'Klaviyo disconnected successfully.');
         } catch (\Exception $e) {
             Log::error('Klaviyo Disconnect Error: ' . $e->getMessage());

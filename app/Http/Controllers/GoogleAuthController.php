@@ -20,11 +20,13 @@ class GoogleAuthController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         if ($user) {
-            $user->update([
-                'google_access_token' => null,
-                'google_refresh_token' => null,
-                'google_token_expires_at' => null,
+        if ($user) {
+            $user->activeConnectors()->where('connector_slug', 'google')->update([
+                'is_active' => false,
+                'credentials' => null,
+                'expires_at' => null,
             ]);
+        }
         }
 
         return redirect()->back()->with('success', 'Google account disconnected.');
@@ -125,11 +127,28 @@ class GoogleAuthController extends Controller
             
             \Log::info("GoogleAuth: Token fetched successfully for user {$user->id}. Saving to DB.");
 
-            $user->update([
-                'google_access_token' => $token['access_token'],
-                'google_refresh_token' => $token['refresh_token'] ?? $user->google_refresh_token,
-                'google_token_expires_at' => now()->addSeconds($token['expires_in']),
-            ]);
+            $user->activeConnectors()->updateOrCreate(
+                ['connector_slug' => 'google'],
+                [
+                    'is_active' => true,
+                    'credentials' => [
+                        'access_token' => $token['access_token'],
+                        'refresh_token' => $token['refresh_token'] ?? $user->activeConnectors()->where('connector_slug', 'google')->value('credentials')['refresh_token'] ?? null,
+                    ],
+                    'expires_at' => now()->addSeconds($token['expires_in']),
+                ]
+            );
+
+            // Backwards compatibility: Keep writing to user table for now?? 
+            // Better to remove it to force usage of new table. 
+            // But let's nullify the old columns to avoid confusion? 
+            // Actually, keep them in sync if we want a safe rollout, but user asked for "Universal System".
+            // Let's stick to modifying the UserConnector only.
+            
+            // $user->update([
+            //    'google_access_token' => $token['access_token'],
+            //    ...
+            // ]);
             
             \Log::info("GoogleAuth: User updated. Returning to popup close view.");
             

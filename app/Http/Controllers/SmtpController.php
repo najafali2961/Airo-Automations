@@ -26,16 +26,21 @@ class SmtpController extends Controller
         $user = Auth::user();
 
         // Update or Create
-        $config = $user->smtpConfig()->updateOrCreate(
-            ['user_id' => $user->id],
+        $user->activeConnectors()->updateOrCreate(
+            ['connector_slug' => 'smtp'],
             [
-                'host' => $request->host,
-                'port' => $request->port,
-                'username' => $request->username,
-                'password' => $request->password, // Model will encrypt automatically
-                'encryption' => $request->encryption,
-                'from_address' => $request->from_address,
-                'from_name' => $request->from_name,
+                'is_active' => true,
+                'credentials' => [
+                    'host' => $request->host,
+                    'port' => $request->port,
+                    'username' => $request->username,
+                    'password' => $request->password, // Model will encrypt automatically
+                    'encryption' => $request->encryption,
+                ],
+                'meta' => [
+                    'from_address' => $request->from_address,
+                    'from_name' => $request->from_name,
+                ]
             ]
         );
 
@@ -48,11 +53,8 @@ class SmtpController extends Controller
     public function disconnect()
     {
         $user = Auth::user();
+        $user->activeConnectors()->where('connector_slug', 'smtp')->delete();
         
-        if ($user->smtpConfig) {
-            $user->smtpConfig->delete();
-        }
-
         return redirect()->back()->with('success', 'SMTP disconnected successfully.');
     }
     
@@ -61,15 +63,16 @@ class SmtpController extends Controller
      */
      public function show()
      {
-         $config = Auth::user()->smtpConfig;
-         if ($config) {
+         $connector = Auth::user()->activeConnectors()->where('connector_slug', 'smtp')->first();
+         
+         if ($connector && $connector->credentials) {
              return response()->json([
-                 'host' => $config->host,
-                 'port' => $config->port,
-                 'username' => $config->username,
-                 'encryption' => $config->encryption,
-                 'from_address' => $config->from_address,
-                 'from_name' => $config->from_name,
+                 'host' => $connector->credentials['host'] ?? '',
+                 'port' => $connector->credentials['port'] ?? '',
+                 'username' => $connector->credentials['username'] ?? '',
+                 'encryption' => $connector->credentials['encryption'] ?? '',
+                 'from_address' => $connector->meta['from_address'] ?? '',
+                 'from_name' => $connector->meta['from_name'] ?? '',
                  // Never return password
              ]);
          }

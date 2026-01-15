@@ -61,7 +61,12 @@ class AppUninstalledJob implements ShouldQueue
         $this->shopDomain = ShopDomain::fromNative($this->shopDomain);
         $shop = User::where('name', $this->shopDomain->toNative())->first();
         if ($shop) {
-            
+            // 1. Delete all Flows (Cascades to Nodes, Edges, Executions via DB foreign keys)
+            // Note: Flows table does not have a constrained foreign key to 'users', so we delete manually.
+            $shop->flows()->delete();
+
+            // 2. Delete User (Cascades to UserConnectors via DB foreign keys)
+            $shop->delete();
         }
         $shop = $shopQuery->getByDomain($this->shopDomain);
         $shopId = $shop->getId();

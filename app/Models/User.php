@@ -28,9 +28,6 @@ class User extends Authenticatable implements IShopModel
         'credits',
         'credits_used',
         'credits_reset_at',
-        'google_access_token',
-        'google_refresh_token',
-        'google_token_expires_at',
     ];
 
     /**
@@ -53,7 +50,6 @@ class User extends Authenticatable implements IShopModel
         'credits_used' => 'integer',
         'credits_reset_at' => 'datetime',
         'shopify_freemium' => 'boolean',
-        'google_token_expires_at' => 'datetime',
     ];
 
 
@@ -115,26 +111,10 @@ class User extends Authenticatable implements IShopModel
     }
 
     /**
-     * Get SMTP Configuration
+     * Get all active connectors for this user
      */
-    public function smtpConfig()
+    public function activeConnectors()
     {
-        return $this->hasOne(SmtpConfig::class);
-    }
-
-    /**
-     * Get Slack Credentials
-     */
-    public function slackCredential()
-    {
-        return $this->hasOne(SlackCredential::class);
-    }
-
-    /**
-     * Get Klaviyo Credentials
-     */
-    public function klaviyoCredential()
-    {
-        return $this->hasOne(KlaviyoCredential::class);
+        return $this->hasMany(UserConnector::class)->where('is_active', true);
     }
 }
