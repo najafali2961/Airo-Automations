@@ -111,6 +111,14 @@ class User extends Authenticatable implements IShopModel
     }
 
     /**
+     * Get all connectors (active or inactive)
+     */
+    public function connectors()
+    {
+        return $this->hasMany(UserConnector::class);
+    }
+
+    /**
      * Get all active connectors for this user
      */
     public function activeConnectors()

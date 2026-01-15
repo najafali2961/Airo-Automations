@@ -127,13 +127,15 @@ class GoogleAuthController extends Controller
             
             \Log::info("GoogleAuth: Token fetched successfully for user {$user->id}. Saving to DB.");
 
-            $user->activeConnectors()->updateOrCreate(
+            $user->connectors()->updateOrCreate(
                 ['connector_slug' => 'google'],
                 [
                     'is_active' => true,
                     'credentials' => [
                         'access_token' => $token['access_token'],
-                        'refresh_token' => $token['refresh_token'] ?? $user->activeConnectors()->where('connector_slug', 'google')->value('credentials')['refresh_token'] ?? null,
+                        // If refreshing, we might need old refresh token if new one not provided?
+                        // Google usually provides refresh token only on first consent or forced prompt.
+                        'refresh_token' => $token['refresh_token'] ?? $user->connectors()->where('connector_slug', 'google')->value('credentials')['refresh_token'] ?? null,
                     ],
                     'expires_at' => now()->addSeconds($token['expires_in']),
                 ]

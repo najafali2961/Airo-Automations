@@ -125,7 +125,7 @@ class KlaviyoController extends Controller
             // We might need to make a "Me" call to get the Account ID (Public Key).
             // For now, let's just store the tokens.
 
-            $user->activeConnectors()->updateOrCreate(
+            $user->connectors()->updateOrCreate(
                 ['connector_slug' => 'klaviyo'],
                 [
                     'is_active' => true,

@@ -20,7 +20,7 @@ class SendSmtpEmailAction implements ActionInterface
     public function handle(Node $node, array $payload, Execution $execution): void
     {
         Log::info("[SmtpAction_v2.5] Handling SMTP Action...");
-        Log::info("--- START SMTP ACTION (VERSION 5.3 - GLOBAL VARS) ---");
+        Log::info("--- START SMTP ACTION (VERSION 5.4 - FIX VARS) ---");
         // ... (Keep existing user retrieval logic) ...
         $user = $execution->flow->user;
         
@@ -106,13 +106,14 @@ class SendSmtpEmailAction implements ActionInterface
         $subject = $this->variableService->replace($rawSubject, $payload);
         $body = $this->variableService->replace($rawBody, $payload);
         try {
-             $mailer->send([], [], function ($message) use ($to, $subject, $body, $smtpConfig) {
+             // FIX: Pass explicit variables instead of undefined $smtpConfig
+             $mailer->send([], [], function ($message) use ($to, $subject, $body, $fromAddress, $fromName) {
                 $message->to($to)
                         ->subject($subject)
-                        ->from($smtpConfig->from_address, $smtpConfig->from_name)
+                        ->from($fromAddress, $fromName)
                         ->html($body);
             });
-            Log::info("SMTP Email sent to $to via " . $smtpConfig->host);
+            Log::info("SMTP Email sent to $to via " . $smtpHost);
         } catch (\Exception $e) {
             Log::error("SMTP Error: " . $e->getMessage());
             throw $e;

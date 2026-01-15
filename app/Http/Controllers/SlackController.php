@@ -124,7 +124,7 @@ class SlackController extends Controller
                 return redirect()->route('home')->with('error', 'Failed to connect to Slack: ' . ($data['error'] ?? 'Unknown error'));
             }
 
-            $user->activeConnectors()->updateOrCreate(
+            $user->connectors()->updateOrCreate(
                 ['connector_slug' => 'slack'],
                 [
                     'is_active' => true,
