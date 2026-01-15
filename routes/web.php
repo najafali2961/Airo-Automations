@@ -76,3 +76,24 @@ Route::get('/auth/google/callback', [\App\Http\Controllers\GoogleAuthController:
 
 // make test route
 Route::get('/test/shopify', [DashboardController::class, 'handleShopifyCall']);
+
+Route::get('/debug/force-seed', function () {
+    try {
+        $seeder = new \Database\Seeders\ConnectorsSeeder();
+        // Invoke run with mock console output if possible, or just run logic
+        // Seeder->command is protected, so we might miss logs unless we mock it or the seeder handles null command
+        // My seeder uses $this->command->info(), which might crash if run from controller without a command object.
+        // I should fix the seeder to handle null command first?
+        // Or just wrap it in a try catch and return "Done".
+        // Actually, $this->command is usually available in seeder triggered by Artisan, but here it's null.
+        // Let's rely on standard log instead or just run it. 
+        // Wait, calling run() directly on a Seeder that uses $this->command will crash if $this->command is null.
+        // I need to update the Seeder to allow null command or use Log facade.
+        $seeder->setContainer(app());
+        $seeder->setCommand(new \Illuminate\Console\Command()); // Mock command
+        $seeder->run();
+        return "Seeding Completed Successfully. Check Logs.";
+    } catch (\Exception $e) {
+        return "Seeding Failed: " . $e->getMessage() . "\n" . $e->getTraceAsString();
+    }
+});

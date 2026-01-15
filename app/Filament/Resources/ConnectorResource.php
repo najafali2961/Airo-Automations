@@ -43,6 +43,7 @@ class ConnectorResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->where('slug', '!=', 'shopify'))
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
@@ -77,7 +78,8 @@ class ConnectorResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\TriggersRelationManager::class,
+            RelationManagers\ActionsRelationManager::class,
         ];
     }
 

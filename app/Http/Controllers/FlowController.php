@@ -25,74 +25,67 @@ class FlowController extends Controller
          
          if ($id && !$flow) abort(404);
 
-         // Load from new flow.php config
-         $flowConfig = config('flow') ?? ['triggers' => [], 'actions' => []];
+         // Fetch Active Connectors with their Active Triggers and Actions from DB
+         $activeConnectors = \App\Models\Connector::query()
+             ->where('is_active', true)
+             ->with([
+                 'triggers' => fn($q) => $q->where('is_active', true),
+                 'actions' => fn($q) => $q->where('is_active', true)
+             ])
+             ->get();
 
-         $shopifyTriggers = [];
-         foreach ($flowConfig['triggers'] as $trigger) {
-             $shopifyTriggers[] = [
-                 'type' => 'trigger',
-
-                 'label' => $trigger['label'],
-                 'description' => $trigger['description'],
-                 'settings' => ['topic' => $trigger['topic']],
-                 'group' => $trigger['category'],
-                 'icon' => $trigger['icon'],
-                 'variables' => $trigger['variables'] ?? []
-             ];
-         }
-
-         $apps = [];
-         
-         // 1. Initialize Shopify App (as it has triggers too)
-         $apps['shopify'] = [
-             'name' => 'Shopify',
-             'icon' => 'shopify',
-             'triggers' => $shopifyTriggers,
-             'actions' => []
-         ];
-
-         // 2. Group Actions dynamically
-         foreach ($flowConfig['actions'] as $action) {
-             $actionDef = [
-                 'type' => 'action',
-
-                 'label' => $action['label'],
-                 'description' => $action['description'],
-                 'settings' => [
-                     'action' => $action['key'],
-                 ],
-                 'group' => $action['category'],
-                 'icon' => $action['icon'],
-                 'app' => $action['app'] ?? 'shopify',
-                 'fields' => $action['fields'] ?? []
-             ];
-
-             $appName = $action['app'] ?? 'shopify';
-             $appName = strtolower($appName);
-
-             if (!isset($apps[$appName])) {
-                 $apps[$appName] = [
-                     'name' => ucfirst($appName), // 'google' -> 'Google'
-                     'icon' => $appName,
-                     'triggers' => [],
-                     'actions' => []
-                 ];
-             }
-
-             $apps[$appName]['actions'][] = $actionDef;
-         }
-         
-         // 3. Format for Frontend
-         // Ensure Shopify is first if desired, or just array_values
-         // We might want to enforce case for specific known apps if ucfirst isn't enough (e.g. SMTP)
+         \Log::info("FlowController DB Debug: Found " . $activeConnectors->count() . " active connectors.");
          
          $formattedApps = [];
-         foreach ($apps as $key => $appData) {
-             if ($key === 'smtp') $appData['name'] = 'SMTP';
-             // if ($key === 'shopify') $appData['name'] = 'Shopify'; // Already set
+
+         foreach ($activeConnectors as $connector) {
+             \Log::info("FlowController DB Debug: Connector {$connector->slug} has " . $connector->triggers->count() . " triggers and " . $connector->actions->count() . " actions.");
              
-             $formattedApps[] = $appData;
+             // Map Triggers
+             $triggers = $connector->triggers->map(function($t) use ($connector) {
+                 return [
+                     'type' => 'trigger',
+                     'id' => $t->key,
+                     'key' => $t->key,
+                     'label' => $t->label,
+                     'description' => $t->description,
+                     'topic' => $t->topic,
+                     'category' => $connector->slug,
+                     'group' => $t->category ?? 'general',
+                     'icon' => $t->icon,
+                     'app' => $connector->slug,
+                     'variables' => $t->variables ?? []
+                 ];
+             })->toArray();
+
+             // Map Actions
+             $actions = $connector->actions->map(function($a) use ($connector) {
+                 return [
+                     'type' => 'action',
+                     'id' => $a->key,
+                     'key' => $a->key,
+                     'label' => $a->label,
+                     'description' => $a->description,
+                     'settings' => [
+                         'action' => $a->key,
+                     ],
+                     'category' => $connector->slug,
+                     'group' => $a->category ?? 'general',
+                     'icon' => $a->icon,
+                     'app' => $connector->slug,
+                     'fields' => $a->fields ?? []
+                 ];
+             })->toArray();
+
+             // Add to formatted list if valid
+             if (!empty($triggers) || !empty($actions) || $connector->slug === 'shopify') {
+                 $formattedApps[] = [
+                     'name' => $connector->name,
+                     'icon' => $connector->slug, 
+                     'triggers' => $triggers,
+                     'actions' => $actions
+                 ];
+             }
          }
          
          $definitions = [

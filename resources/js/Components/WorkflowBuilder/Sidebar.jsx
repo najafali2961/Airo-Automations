@@ -28,44 +28,35 @@ export default function Sidebar({ definitions, connectors, onNodeClick }) {
     const [selectedApp, setSelectedApp] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const connectorApps = [
-        {
-            name: "Google",
+    // Color/Icon mapping for known apps (visuals only, not existence)
+    const appVisuals = {
+        google: {
             color: "#EA4335",
             iconUrl: "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
-            triggers: [],
-            actions: [],
         },
-        {
-            name: "Slack",
+        slack: {
             color: "#4A154B",
             iconUrl: "https://cdn-icons-png.flaticon.com/512/2111/2111615.png",
-            triggers: [],
-            actions: [],
         },
-        {
-            name: "SMTP",
+        smtp: {
             color: "#D93025",
             iconUrl: "https://cdn-icons-png.flaticon.com/512/732/732200.png",
-            triggers: [],
-            actions: [],
         },
-        {
-            name: "Twilio",
+        twilio: {
             color: "#F22F46",
             iconUrl: "https://cdn-icons-png.flaticon.com/512/5968/5968841.png",
-            triggers: [],
-            actions: [],
         },
-        {
-            name: "Klaviyo",
-            color: "#25D366", // Klaviyo Green
+        klaviyo: {
+            color: "#25D366",
             iconUrl:
                 "https://www.klaviyo.com/application-assets/klaviyo/production/static-assets/favicon.png",
-            triggers: [],
-            actions: [],
         },
-    ];
+        shopify: {
+            color: "#95BF47",
+            iconUrl:
+                "https://upload.wikimedia.org/wikipedia/commons/0/0e/Shopify_logo_2018.svg",
+        },
+    };
 
     const standardNodes = [
         {
@@ -86,39 +77,23 @@ export default function Sidebar({ definitions, connectors, onNodeClick }) {
         },
     ];
 
+    // Strictly use definitions.apps from backend
     const apps = (definitions?.apps || []).map((app) => {
-        if (app.name === "Shopify") {
+        const lowerName = app.name.toLowerCase();
+        const visual = appVisuals[lowerName];
+
+        if (visual) {
             return {
                 ...app,
-                color: "#95BF47", // Shopify Green
-                iconUrl:
-                    "https://upload.wikimedia.org/wikipedia/commons/0/0e/Shopify_logo_2018.svg",
-            };
-        }
-
-        // Check if there is a matching connector app definition
-        const connectorMatch = connectorApps.find(
-            (ca) => ca.name.toLowerCase() === app.name.toLowerCase()
-        );
-
-        if (connectorMatch) {
-            return {
-                ...app,
-                color: app.color || connectorMatch.color,
-                iconUrl: app.iconUrl || connectorMatch.iconUrl,
+                color: app.color || visual.color,
+                iconUrl: app.iconUrl || visual.iconUrl,
             };
         }
 
         return app;
     });
 
-    // Filter out connectorApps that are already present in apps (to avoid duplicates)
-    const uniqueConnectorApps = connectorApps.filter(
-        (ca) =>
-            !apps.some((a) => a.name.toLowerCase() === ca.name.toLowerCase())
-    );
-
-    const allApps = [...apps, ...uniqueConnectorApps];
+    const allApps = apps;
 
     const searchResults = useMemo(() => {
         if (!searchQuery) return null;

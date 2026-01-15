@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             ConnectorSeeder::class,
             TemplateSeeder::class,
+            ConnectorsSeeder::class,
         ]);
     }
 }

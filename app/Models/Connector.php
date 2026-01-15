@@ -17,4 +17,14 @@ class Connector extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function triggers()
+    {
+        return $this->hasMany(ConnectorTrigger::class);
+    }
+
+    public function actions()
+    {
+        return $this->hasMany(ConnectorAction::class);
+    }
 }
