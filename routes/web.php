@@ -44,6 +44,7 @@ Route::middleware(['verify.shopify'])->group(function () {
 
     // SMTP
     Route::post('/smtp/save', [\App\Http\Controllers\SmtpController::class, 'store'])->name('smtp.save');
+    Route::post('/smtp/test', [\App\Http\Controllers\SmtpController::class, 'test'])->name('smtp.test');
     Route::post('/smtp/disconnect', [\App\Http\Controllers\SmtpController::class, 'disconnect'])->name('smtp.disconnect');
     Route::get('/api/smtp/config', [\App\Http\Controllers\SmtpController::class, 'show'])->name('smtp.show');
 

@@ -48,6 +48,51 @@ class SmtpController extends Controller
     }
 
     /**
+     * Test the SMTP configuration.
+     */
+    public function test(Request $request)
+    {
+        $request->validate([
+            'host' => 'required|string',
+            'port' => 'required|numeric',
+            'username' => 'required|string',
+            'password' => 'required|string',
+            'encryption' => 'nullable|in:tls,ssl',
+            'from_address' => 'required|email',
+            'from_name' => 'required|string',
+        ]);
+
+        try {
+            // Dynamic configuration for testing
+            $config = [
+                'transport' => 'smtp',
+                'host' => $request->host,
+                'port' => $request->port,
+                'encryption' => $request->encryption,
+                'username' => $request->username,
+                'password' => $request->password,
+                'timeout' => null,
+            ];
+
+            // Set a temporary mailer config
+            config(['mail.mailers.smtp_test' => $config]);
+            config(['mail.from.address' => $request->from_address]);
+            config(['mail.from.name' => $request->from_name]);
+
+            // Attempt to send a raw email using this new mailer
+            \Illuminate\Support\Facades\Mail::mailer('smtp_test')->raw('This is a test email from your Shopify Automation App.', function ($message) use ($request) {
+                $message->to($request->from_address)
+                        ->subject('SMTP Connection Test');
+            });
+
+            return response()->json(['message' => 'Connection successful! Test email sent to ' . $request->from_address]);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Connection failed: ' . $e->getMessage()], 422);
+        }
+    }
+
+    /**
      * Delete the SMTP configuration.
      */
     public function disconnect()

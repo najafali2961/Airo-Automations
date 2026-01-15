@@ -210,6 +210,20 @@ export default function Connectors({ connectors }) {
         });
     };
 
+    const handleSmtpTest = async () => {
+        setSmtpLoading(true);
+        try {
+            const response = await window.axios.post("/smtp/test", smtpConfig);
+            setSmtpLoading(false);
+            setToastMessage(response.data.message);
+            setActiveToast(true);
+        } catch (error) {
+            setSmtpLoading(false);
+            setToastMessage(error.response?.data?.error || "Connection Failed");
+            setActiveToast(true);
+        }
+    };
+
     // ============================================================================================
     //  IndexTable & Filters Logic
     // ============================================================================================
@@ -612,6 +626,15 @@ export default function Connectors({ connectors }) {
                         loading: smtpLoading,
                     }}
                     secondaryActions={[
+                        {
+                            content: "Test Connection",
+                            onAction: handleSmtpTest,
+                            loading: smtpLoading,
+                            disabled:
+                                !smtpConfig.host ||
+                                !smtpConfig.username ||
+                                !smtpConfig.password,
+                        },
                         {
                             content: "Cancel",
                             onAction: () => setSmtpModalOpen(false),
