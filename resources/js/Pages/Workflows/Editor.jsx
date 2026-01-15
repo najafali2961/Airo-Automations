@@ -470,14 +470,6 @@ export default function WorkflowEditor({
                         >
                             Format Flow
                         </Button>
-
-                        <Button
-                            variant="primary"
-                            onClick={handleExecute}
-                            disabled={isDirty || saving}
-                        >
-                            Run Test
-                        </Button>
                     </div>
                 </div>
             </div>
