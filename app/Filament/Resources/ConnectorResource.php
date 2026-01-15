@@ -29,8 +29,9 @@ class ConnectorResource extends Resource
                 Forms\Components\TextInput::make('slug')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\FileUpload::make('icon')
-                    ->image(),
+                Forms\Components\TextInput::make('icon')
+                    ->label('Icon URL')
+                    ->maxLength(2048),
                 Forms\Components\Textarea::make('description')
                     ->maxLength(65535)
                     ->columnSpanFull(),
@@ -47,7 +48,9 @@ class ConnectorResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('icon'),
+                Tables\Columns\ImageColumn::make('icon')
+                    ->circular()
+                    ->defaultImageUrl(null), // Ensure nulls don't break logic
                 Tables\Columns\ToggleColumn::make('is_active'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

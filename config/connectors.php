@@ -7,14 +7,14 @@ return [
         'icon' => 'https://cdn-icons-png.flaticon.com/512/2991/2991148.png', 
         'auth_type' => 'oauth',
         'auth_route' => 'auth.google.redirect',
-        'connected_check' => 'google_access_token', // Field in User model
+        'connected_check' => 'google_access_token', 
         'is_active' => true,
     ],
     'smtp' => [
         'title' => 'SMTP',
         'description' => 'Connect external email hosting provider.',
         'icon' => 'https://cdn-icons-png.flaticon.com/512/732/732200.png',
-        'auth_type' => 'basic', // changed from coming_soon
+        'auth_type' => 'basic', 
         'is_active' => true,
     ],
     'klaviyo' => [
