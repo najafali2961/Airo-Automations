@@ -60,6 +60,19 @@ export default function AdminTemplateEditor({
                 }
             }
 
+            // Handle pre-formatted React Flow nodes (from DB/this editor)
+            if (n.position && n.data) {
+                return {
+                    ...n,
+                    id: String(n.id),
+                    data: {
+                        ...n.data,
+                        appName: appName || n.data.appName,
+                    },
+                };
+            }
+
+            // Handle Legacy Flat DB structure
             return {
                 id: String(n.id),
                 type: n.type,
@@ -75,14 +88,20 @@ export default function AdminTemplateEditor({
 
     const initialEdges = useMemo(() => {
         if (!flow?.edges) return [];
-        return flow.edges.map((e) => ({
-            id: `e${e.source_node_id}-${e.target_node_id}`,
-            source: String(e.source_node_id),
-            target: String(e.target_node_id),
-            type: "custom",
-            label: e.label || "then",
-            sourceHandle: e.source_handle || e.sourceHandle || null,
-        }));
+        return flow.edges.map((e) => {
+            // Check for React Flow format (source/target) or DB format (source_node_id/target_node_id)
+            const source = e.source || String(e.source_node_id);
+            const target = e.target || String(e.target_node_id);
+
+            return {
+                id: e.id || `e${source}-${target}`, // Use existing ID if available
+                source: source,
+                target: target,
+                type: "custom",
+                label: e.label || "then",
+                sourceHandle: e.source_handle || e.sourceHandle || null,
+            };
+        });
     }, [flow]);
 
     const handleSave = async () => {

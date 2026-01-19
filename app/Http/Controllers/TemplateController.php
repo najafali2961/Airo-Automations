@@ -57,8 +57,10 @@ class TemplateController extends Controller
             $node = new Node();
             $node->flow_id = $flow->id;
             $node->type = $nodeData['type'];
-            $node->label = $nodeData['label'] ?? null;
-            $node->settings = $nodeData['settings'] ?? [];
+            
+            // Handle both flat and nested (React Flow) structures
+            $node->label = $nodeData['label'] ?? $nodeData['data']['label'] ?? null;
+            $node->settings = $nodeData['settings'] ?? $nodeData['data']['settings'] ?? [];
             
             // Handle position formats (flat or nested)
             $x = $nodeData['position_x'] ?? ($nodeData['position']['x'] ?? 0);
