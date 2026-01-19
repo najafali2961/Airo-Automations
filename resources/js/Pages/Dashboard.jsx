@@ -193,7 +193,7 @@ export default function Dashboard({
                             <div className="text-center">
                                 <Text variant="heading2xl" as="p">
                                     {Math.round(
-                                        (stats.total_executions * 5) / 60
+                                        (stats.total_executions * 5) / 60,
                                     )}{" "}
                                     <span className="text-green-600 text-lg">
                                         ↑
@@ -240,7 +240,7 @@ export default function Dashboard({
                                       ((stats.total_executions -
                                           stats.failed_executions) /
                                           stats.total_executions) *
-                                          100
+                                          100,
                                   ) + "%"
                                 : "N/A"
                         }
@@ -268,7 +268,7 @@ export default function Dashboard({
                                         onClick={() =>
                                             router.visit(
                                                 "/workflows" +
-                                                    window.location.search
+                                                    window.location.search,
                                             )
                                         }
                                         icon={ArrowRightIcon}
@@ -340,13 +340,13 @@ export default function Dashboard({
                                             id={exec.id}
                                             key={exec.id}
                                             selected={selectedResources.includes(
-                                                exec.id
+                                                exec.id,
                                             )}
                                             position={index}
                                             onClick={() =>
                                                 router.visit(
                                                     `/executions/${exec.id}` +
-                                                        window.location.search
+                                                        window.location.search,
                                                 )
                                             }
                                         >
@@ -365,7 +365,7 @@ export default function Dashboard({
                                                     >
                                                         #{exec.id} •{" "}
                                                         {new Date(
-                                                            exec.created_at
+                                                            exec.created_at,
                                                         ).toLocaleString()}
                                                     </Text>
                                                     <InlineStack
@@ -423,7 +423,7 @@ export default function Dashboard({
                                             hasPrevious={currentPage > 1}
                                             onPrevious={() =>
                                                 setCurrentPage(
-                                                    (prev) => prev - 1
+                                                    (prev) => prev - 1,
                                                 )
                                             }
                                             hasNext={
@@ -432,7 +432,7 @@ export default function Dashboard({
                                             }
                                             onNext={() =>
                                                 setCurrentPage(
-                                                    (prev) => prev + 1
+                                                    (prev) => prev + 1,
                                                 )
                                             }
                                         />
@@ -457,7 +457,7 @@ export default function Dashboard({
                                         onClick={() =>
                                             router.visit(
                                                 "/workflows" +
-                                                    window.location.search
+                                                    window.location.search,
                                             )
                                         }
                                     >
@@ -478,57 +478,57 @@ export default function Dashboard({
                                                     router.visit(
                                                         `/workflows/${flow.id}` +
                                                             window.location
-                                                                .search
+                                                                .search,
                                                     )
                                                 }
                                             >
-                                                <BlockStack gap="050">
-                                                    <InlineStack
-                                                        align="start"
-                                                        blockAlign="center"
-                                                        gap="200"
-                                                    >
-                                                        {flow.active ? (
-                                                            <div
-                                                                className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm flex-shrink-0 border border-emerald-200"
-                                                                title="Active"
-                                                            />
-                                                        ) : (
-                                                            <div
-                                                                className="w-2.5 h-2.5 rounded-full bg-gray-300 flex-shrink-0 border border-gray-200"
-                                                                title="Inactive"
-                                                            />
-                                                        )}
-                                                        <Text
-                                                            fontWeight="bold"
-                                                            variant="bodyMd"
-                                                            truncate
-                                                        >
-                                                            {flow.name}
-                                                        </Text>
-                                                    </InlineStack>
-                                                    <div className="pl-5">
-                                                        <Text
-                                                            variant="bodyXs"
-                                                            tone="subdued"
-                                                        >
-                                                            {flow.executions_count ||
-                                                                0}{" "}
-                                                            runs • Updated{" "}
-                                                            {new Date(
-                                                                flow.updated_at
-                                                            ).toLocaleDateString(
-                                                                undefined,
-                                                                {
-                                                                    month: "short",
-                                                                    day: "numeric",
-                                                                    hour: "2-digit",
-                                                                    minute: "2-digit",
-                                                                }
+                                                <div className="flex-1 min-w-0">
+                                                    <BlockStack gap="050">
+                                                        <div className="flex items-center gap-2 min-w-0">
+                                                            {flow.active ? (
+                                                                <div
+                                                                    className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm flex-shrink-0 border border-emerald-200"
+                                                                    title="Active"
+                                                                />
+                                                            ) : (
+                                                                <div
+                                                                    className="w-2.5 h-2.5 rounded-full bg-gray-300 flex-shrink-0 border border-gray-200"
+                                                                    title="Inactive"
+                                                                />
                                                             )}
-                                                        </Text>
-                                                    </div>
-                                                </BlockStack>
+                                                            <div className="min-w-0 flex-1">
+                                                                <Text
+                                                                    fontWeight="bold"
+                                                                    variant="bodyMd"
+                                                                    truncate
+                                                                >
+                                                                    {flow.name}
+                                                                </Text>
+                                                            </div>
+                                                        </div>
+                                                        <div className="pl-5">
+                                                            <Text
+                                                                variant="bodyXs"
+                                                                tone="subdued"
+                                                            >
+                                                                {flow.executions_count ||
+                                                                    0}{" "}
+                                                                runs • Updated{" "}
+                                                                {new Date(
+                                                                    flow.updated_at,
+                                                                ).toLocaleDateString(
+                                                                    undefined,
+                                                                    {
+                                                                        month: "short",
+                                                                        day: "numeric",
+                                                                        hour: "2-digit",
+                                                                        minute: "2-digit",
+                                                                    },
+                                                                )}
+                                                            </Text>
+                                                        </div>
+                                                    </BlockStack>
+                                                </div>
                                                 <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <Icon
                                                         source={ArrowRightIcon}
@@ -546,7 +546,7 @@ export default function Dashboard({
                                     onClick={() =>
                                         router.visit(
                                             "/workflows" +
-                                                window.location.search
+                                                window.location.search,
                                         )
                                     }
                                 >
