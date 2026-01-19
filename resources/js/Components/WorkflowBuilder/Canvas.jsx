@@ -58,7 +58,7 @@ const InnerBuilder = ({
 
     // ... (existing state) ...
     const [nodes, setNodes, onNodesChange] = useNodesState(
-        initialNodes || initialNodesDefault
+        initialNodes || initialNodesDefault,
     );
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges || []);
 
@@ -142,12 +142,12 @@ const InnerBuilder = ({
         (nodeId) => {
             setNodes((nds) => nds.filter((n) => n.id !== nodeId));
             setEdges((eds) =>
-                eds.filter((e) => e.source !== nodeId && e.target !== nodeId)
+                eds.filter((e) => e.source !== nodeId && e.target !== nodeId),
             );
             if (onFlowChange) onFlowChange();
             if (onNodeSelect) onNodeSelect(null);
         },
-        [setNodes, setEdges, onFlowChange, onNodeSelect]
+        [setNodes, setEdges, onFlowChange, onNodeSelect],
     );
 
     // Node Hydration
@@ -162,7 +162,7 @@ const InnerBuilder = ({
                         onDelete: () => handleDeleteNode(node.id),
                     },
                 };
-            })
+            }),
         );
     }, [handleDeleteNode, setNodes, nodes.length]);
 
@@ -171,13 +171,13 @@ const InnerBuilder = ({
         (changes) => {
             onNodesChange(changes);
             const isSignificant = changes.some(
-                (c) => c.type !== "dimensions" && c.type !== "select"
+                (c) => c.type !== "dimensions" && c.type !== "select",
             );
             if (isSignificant && onFlowChange) {
                 onFlowChange();
             }
         },
-        [onFlowChange, onNodesChange]
+        [onFlowChange, onNodesChange],
     );
 
     const handleEdgesChange = useCallback(
@@ -188,7 +188,7 @@ const InnerBuilder = ({
                 onFlowChange();
             }
         },
-        [onFlowChange, onEdgesChange]
+        [onFlowChange, onEdgesChange],
     );
 
     const onLabelChange = useCallback(
@@ -199,11 +199,11 @@ const InnerBuilder = ({
                         return { ...e, label: newLabel };
                     }
                     return e;
-                })
+                }),
             );
             if (onFlowChange) onFlowChange();
         },
-        [setEdges, onFlowChange]
+        [setEdges, onFlowChange],
     );
 
     const prepareEdge = useCallback(
@@ -216,7 +216,7 @@ const InnerBuilder = ({
                 onLabelChange: onLabelChange,
             },
         }),
-        [onAddConnectorClick, onLabelChange]
+        [onAddConnectorClick, onLabelChange],
     );
 
     useEffect(() => {
@@ -249,7 +249,7 @@ const InnerBuilder = ({
             setEdges((eds) => addEdge(newEdge, eds));
             if (onFlowChange) onFlowChange();
         },
-        [setEdges, onFlowChange, prepareEdge]
+        [setEdges, onFlowChange, prepareEdge],
     );
 
     // Exposed Methods
@@ -279,7 +279,7 @@ const InnerBuilder = ({
                 newNodes.map((n) => ({
                     ...n,
                     data: { ...n.data, onDelete: () => handleDeleteNode(n.id) },
-                }))
+                })),
             );
             setEdges(newEdges.map((e) => prepareEdge(e)));
         },
@@ -290,7 +290,7 @@ const InnerBuilder = ({
                         return { ...node, data: { ...node.data, ...data } };
                     }
                     return node;
-                })
+                }),
             );
         },
         insertNodeBetween: (nodeDef, context) => {
@@ -348,7 +348,14 @@ const InnerBuilder = ({
                 data: {
                     label: nodeDef.label,
                     appName: nodeDef.category || nodeDef.name,
-                    settings: nodeDef.settings || {},
+                    settings: {
+                        ...(nodeDef.settings || {}),
+                        ...(nodeDef.topic ? { topic: nodeDef.topic } : {}),
+                        // Map key/id to settings.id for backend resolution
+                        ...(nodeDef.key || nodeDef.id
+                            ? { id: nodeDef.key || nodeDef.id }
+                            : {}),
+                    },
                     onDelete: () => handleDeleteNode(newNodeId),
                 },
             };
@@ -367,14 +374,14 @@ const InnerBuilder = ({
             stopper: StopperNode,
             shopifyTrigger: TriggerNode,
         }),
-        []
+        [],
     );
 
     const edgeTypes = useMemo(
         () => ({
             custom: CustomEdge,
         }),
-        []
+        [],
     );
 
     const onDrop = useCallback(
@@ -382,16 +389,16 @@ const InnerBuilder = ({
             event.preventDefault();
             const type = event.dataTransfer.getData("application/reactflow");
             const label = event.dataTransfer.getData(
-                "application/reactflow/label"
+                "application/reactflow/label",
             );
             const appName = event.dataTransfer.getData(
-                "application/reactflow/appName"
+                "application/reactflow/appName",
             );
             const description = event.dataTransfer.getData(
-                "application/reactflow/description"
+                "application/reactflow/description",
             );
             const defaultsStr = event.dataTransfer.getData(
-                "application/reactflow/defaults"
+                "application/reactflow/defaults",
             );
 
             if (typeof type === "undefined" || !type) return;
@@ -425,7 +432,7 @@ const InnerBuilder = ({
             setNodes((nds) => nds.concat(newNode));
             if (onFlowChange) onFlowChange();
         },
-        [screenToFlowPosition, setNodes, onFlowChange, handleDeleteNode]
+        [screenToFlowPosition, setNodes, onFlowChange, handleDeleteNode],
     );
 
     const onDragOver = useCallback((event) => {
@@ -437,7 +444,7 @@ const InnerBuilder = ({
         (_, node) => {
             if (onNodeSelect) onNodeSelect(node);
         },
-        [onNodeSelect]
+        [onNodeSelect],
     );
 
     const onPaneClick = useCallback(() => {
