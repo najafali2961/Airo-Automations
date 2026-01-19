@@ -24,7 +24,7 @@ class ShopifyGqlAction extends BaseAction
         'capture_payment' => 'orderPaymentUpsert', 
         'adjust_inventory' => 'inventoryAdjustQuantities',
         'create_basic_discount' => 'discountCodeBasicCreate',
-        'update_variant_price' => 'productVariantUpdate',
+        'update_variant_price' => 'productVariantsBulkUpdate',
         'cancel_order' => 'orderCancel',
     ];
 
@@ -151,10 +151,23 @@ class ShopifyGqlAction extends BaseAction
                 ];
 
             case 'update_variant_price':
+                // Try to find Product ID
+                $productId = $payload['admin_graphql_api_id'] ?? null;
+                if (!$productId && isset($payload['product_id'])) {
+                    $productId = $payload['product_id'];
+                }
+                // Fallback: if 'id' is present and looks like product, or just use it
+                if (!$productId && isset($payload['id'])) {
+                    $productId = $payload['id'];
+                }
+
                 return [
-                    'input' => [
-                        'id' => $this->ensureGid($settings['variant_id'] ?? $id, 'ProductVariant'),
-                        'price' => (string)$settings['price']
+                    'productId' => $this->ensureGid($productId, 'Product'),
+                    'variants' => [
+                        [
+                            'id' => $this->ensureGid($settings['variant_id'] ?? null, 'ProductVariant'),
+                            'price' => (string)$settings['price']
+                        ]
                     ]
                 ];
         }
@@ -192,8 +205,8 @@ class ShopifyGqlAction extends BaseAction
                 return 'mutation inventoryAdjustQuantities($input: InventoryAdjustQuantitiesInput!) { inventoryAdjustQuantities(input: $input) { inventoryAdjustmentGroup { id } userErrors { field message } } }';
             case 'discountCodeBasicCreate':
                 return 'mutation discountCodeBasicCreate($basicCodeDiscount: DiscountCodeBasicInput!) { discountCodeBasicCreate(basicCodeDiscount: $basicCodeDiscount) { codeDiscountNode { idDiscount { id } } userErrors { field message } } }';
-            case 'productVariantUpdate':
-                return 'mutation productVariantUpdate($input: ProductVariantInput!) { productVariantUpdate(input: $input) { productVariant { id } userErrors { field message } } }';
+            case 'productVariantsBulkUpdate':
+                return 'mutation productVariantsBulkUpdate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) { productVariantsBulkUpdate(productId: $productId, variants: $variants) { productVariants { id } userErrors { field message } } }';
         }
         return '';
     }

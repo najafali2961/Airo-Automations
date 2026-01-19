@@ -24,7 +24,9 @@ import {
     Select,
     Card,
     Grid,
+    Icon,
 } from "@shopify/polaris";
+import { ViewIcon, HideIcon } from "@shopify/polaris-icons";
 import { getIconAndColor } from "../../Components/WorkflowBuilder/utils";
 
 export default function Connectors({ connectors }) {
@@ -43,11 +45,13 @@ export default function Connectors({ connectors }) {
         from_address: "",
         from_name: "",
     });
-    const [smtpLoading, setSmtpLoading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isTesting, setIsTesting] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const toggleToast = useCallback(
         () => setActiveToast((active) => !active),
-        []
+        [],
     );
 
     // ============================================================================================
@@ -78,13 +82,13 @@ export default function Connectors({ connectors }) {
             // We should fetch existing config if any
             try {
                 const host = new URLSearchParams(window.location.search).get(
-                    "host"
+                    "host",
                 );
                 const res = await window.axios.get(
-                    `/api/smtp/config?host=${host}`
+                    `/api/smtp/config?host=${host}`,
                 );
                 if (res.data) {
-                    setSmtpConfig({ ...res.data, password: "" }); // Don't show password
+                    setSmtpConfig({ ...res.data });
                 }
             } catch (e) {
                 console.error(e);
@@ -96,7 +100,7 @@ export default function Connectors({ connectors }) {
         if (connector.auth_type === "oauth" && connector.auth_url) {
             try {
                 const host = new URLSearchParams(window.location.search).get(
-                    "host"
+                    "host",
                 );
 
                 // Fetch signed URL if needed
@@ -112,7 +116,7 @@ export default function Connectors({ connectors }) {
                         window.open(
                             response.data.url,
                             `${connector.key}_auth_popup`,
-                            "width=600,height=700,status=yes,scrollbars=yes"
+                            "width=600,height=700,status=yes,scrollbars=yes",
                         );
                     } else {
                         setToastMessage("Failed to get auth URL");
@@ -184,7 +188,7 @@ export default function Connectors({ connectors }) {
                     setIsDisconnectingKey(null);
                     setItemToDisconnect(null);
                 },
-            }
+            },
         );
     };
 
@@ -192,17 +196,17 @@ export default function Connectors({ connectors }) {
     //  SMTP Save Logic
     // ============================================================================================
     const handleSmtpSave = () => {
-        setSmtpLoading(true);
+        setIsSaving(true);
         router.post("/smtp/save", smtpConfig, {
             onSuccess: () => {
                 setSmtpModalOpen(false);
                 setToastMessage("SMTP Configuration Saved");
                 setActiveToast(true);
-                setSmtpLoading(false);
+                setIsSaving(false);
                 router.reload();
             },
             onError: (errors) => {
-                setSmtpLoading(false);
+                setIsSaving(false);
                 setToastMessage("Failed to save SMTP config");
                 setActiveToast(true);
                 console.log(errors);
@@ -211,14 +215,14 @@ export default function Connectors({ connectors }) {
     };
 
     const handleSmtpTest = async () => {
-        setSmtpLoading(true);
+        setIsTesting(true);
         try {
             const response = await window.axios.post("/smtp/test", smtpConfig);
-            setSmtpLoading(false);
+            setIsTesting(false);
             setToastMessage(response.data.message);
             setActiveToast(true);
         } catch (error) {
-            setSmtpLoading(false);
+            setIsTesting(false);
             setToastMessage(error.response?.data?.error || "Connection Failed");
             setActiveToast(true);
         }
@@ -317,15 +321,15 @@ export default function Connectors({ connectors }) {
 
     const handleStatusFilterChange = useCallback(
         (value) => setStatusFilter(value),
-        []
+        [],
     );
     const handleFiltersQueryChange = useCallback(
         (value) => setQueryValue(value),
-        []
+        [],
     );
     const handleStatusFilterRemove = useCallback(
         () => setStatusFilter(undefined),
-        []
+        [],
     );
     const handleQueryValueRemove = useCallback(() => setQueryValue(""), []);
     const handleFiltersClearAll = useCallback(() => {
@@ -366,7 +370,7 @@ export default function Connectors({ connectors }) {
 
     // 4. Data Processing (Filtering & Sorting)
     const filteredConnectors = useMemo(() => {
-        let result = [...connectors];
+        let result = [...connectors].filter((c) => c.key !== "shopify");
 
         // A. Filter by View (Tab)
         const currentView = itemStrings[selected];
@@ -382,14 +386,14 @@ export default function Connectors({ connectors }) {
             result = result.filter(
                 (item) =>
                     item.title.toLowerCase().includes(lowerQuery) ||
-                    item.description.toLowerCase().includes(lowerQuery)
+                    item.description.toLowerCase().includes(lowerQuery),
             );
         }
 
         // C. Filter by Specific Filters
         if (statusFilter && statusFilter.length > 0) {
             result = result.filter((item) =>
-                statusFilter.includes(item.status)
+                statusFilter.includes(item.status),
             );
         }
 
@@ -581,7 +585,7 @@ export default function Connectors({ connectors }) {
                             <div className="p-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {filteredConnectors.map(
-                                        renderConnectorCard
+                                        renderConnectorCard,
                                     )}
                                 </div>
                             </div>
@@ -623,14 +627,16 @@ export default function Connectors({ connectors }) {
                     primaryAction={{
                         content: "Save",
                         onAction: handleSmtpSave,
-                        loading: smtpLoading,
+                        loading: isSaving,
+                        disabled: isTesting,
                     }}
                     secondaryActions={[
                         {
                             content: "Test Connection",
                             onAction: handleSmtpTest,
-                            loading: smtpLoading,
+                            loading: isTesting,
                             disabled:
+                                isSaving ||
                                 !smtpConfig.host ||
                                 !smtpConfig.username ||
                                 !smtpConfig.password,
@@ -638,6 +644,7 @@ export default function Connectors({ connectors }) {
                         {
                             content: "Cancel",
                             onAction: () => setSmtpModalOpen(false),
+                            disabled: isSaving || isTesting,
                         },
                     ]}
                 >
@@ -690,8 +697,25 @@ export default function Connectors({ connectors }) {
                                             password: val,
                                         })
                                     }
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     autoComplete="off"
+                                    suffix={
+                                        <div
+                                            className="cursor-pointer flex items-center"
+                                            onClick={() =>
+                                                setShowPassword(!showPassword)
+                                            }
+                                        >
+                                            <Icon
+                                                source={
+                                                    showPassword
+                                                        ? HideIcon
+                                                        : ViewIcon
+                                                }
+                                                tone="base"
+                                            />
+                                        </div>
+                                    }
                                 />
                             </FormLayout.Group>
                             <Select

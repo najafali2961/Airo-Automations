@@ -29,6 +29,8 @@ class ActionRegistry
         'remove_product_tag' => \App\Flow\Actions\Products\RemoveProductTag::class,
         'update_product_status' => \App\Flow\Actions\Products\UpdateProductStatus::class,
         'delete_product' => \App\Flow\Actions\Shopify\ShopifyGqlAction::class,
+        'update_variant_price' => \App\Flow\Actions\Shopify\ShopifyGqlAction::class,
+        'adjust_inventory' => \App\Flow\Actions\Shopify\ShopifyGqlAction::class,
         
         // Customers
         'add_customer_tag' => \App\Flow\Actions\Customers\AddCustomerTag::class,

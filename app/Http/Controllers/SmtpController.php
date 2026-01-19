@@ -118,7 +118,7 @@ class SmtpController extends Controller
                  'encryption' => $connector->credentials['encryption'] ?? '',
                  'from_address' => $connector->meta['from_address'] ?? '',
                  'from_name' => $connector->meta['from_name'] ?? '',
-                 // Never return password
+                 'password' => $connector->credentials['password'] ?? '',
              ]);
          }
          return response()->json(null);
