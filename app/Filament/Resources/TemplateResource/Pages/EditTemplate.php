@@ -14,6 +14,10 @@ class EditTemplate extends EditRecord
     {
         return [
             Actions\DeleteAction::make(),
+            Actions\Action::make('open_visual_editor')
+                ->label('Open Visual Editor')
+                ->url(fn () => route('admin.template.editor', $this->record))
+                ->openUrlInNewTab(),
         ];
     }
 }

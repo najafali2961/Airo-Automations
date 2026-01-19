@@ -19,7 +19,7 @@ createInertiaApp({
         const urlParams = new URLSearchParams(window.location.search);
         const host = urlParams.get("host");
         const apiKey = document.querySelector(
-            'meta[name="shopify-api-key"]'
+            'meta[name="shopify-api-key"]',
         )?.content;
 
         if (host && apiKey) {
@@ -38,14 +38,14 @@ createInertiaApp({
                 },
                 function (error) {
                     return Promise.reject(error);
-                }
+                },
             );
         }
 
         const config = {
             apiKey: apiKey,
             host: host,
-            forceRedirect: true,
+            forceRedirect: !!host,
         };
 
         createRoot(el).render(
@@ -62,7 +62,7 @@ createInertiaApp({
                 <ErrorBoundary>
                     <App {...props} />
                 </ErrorBoundary>
-            </AppProvider>
+            </AppProvider>,
         );
     },
 });

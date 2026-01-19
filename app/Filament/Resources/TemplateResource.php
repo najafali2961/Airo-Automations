@@ -32,11 +32,24 @@ class TemplateResource extends Resource
                 Forms\Components\Textarea::make('description')
                     ->maxLength(65535)
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('category'),
+                Forms\Components\Select::make('category')
+                    ->options([
+                        'shopify' => 'Shopify',
+                        'slack' => 'Slack',
+                        'email' => 'Email',
+                        'google' => 'Google',
+                        'utility' => 'Utility',
+                        'klaviyo' => 'Klaviyo',
+                        'marketing' => 'Marketing',
+                    ])
+                    ->required()
+                    ->searchable(),
                 Forms\Components\TagsInput::make('tags'),
                 Forms\Components\Textarea::make('workflow_data')
                     ->rows(10)
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->formatStateUsing(fn ($state) => is_array($state) ? json_encode($state, JSON_PRETTY_PRINT) : $state)
+                    ->dehydrateStateUsing(fn ($state) => is_string($state) ? json_decode($state, true) : $state),
             ]);
     }
 
@@ -47,7 +60,14 @@ class TemplateResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('category')
-                    ->searchable(),
+                    ->badge()
+                    ->colors([
+                        'primary',
+                        'success' => 'shopify',
+                        'warning' => 'email',
+                        'danger' => 'slack',
+                        'info' => 'google',
+                    ]),
                 Tables\Columns\TextColumn::make('tags')
                     ->badge(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -60,6 +80,11 @@ class TemplateResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('visual_editor')
+                    ->label('Visual Editor')
+                    ->icon('heroicon-o-pencil-square')
+                    ->url(fn (Template $record) => route('admin.template.editor', $record))
+                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
