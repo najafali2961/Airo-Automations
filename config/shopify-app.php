@@ -387,139 +387,139 @@ return [
     'webhooks' => [
         [
             'topic' => 'PRODUCTS_UPDATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/products-update'
+            'address' => env('APP_URL') . '/webhook/products-update'
         ],
         [
             'topic' => 'PRODUCTS_DELETE',
-            'address' => env('APP_URL') . '/shopify-webhooks/products-delete'
+            'address' => env('APP_URL') . '/webhook/products-delete'
         ],
         [
             'topic' => 'PRODUCTS_CREATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/products-create'
+            'address' => env('APP_URL') . '/webhook/products-create'
         ],
         [
             'topic' => 'PRODUCT_PUBLICATIONS_CREATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/products-published'
+            'address' => env('APP_URL') . '/webhook/products-published'
         ],
         [
             'topic' => 'PRODUCT_PUBLICATIONS_DELETE',
-            'address' => env('APP_URL') . '/shopify-webhooks/products-unpublished'
+            'address' => env('APP_URL') . '/webhook/products-unpublished'
         ],
         [
             'topic' => 'ORDERS_CREATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/orders-create'
+            'address' => env('APP_URL') . '/webhook/orders-create'
         ],
         [
             'topic' => 'ORDERS_UPDATED',
-            'address' => env('APP_URL') . '/shopify-webhooks/orders-updated'
+            'address' => env('APP_URL') . '/webhook/orders-updated'
         ],
         [
             'topic' => 'ORDERS_PAID',
-            'address' => env('APP_URL') . '/shopify-webhooks/orders-paid'
+            'address' => env('APP_URL') . '/webhook/orders-paid'
         ],
         [
             'topic' => 'ORDERS_CANCELLED',
-            'address' => env('APP_URL') . '/shopify-webhooks/orders-cancelled'
+            'address' => env('APP_URL') . '/webhook/orders-cancelled'
         ],
         [
             'topic' => 'ORDERS_FULFILLED',
-            'address' => env('APP_URL') . '/shopify-webhooks/orders-fulfilled'
+            'address' => env('APP_URL') . '/webhook/orders-fulfilled'
         ],
         [
             'topic' => 'ORDERS_PARTIALLY_FULFILLED',
-            'address' => env('APP_URL') . '/shopify-webhooks/orders-partially-fulfilled'
+            'address' => env('APP_URL') . '/webhook/orders-partially-fulfilled'
         ],
         [
             'topic' => 'ORDERS_DELETE',
-            'address' => env('APP_URL') . '/shopify-webhooks/orders-deleted'
+            'address' => env('APP_URL') . '/webhook/orders-deleted'
         ],
         [
             'topic' => 'CUSTOMERS_CREATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/customers-create'
+            'address' => env('APP_URL') . '/webhook/customers-create'
         ],
         [
             'topic' => 'CUSTOMERS_UPDATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/customers-update'
+            'address' => env('APP_URL') . '/webhook/customers-update'
         ],
         [
             'topic' => 'CUSTOMERS_DELETE',
-            'address' => env('APP_URL') . '/shopify-webhooks/customers-delete'
+            'address' => env('APP_URL') . '/webhook/customers-delete'
         ],
         [
             'topic' => 'COLLECTIONS_CREATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/collections-create'
+            'address' => env('APP_URL') . '/webhook/collections-create'
         ],
         [
             'topic' => 'COLLECTIONS_UPDATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/collections-update'
+            'address' => env('APP_URL') . '/webhook/collections-update'
         ],
         [
             'topic' => 'COLLECTIONS_DELETE',
-            'address' => env('APP_URL') . '/shopify-webhooks/collections-delete'
+            'address' => env('APP_URL') . '/webhook/collections-delete'
         ],
         [
             'topic' => 'SHOP_UPDATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/shop-update'
+            'address' => env('APP_URL') . '/webhook/shop-update'
         ],
         [
             'topic' => 'APP_UNINSTALLED',
-            'address' => env('APP_URL') . '/shopify-webhooks/app-uninstalled'
+            'address' => env('APP_URL') . '/webhook/app-uninstalled'
         ],
         [
             'topic' => 'DISCOUNTS_CREATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/discounts-create'
+            'address' => env('APP_URL') . '/webhook/discounts-create'
         ],
         [
             'topic' => 'DISCOUNTS_UPDATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/discounts-update'
+            'address' => env('APP_URL') . '/webhook/discounts-update'
         ],
         [
             'topic' => 'DISCOUNTS_DELETE',
-            'address' => env('APP_URL') . '/shopify-webhooks/discounts-delete'
+            'address' => env('APP_URL') . '/webhook/discounts-delete'
         ],
         [
             'topic' => 'CHECKOUTS_CREATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/checkouts-create'
+            'address' => env('APP_URL') . '/webhook/checkouts-create'
         ],
         [
             'topic' => 'CHECKOUTS_UPDATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/checkouts-update'
+            'address' => env('APP_URL') . '/webhook/checkouts-update'
         ],
         [
             'topic' => 'CHECKOUTS_DELETE',
-            'address' => env('APP_URL') . '/shopify-webhooks/checkouts-delete'
+            'address' => env('APP_URL') . '/webhook/checkouts-delete'
         ],
         [
             'topic' => 'INVENTORY_LEVELS_UPDATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/inventory-levels-update'
+            'address' => env('APP_URL') . '/webhook/inventory-levels-update'
         ],
         [
             'topic' => 'INVENTORY_ITEMS_CREATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/inventory-items-create'
+            'address' => env('APP_URL') . '/webhook/inventory-items-create'
         ],
         [
             'topic' => 'INVENTORY_ITEMS_UPDATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/inventory-items-update'
+            'address' => env('APP_URL') . '/webhook/inventory-items-update'
         ],
         [
             'topic' => 'BULK_OPERATIONS_FINISH',
-            'address' => env('APP_URL') . '/shopify-webhooks/bulk-operations-finish'
+            'address' => env('APP_URL') . '/webhook/bulk-operations-finish'
         ],
        [
     'topic' => 'FULFILLMENT_ORDERS_CANCELLATION_REQUEST_SUBMITTED',
-    'address' => env('APP_URL') . '/shopify-webhooks/fulfillment-orders-cancellation-request'
+    'address' => env('APP_URL') . '/webhook/fulfillment-orders-cancellation-request'
 ],
         [
             'topic' => 'CARTS_CREATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/carts-create'
+            'address' => env('APP_URL') . '/webhook/carts-create'
         ],
         [
             'topic' => 'CARTS_UPDATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/carts-update'
+            'address' => env('APP_URL') . '/webhook/carts-update'
         ],
         [
             'topic' => 'APP_SUBSCRIPTIONS_UPDATE',
-            'address' => env('APP_URL') . '/shopify-webhooks/app-subscriptions-update'
+            'address' => env('APP_URL') . '/webhook/app-subscriptions-update'
         ],
         /*
             [

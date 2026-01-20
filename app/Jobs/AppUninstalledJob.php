@@ -75,10 +75,22 @@ class AppUninstalledJob implements ShouldQueue
             // 3. Conditional Cleanup for potential other tables (Defensive)
             // Removed undefined tables based on user feedback
 
-            // 4. Delete User (Cascades to UserConnectors via DB foreign keys)
-            $shop->delete();
+            // 4. Delete User Connectors (Since we SoftDelete the User, we must manually clean these up)
+            if (method_exists($shop, 'connectors')) {
+                $shop->connectors()->delete();
+            }
+
+            // Note: We do NOT delete the $shop (User) here manually.
+            // We let the framework handling below (softDelete) take care of it.
+            // This prevents the "Call to a member function getId() on null" error.
         }
+        
         $shop = $shopQuery->getByDomain($this->shopDomain);
+        // Ensure shop exists before proceeding (defensive)
+        if (!$shop) {
+             return true; // Already deleted or not found
+        }
+        
         $shopId = $shop->getId();
         $cancelCurrentPlanAction($shopId);
         $shopCommand->clean($shopId);
