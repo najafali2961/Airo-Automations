@@ -714,7 +714,7 @@ return [
                     ['value' => 'customer_email', 'label' => 'Customer Email (from Trigger)'],
                     ['value' => 'order_email', 'label' => 'Order Email (from Trigger)'],
                  ], 'default' => 'custom'],
-                 ['name' => 'to', 'label' => 'To (Custom)', 'type' => 'text', 'placeholder' => 'recipient@example.com'],
+                 ['name' => 'to', 'label' => 'To (Custom)', 'type' => 'text', 'placeholder' => 'recipient@example.com', 'showIf' => ['field' => 'recipient_type', 'value' => 'custom']],
                  ['name' => 'subject', 'label' => 'Subject', 'type' => 'text', 'required' => true, 'placeholder' => 'Update on {{ product.title }}'],
                  ['name' => 'body', 'label' => 'Body (HTML)', 'type' => 'textarea', 'required' => true, 'placeholder' => '<h1>New Order: {{ order.name }}</h1><p>Total: {{ order.total_price }}</p>'],
             ]

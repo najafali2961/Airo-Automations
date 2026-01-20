@@ -74,7 +74,12 @@ class FlowController extends Controller
                      'group' => $a->category ?? 'general',
                      'icon' => $a->icon,
                      'app' => $connector->slug,
-                     'fields' => $a->fields ?? []
+                     'fields' => (function() use ($a) {
+                        // Attempt to load fresh definition from config to ensure dev changes (like showIf) are reflected
+                        $configActions = config('flow.actions');
+                        $configDef = collect($configActions)->firstWhere('key', $a->key);
+                        return $configDef['fields'] ?? $a->fields ?? [];
+                     })()
                  ];
              })->toArray();
 

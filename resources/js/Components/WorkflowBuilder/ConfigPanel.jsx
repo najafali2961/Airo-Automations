@@ -37,14 +37,14 @@ export default function ConfigPanel({
                         (settings.topic && t.topic === settings.topic) ||
                         (settings.topic &&
                             t.settings?.topic === settings.topic) ||
-                        t.label === node.data.label
+                        t.label === node.data.label,
                 );
                 if (trigger) return trigger;
             } else if (node.type === "action") {
                 const action = app.actions?.find(
                     (a) =>
                         a.settings?.action === settings.action ||
-                        a.label === node.data.label
+                        a.label === node.data.label,
                 );
                 if (action) return action;
             }
@@ -68,7 +68,7 @@ export default function ConfigPanel({
         ) {
             console.log(
                 "ConfigPanel: Auto-repairing missing topic",
-                definition.topic
+                definition.topic,
             );
             updateSetting("topic", definition.topic);
         }
@@ -106,7 +106,7 @@ export default function ConfigPanel({
         const parentApp = definitions.apps.find(
             (app) =>
                 app.actions?.some((a) => a.label === definition.label) ||
-                app.triggers?.some((t) => t.label === definition.label)
+                app.triggers?.some((t) => t.label === definition.label),
         );
 
         if (parentApp) {
@@ -206,87 +206,129 @@ export default function ConfigPanel({
                     </Text>
                 )}
 
-                {definition.fields?.map((field) => (
-                    <div key={field.name}>
-                        {field.type === "select" ? (
-                            <Select
-                                label={field.label}
-                                options={field.options}
-                                value={
-                                    settings[field.name] || field.default || ""
-                                }
-                                onChange={(val) =>
-                                    updateSetting(field.name, val)
-                                }
-                                disabled={!isConnected}
-                                required={field.required}
-                            />
-                        ) : field.type === "resource_select" ? (
-                            <ResourceSelect
-                                label={field.label}
-                                value={settings[field.name] || ""}
-                                onChange={(val) =>
-                                    updateSetting(field.name, val)
-                                }
-                                service={(function () {
-                                    // 1. Try explicit app name from node data or definition
-                                    if (node.data.appName)
-                                        return node.data.appName;
-                                    if (
-                                        definition.app &&
-                                        definition.app !== "shopify"
-                                    )
-                                        return definition.app;
+                {definition.fields?.map((field) => {
+                    // Logic for conditional visibility (showIf)
+                    if (field.showIf) {
+                        const {
+                            field: depField,
+                            value: depValue,
+                            operator,
+                        } = field.showIf;
+                        // Resolve current value of the dependency, falling back to its default
+                        const depDef = definition.fields.find(
+                            (f) => f.name === depField,
+                        );
+                        const effectiveVal =
+                            settings[depField] ?? depDef?.default;
 
-                                    // 2. Fallback based on group/category mappings
-                                    const group = definition.group;
-                                    if (group === "marketing") return "klaviyo";
-                                    if (group === "productivity")
-                                        return "google";
-                                    if (group === "communication") {
-                                        if (definition.icon === "MessageSquare")
-                                            return "slack";
-                                        if (
-                                            definition.icon === "Mail" &&
-                                            definition.label.includes("Gmail")
-                                        )
-                                            return "google";
-                                        if (
-                                            definition.icon === "Mail" &&
-                                            definition.label.includes("SMTP")
-                                        )
-                                            return "smtp";
+                        let isVisible = true;
+                        if (operator === "!=") {
+                            isVisible = effectiveVal !== depValue;
+                        } else {
+                            // Default to equals
+                            isVisible = effectiveVal === depValue;
+                        }
+
+                        if (!isVisible) return null;
+                    }
+
+                    return (
+                        <div
+                            key={field.name}
+                            className="animate-in fade-in slide-in-from-top-1 duration-200"
+                        >
+                            {field.type === "select" ? (
+                                <Select
+                                    label={field.label}
+                                    options={field.options}
+                                    value={
+                                        settings[field.name] ||
+                                        field.default ||
+                                        ""
                                     }
+                                    onChange={(val) =>
+                                        updateSetting(field.name, val)
+                                    }
+                                    disabled={!isConnected}
+                                    required={field.required}
+                                />
+                            ) : field.type === "resource_select" ? (
+                                <ResourceSelect
+                                    label={field.label}
+                                    value={settings[field.name] || ""}
+                                    onChange={(val) =>
+                                        updateSetting(field.name, val)
+                                    }
+                                    service={(function () {
+                                        // 1. Try explicit app name from node data or definition
+                                        if (node.data.appName)
+                                            return node.data.appName;
+                                        if (
+                                            definition.app &&
+                                            definition.app !== "shopify"
+                                        )
+                                            return definition.app;
 
-                                    // 3. Last resort
-                                    return group;
-                                })()}
-                                resource={field.resource}
-                                placeholder={field.placeholder}
-                                disabled={!isConnected}
-                                required={field.required}
-                            />
-                        ) : (
-                            <VariableInput
-                                label={field.label}
-                                value={settings[field.name] || ""}
-                                onChange={(val) =>
-                                    updateSetting(field.name, val)
-                                }
-                                placeholder={field.placeholder}
-                                multiline={
-                                    field.type === "textarea" ? 4 : false
-                                }
-                                type={
-                                    field.type === "number" ? "number" : "text"
-                                }
-                                disabled={!isConnected}
-                                required={field.required}
-                                variables={triggerVariables || []}
-                            />
-                        )}
-                    </div>
-                ))}
+                                        // 2. Fallback based on group/category mappings
+                                        const group = definition.group;
+                                        if (group === "marketing")
+                                            return "klaviyo";
+                                        if (group === "productivity")
+                                            return "google";
+                                        if (group === "communication") {
+                                            if (
+                                                definition.icon ===
+                                                "MessageSquare"
+                                            )
+                                                return "slack";
+                                            if (
+                                                definition.icon === "Mail" &&
+                                                definition.label.includes(
+                                                    "Gmail",
+                                                )
+                                            )
+                                                return "google";
+                                            if (
+                                                definition.icon === "Mail" &&
+                                                definition.label.includes(
+                                                    "SMTP",
+                                                )
+                                            )
+                                                return "smtp";
+                                        }
+
+                                        // 3. Last resort
+                                        return group;
+                                    })()}
+                                    resource={field.resource}
+                                    placeholder={field.placeholder}
+                                    disabled={!isConnected}
+                                    required={field.required}
+                                />
+                            ) : (
+                                <VariableInput
+                                    label={field.label}
+                                    value={settings[field.name] || ""}
+                                    onChange={(val) =>
+                                        updateSetting(field.name, val)
+                                    }
+                                    placeholder={field.placeholder}
+                                    multiline={
+                                        field.type === "textarea" ? 4 : false
+                                    }
+                                    type={
+                                        field.type === "number"
+                                            ? "number"
+                                            : "text"
+                                    }
+                                    disabled={!isConnected}
+                                    required={field.required}
+                                    variables={triggerVariables || []}
+                                />
+                            )}
+                        </div>
+                    );
+                })}
 
                 {!definition.fields ||
                     (definition.fields.length === 0 && (
@@ -299,7 +341,7 @@ export default function ConfigPanel({
     };
 
     const { icon, color, isUrl } = getIconAndColor(
-        node.data.appName || node.data.label || node.type
+        node.data.appName || node.data.label || node.type,
     );
 
     return (
@@ -384,7 +426,7 @@ const ConditionSettings = ({ settings, onChange }) => {
             "rules",
             newRules.length > 0
                 ? newRules
-                : [{ field: "", operator: "=", value: "" }]
+                : [{ field: "", operator: "=", value: "" }],
         );
     };
 
