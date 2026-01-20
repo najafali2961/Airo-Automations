@@ -21,8 +21,7 @@ class ConnectorsSeeder extends Seeder
 
     public function run()
     {
-        // Debugging Config Loading
-        $config = config('flow');
+$config = config('flow');
         
         if (empty($config) || empty($config['triggers'])) {
             $this->log("Config 'flow' seems empty using config() helper. Attempting direct file load...", 'warn');
@@ -39,7 +38,7 @@ class ConnectorsSeeder extends Seeder
         $triggers = $config['triggers'] ?? [];
         $actions = $config['actions'] ?? [];
 
-        $this->log("Found " . count($triggers) . " triggers and " . count($actions) . " actions in config.");
+       
 
         // Connectors to ensure exist
         $definedConnectors = [
@@ -64,10 +63,7 @@ class ConnectorsSeeder extends Seeder
                     ]
                 );
             }
-            $this->log("Connectors synced.");
-
-            // CRITICAL FIX: Explicitly define correct Product Trigger Data to override potential stale config
-            // This ensures that even if config/flow.php on the server is outdated, the DB gets the correct data.
+          
             $explicitTriggers = [
                 'products_update' => [
                     'label' => 'Product Updated',
@@ -182,7 +178,6 @@ class ConnectorsSeeder extends Seeder
                     continue;
                 }
 
-                $this->log("Seeding Trigger: {$trigger['key']} | Label: {$trigger['label']} | Desc: " . substr($trigger['description'] ?? 'N/A', 0, 30));
 
                 ConnectorTrigger::updateOrCreate(
                     [
@@ -202,16 +197,14 @@ class ConnectorsSeeder extends Seeder
                 );
                 $triggerCount++;
             }
-            $this->log("Seeded $triggerCount triggers.");
+
 
             // Verification Log
-            $this->log("--- VERIFICATION ---");
+       
             $verifyKeys = ['products_update', 'products_delete', 'customers_create', 'customers_delete'];
             $results = ConnectorTrigger::whereIn('key', $verifyKeys)->get();
-            foreach($results as $r) {
-                 $this->log("DB Check [{$r->key}]: Label='{$r->label}', Desc='{$r->description}'");
-            }
-            $this->log("--------------------");
+           
+            
 
             // B. Seed Triggers
             $triggerCount = 0;
@@ -242,8 +235,7 @@ class ConnectorsSeeder extends Seeder
                 );
                 $triggerCount++;
             }
-            $this->log("Seeded $triggerCount triggers.");
-
+          
             // C. Seed Actions
             $actionCount = 0;
             foreach ($actions as $action) {
@@ -272,10 +264,9 @@ class ConnectorsSeeder extends Seeder
                 );
                 $actionCount++;
             }
-            $this->log("Seeded $actionCount actions.");
+
 
             DB::commit();
-            $this->log('Database seeding completed successfully.');
 
         } catch (\Exception $e) {
             DB::rollBack();

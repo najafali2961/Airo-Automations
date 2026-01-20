@@ -14,6 +14,8 @@ use Osiset\ShopifyApp\Actions\CancelCurrentPlan;
 use Osiset\ShopifyApp\Objects\Values\ShopDomain;
 use Osiset\ShopifyApp\Contracts\Queries\Shop as IShopQuery;
 use Osiset\ShopifyApp\Contracts\Commands\Shop as IShopCommand;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class AppUninstalledJob implements ShouldQueue
 // class AppUninstalledJob extends \Osiset\ShopifyApp\Messaging\Jobs\AppUninstalledJob
@@ -65,7 +67,15 @@ class AppUninstalledJob implements ShouldQueue
             // Note: Flows table does not have a constrained foreign key to 'users', so we delete manually.
             $shop->flows()->delete();
 
-            // 2. Delete User (Cascades to UserConnectors via DB foreign keys)
+            // 2. Delete Webhook Logs (Manual cleanup)
+            if (Schema::hasTable('webhook_logs')) {
+                DB::table('webhook_logs')->where('shop_id', $shop->id)->delete();
+            }
+
+            // 3. Conditional Cleanup for potential other tables (Defensive)
+            // Removed undefined tables based on user feedback
+
+            // 4. Delete User (Cascades to UserConnectors via DB foreign keys)
             $shop->delete();
         }
         $shop = $shopQuery->getByDomain($this->shopDomain);
