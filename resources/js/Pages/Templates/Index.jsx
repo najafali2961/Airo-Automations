@@ -30,6 +30,7 @@ import {
 } from "@shopify/polaris-icons";
 import { Head, router } from "@inertiajs/react";
 import { useAppBridge } from "@shopify/app-bridge-react";
+import TemplatePreview from "./Partials/TemplatePreview";
 
 // Static assets for logos (placeholders or CDN links usually)
 const LOGOS = {
@@ -51,6 +52,7 @@ export default function Index({ templates = [] }) {
 
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isActivating, setIsActivating] = useState(false);
 
     // --- Sorting Options ---
     const sortOptions = [
@@ -194,10 +196,12 @@ export default function Index({ templates = [] }) {
             `/templates/${selectedTemplate.slug}/activate`,
             {},
             {
+                onStart: () => setIsActivating(true),
+                onFinish: () => setIsActivating(false),
                 onSuccess: () => {
                     setIsModalOpen(false);
                     shopify.toast.show(
-                        "Template activated - Redirecting to Editor..."
+                        "Template activated - Redirecting to Editor...",
                     );
                 },
                 onError: (errors) => {
@@ -209,7 +213,7 @@ export default function Index({ templates = [] }) {
                         isError: true,
                     });
                 },
-            }
+            },
         );
     };
 
@@ -400,7 +404,7 @@ export default function Index({ templates = [] }) {
                                                                   70
                                                                     ? template.description.substring(
                                                                           0,
-                                                                          70
+                                                                          70,
                                                                       ) + "..."
                                                                     : template.description
                                                                 : ""}
@@ -411,7 +415,7 @@ export default function Index({ templates = [] }) {
                                                 <Button
                                                     onClick={() =>
                                                         handleTemplateClick(
-                                                            template
+                                                            template,
                                                         )
                                                     }
                                                     fullWidth
@@ -438,11 +442,14 @@ export default function Index({ templates = [] }) {
                 primaryAction={{
                     content: "Use Template",
                     onAction: handleActivate,
+                    loading: isActivating,
+                    disabled: isActivating,
                 }}
                 secondaryActions={[
                     {
                         content: "Cancel",
                         onAction: () => setIsModalOpen(false),
+                        disabled: isActivating,
                     },
                 ]}
                 size="large"
@@ -496,7 +503,7 @@ export default function Index({ templates = [] }) {
                                                             {c}
                                                         </Text>
                                                     </InlineStack>
-                                                )
+                                                ),
                                             )}
                                     </InlineStack>
                                 </LegacyCard>
@@ -513,47 +520,59 @@ export default function Index({ templates = [] }) {
                                                         <Tag key={tag}>
                                                             {tag}
                                                         </Tag>
-                                                    )
+                                                    ),
                                                 )}
                                             </InlineStack>
                                         </BlockStack>
                                     )}
                             </BlockStack>
                         </Layout.Section>
-
                         <Layout.Section variant="oneThird">
                             <div
                                 style={{
-                                    padding: "2rem",
+                                    height: "400px", // Fixed height for React Flow
                                     background: "#f6f6f7",
                                     borderRadius: "8px",
-                                    border: "1px dashed #dbe1e6",
-                                    height: "100%",
-                                    minHeight: "300px",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    justifyContent: "center",
+                                    border: "1px solid #dbe1e6",
+                                    overflow: "hidden",
                                 }}
                             >
-                                <BlockStack
-                                    align="center"
-                                    inlineAlign="center"
-                                    gap="400"
-                                >
-                                    <Icon
-                                        source={ViewIcon}
-                                        tone="subdued"
-                                        size="large"
+                                {selectedTemplate?.workflow_data ? (
+                                    <TemplatePreview
+                                        flowData={
+                                            selectedTemplate.workflow_data
+                                        }
                                     />
-                                    <Text
-                                        variant="bodySm"
-                                        tone="subdued"
-                                        alignment="center"
+                                ) : (
+                                    <div
+                                        style={{
+                                            height: "100%",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                        }}
                                     >
-                                        Logic Preview
-                                    </Text>
-                                </BlockStack>
+                                        <BlockStack
+                                            align="center"
+                                            inlineAlign="center"
+                                            gap="400"
+                                        >
+                                            <Icon
+                                                source={ViewIcon}
+                                                tone="subdued"
+                                                size="large"
+                                            />
+                                            <Text
+                                                variant="bodySm"
+                                                tone="subdued"
+                                                alignment="center"
+                                            >
+                                                No preview available
+                                            </Text>
+                                        </BlockStack>
+                                    </div>
+                                )}
                             </div>
                         </Layout.Section>
                     </Layout>

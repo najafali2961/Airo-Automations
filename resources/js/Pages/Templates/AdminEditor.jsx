@@ -274,6 +274,13 @@ export default function AdminTemplateEditor({
 
                         <div className="flex items-center gap-3">
                             <Button
+                                size="slim"
+                                onClick={() => builderRef.current?.autoLayout()}
+                            >
+                                Format Flow
+                            </Button>
+
+                            <Button
                                 variant="primary"
                                 onClick={handleSave}
                                 loading={saving}

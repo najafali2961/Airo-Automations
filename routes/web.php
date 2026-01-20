@@ -99,7 +99,6 @@ Route::get('/debug/force-seed', function () {
 });
 
 // Admin Tools
-Route::middleware(['auth'])->group(function () {
+
     Route::get('/admin-tools/template-editor/{template:id}', [\App\Http\Controllers\Admin\TemplateEditorController::class, 'edit'])->name('admin.template.editor');
     Route::post('/admin-tools/template-editor/{template:id}/save', [\App\Http\Controllers\Admin\TemplateEditorController::class, 'save'])->name('admin.template.save');
-});

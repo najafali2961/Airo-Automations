@@ -50,15 +50,17 @@ createInertiaApp({
 
         createRoot(el).render(
             <AppProvider i18n={enTranslations} config={config}>
-                <NavMenu>
-                    <a href="/" rel="home">
-                        Home
-                    </a>
-                    <a href="/workflows">Workflows</a>
-                    <a href="/templates">Templates</a>
-                    <a href="/executions">Executions</a>
-                    <a href="/connectors">Connectors</a>
-                </NavMenu>
+                {!window.location.pathname.startsWith("/admin-tools") && (
+                    <NavMenu>
+                        <a href="/" rel="home">
+                            Home
+                        </a>
+                        <a href="/workflows">Workflows</a>
+                        <a href="/templates">Templates</a>
+                        <a href="/executions">Executions</a>
+                        <a href="/connectors">Connectors</a>
+                    </NavMenu>
+                )}
                 <ErrorBoundary>
                     <App {...props} />
                 </ErrorBoundary>
