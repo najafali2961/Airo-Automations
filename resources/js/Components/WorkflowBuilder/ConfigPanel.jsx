@@ -123,6 +123,7 @@ export default function ConfigPanel({
                 <ConditionSettings
                     settings={settings}
                     onChange={updateSetting}
+                    triggerVariables={triggerVariables}
                 />
             );
         }
@@ -407,7 +408,7 @@ function getAllTriggers(definitions) {
     return options;
 }
 
-const ConditionSettings = ({ settings, onChange }) => {
+const ConditionSettings = ({ settings, onChange, triggerVariables }) => {
     const rules = settings.rules || [{ field: "", operator: "=", value: "" }];
 
     const updateRule = (index, key, val) => {
@@ -432,15 +433,10 @@ const ConditionSettings = ({ settings, onChange }) => {
 
     const commonFields = [
         { label: "Custom Path", value: "" },
-        { label: "Order Total Price", value: "total_price" },
-        { label: "Order Subtotal", value: "subtotal_price" },
-        { label: "Order Tags", value: "tags" },
-        { label: "Customer Tags", value: "customer.tags" },
-        { label: "Line Items Count", value: "line_items.length" },
-        { label: "Shipping Country", value: "shipping_address.country_code" },
-        { label: "Product Title", value: "title" },
-        { label: "Product Type", value: "product_type" },
-        { label: "Customer Email", value: "email" },
+        ...(triggerVariables || []).map((v) => ({
+            label: v.label,
+            value: v.value,
+        })),
     ];
 
     const operators = [

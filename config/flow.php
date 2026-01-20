@@ -20,19 +20,66 @@ return [
             'category' => 'orders',
             'icon' => 'ShoppingBag',
             'variables' => [
-                ['label' => 'Order Name', 'value' => 'order.name'],
+                // Identity
+                ['label' => 'Order Name (e.g. #1001)', 'value' => 'order.name'],
                 ['label' => 'Order ID', 'value' => 'order.id'],
+                ['label' => 'Order Number', 'value' => 'order.order_number'],
+                ['label' => 'Processed At', 'value' => 'order.processed_at'],
+                
+                // Financials
                 ['label' => 'Total Price', 'value' => 'order.total_price'],
                 ['label' => 'Subtotal', 'value' => 'order.subtotal_price'],
                 ['label' => 'Total Tax', 'value' => 'order.total_tax'],
+                ['label' => 'Total Discounts', 'value' => 'order.total_discounts'],
+                ['label' => 'Total Line Items Price', 'value' => 'order.total_line_items_price'],
+                ['label' => 'Outstanding Balance', 'value' => 'order.total_outstanding'],
                 ['label' => 'Currency', 'value' => 'order.currency'],
                 ['label' => 'Financial Status', 'value' => 'order.financial_status'],
-                ['label' => 'Validation Link', 'value' => 'order.order_status_url'],
+                ['label' => 'Payment Gateway Names', 'value' => 'order.payment_gateway_names.0'], // First gateway
+                ['label' => 'Taxes Included', 'value' => 'order.taxes_included'],
+                
+                // Customer
                 ['label' => 'Customer Email', 'value' => 'order.email'],
+                ['label' => 'Customer Phone', 'value' => 'order.phone'],
+                ['label' => 'Customer ID', 'value' => 'order.customer.id'],
                 ['label' => 'Customer First Name', 'value' => 'order.customer.first_name'],
                 ['label' => 'Customer Last Name', 'value' => 'order.customer.last_name'],
-                ['label' => 'Customer ID', 'value' => 'order.customer.id'],
+                ['label' => 'Customer Orders Count', 'value' => 'order.customer.orders_count'],
+                ['label' => 'Customer Total Spent', 'value' => 'order.customer.total_spent'],
+                ['label' => 'Customer Tags', 'value' => 'order.customer.tags'],
+                ['label' => 'Customer Verified Email', 'value' => 'order.customer.verified_email'],
+                ['label' => 'Customer Accepts Marketing', 'value' => 'order.customer.accepts_marketing'],
+
+                // Addresses
+                ['label' => 'Billing Name', 'value' => 'order.billing_address.name'],
+                ['label' => 'Billing City', 'value' => 'order.billing_address.city'],
+                ['label' => 'Billing Country', 'value' => 'order.billing_address.country'],
+                ['label' => 'Billing Country Code', 'value' => 'order.billing_address.country_code'],
+                ['label' => 'Billing Zip', 'value' => 'order.billing_address.zip'],
+                ['label' => 'Billing Province', 'value' => 'order.billing_address.province'],
+                
+                ['label' => 'Shipping Name', 'value' => 'order.shipping_address.name'],
+                ['label' => 'Shipping City', 'value' => 'order.shipping_address.city'],
+                ['label' => 'Shipping Country', 'value' => 'order.shipping_address.country'],
+                ['label' => 'Shipping Country Code', 'value' => 'order.shipping_address.country_code'],
+                ['label' => 'Shipping Zip', 'value' => 'order.shipping_address.zip'],
+                ['label' => 'Shipping Province', 'value' => 'order.shipping_address.province'],
+                ['label' => 'Shipping Phone', 'value' => 'order.shipping_address.phone'],
+
+                // Fulfillment
+                ['label' => 'Fulfillment Status', 'value' => 'order.fulfillment_status'],
+                ['label' => 'Shipping Lines Title', 'value' => 'order.shipping_lines.0.title'],
+                ['label' => 'Shipping Lines Price', 'value' => 'order.shipping_lines.0.price'],
+                
+                // Meta
                 ['label' => 'Tags', 'value' => 'order.tags'],
+                ['label' => 'Note', 'value' => 'order.note'],
+                ['label' => 'Referring Site', 'value' => 'order.referring_site'],
+                ['label' => 'Landing Site', 'value' => 'order.landing_site'],
+                ['label' => 'Cancel Reason', 'value' => 'order.cancel_reason'],
+                ['label' => 'Buyer Accepts Marketing', 'value' => 'order.buyer_accepts_marketing'],
+                ['label' => 'Test Order', 'value' => 'order.test'],
+                ['label' => 'Validation Link', 'value' => 'order.order_status_url'],
             ],
         ],
         [
@@ -42,6 +89,38 @@ return [
             'topic' => 'ORDERS_UPDATED',
             'category' => 'orders',
             'icon' => 'ShoppingBag',
+            'variables' => [
+                 // Identity
+                 ['label' => 'Order Name (e.g. #1001)', 'value' => 'order.name'],
+                 ['label' => 'Order ID', 'value' => 'order.id'],
+                 ['label' => 'Order Number', 'value' => 'order.order_number'],
+                 
+                 // Financials
+                 ['label' => 'Total Price', 'value' => 'order.total_price'],
+                 ['label' => 'Subtotal', 'value' => 'order.subtotal_price'],
+                 ['label' => 'Total Tax', 'value' => 'order.total_tax'],
+                 ['label' => 'Financial Status', 'value' => 'order.financial_status'],
+                 
+                 // Customer
+                 ['label' => 'Customer Email', 'value' => 'order.email'],
+                 ['label' => 'Customer First Name', 'value' => 'order.customer.first_name'],
+                 ['label' => 'Customer Last Name', 'value' => 'order.customer.last_name'],
+                 ['label' => 'Customer Tags', 'value' => 'order.customer.tags'],
+ 
+                 // Addresses
+                 ['label' => 'Billing City', 'value' => 'order.billing_address.city'],
+                 ['label' => 'Billing Country Code', 'value' => 'order.billing_address.country_code'],
+                 ['label' => 'Shipping City', 'value' => 'order.shipping_address.city'],
+                 ['label' => 'Shipping Country Code', 'value' => 'order.shipping_address.country_code'],
+ 
+                 // Fulfillment
+                 ['label' => 'Fulfillment Status', 'value' => 'order.fulfillment_status'],
+                 
+                 // Meta
+                 ['label' => 'Tags', 'value' => 'order.tags'],
+                 ['label' => 'Note', 'value' => 'order.note'],
+                 ['label' => 'Updated At', 'value' => 'order.updated_at'],
+            ],
         ],
         [
             'key' => 'orders_paid',
@@ -50,6 +129,11 @@ return [
             'topic' => 'ORDERS_PAID',
             'category' => 'orders',
             'icon' => 'ShoppingBag',
+            'variables' => [
+                ['label' => 'Order Name', 'value' => 'order.name'],
+                ['label' => 'Total Price', 'value' => 'order.total_price'],
+                ['label' => 'Financial Status', 'value' => 'order.financial_status'],
+            ],
         ],
         [
             'key' => 'orders_cancelled',
@@ -58,6 +142,11 @@ return [
             'topic' => 'ORDERS_CANCELLED',
             'category' => 'orders',
             'icon' => 'ShoppingBag',
+            'variables' => [
+                ['label' => 'Order Name', 'value' => 'order.name'],
+                ['label' => 'Cancel Reason', 'value' => 'order.cancel_reason'],
+                ['label' => 'Cancelled At', 'value' => 'order.cancelled_at'],
+            ],
         ],
         [
             'key' => 'orders_fulfilled',
@@ -66,6 +155,10 @@ return [
             'topic' => 'ORDERS_FULFILLED',
             'category' => 'orders',
             'icon' => 'ShoppingBag',
+            'variables' => [
+                ['label' => 'Order Name', 'value' => 'order.name'],
+                ['label' => 'Fulfillment Status', 'value' => 'order.fulfillment_status'],
+            ],
         ],
         [
             'key' => 'orders_partially_fulfilled',
@@ -91,6 +184,19 @@ return [
                 ['label' => 'Product Type', 'value' => 'product.product_type'],
                 ['label' => 'Vendor', 'value' => 'product.vendor'],
                 ['label' => 'Status', 'value' => 'product.status'],
+                ['label' => 'Tags', 'value' => 'product.tags'],
+                ['label' => 'Template Suffix', 'value' => 'product.template_suffix'],
+                ['label' => 'Published Scope', 'value' => 'product.published_scope'],
+                ['label' => 'Created At', 'value' => 'product.created_at'],
+                ['label' => 'Published At', 'value' => 'product.published_at'],
+                // Variants
+                ['label' => 'Total Variants', 'value' => 'product.variants.length'],
+                ['label' => 'First Variant Price', 'value' => 'product.variants.0.price'],
+                ['label' => 'First Variant SKU', 'value' => 'product.variants.0.sku'],
+                ['label' => 'First Variant Inventory', 'value' => 'product.variants.0.inventory_quantity'],
+                ['label' => 'First Variant Weight', 'value' => 'product.variants.0.weight'],
+                ['label' => 'First Variant Requires Shipping', 'value' => 'product.variants.0.requires_shipping'],
+                ['label' => 'First Variant Taxable', 'value' => 'product.variants.0.taxable'],
             ],
         ],
         [
@@ -108,6 +214,12 @@ return [
                 ['label' => 'Vendor', 'value' => 'product.vendor'],
                 ['label' => 'Status', 'value' => 'product.status'],
                 ['label' => 'Tags', 'value' => 'product.tags'],
+                ['label' => 'Updated At', 'value' => 'product.updated_at'],
+                ['label' => 'Template Suffix', 'value' => 'product.template_suffix'],
+                // Variants (simplified)
+                ['label' => 'Price (Var 1)', 'value' => 'product.variants.0.price'],
+                ['label' => 'Inventory (Var 1)', 'value' => 'product.variants.0.inventory_quantity'],
+                ['label' => 'SKU (Var 1)', 'value' => 'product.variants.0.sku'],
             ],
         ],
         [
@@ -117,6 +229,9 @@ return [
             'topic' => 'PRODUCTS_DELETE',
             'category' => 'products',
             'icon' => 'Package',
+            'variables' => [
+                 ['label' => 'Product ID', 'value' => 'product.id'],
+            ],
         ],
         
         // Customers
@@ -136,7 +251,18 @@ return [
                 ['label' => 'Total Spent', 'value' => 'customer.total_spent'],
                 ['label' => 'Orders Count', 'value' => 'customer.orders_count'],
                 ['label' => 'State', 'value' => 'customer.state'],
+                ['label' => 'Verified Email', 'value' => 'customer.verified_email'],
+                ['label' => 'Accepts Marketing', 'value' => 'customer.accepts_marketing'],
+                ['label' => 'Tax Exempt', 'value' => 'customer.tax_exempt'],
+                ['label' => 'Currency', 'value' => 'customer.currency'],
                 ['label' => 'Tags', 'value' => 'customer.tags'],
+                ['label' => 'Created At', 'value' => 'customer.created_at'],
+                // Default Address
+                ['label' => 'Default Address City', 'value' => 'customer.default_address.city'],
+                ['label' => 'Default Address Country', 'value' => 'customer.default_address.country_code'],
+                ['label' => 'Default Address State', 'value' => 'customer.default_address.province'],
+                ['label' => 'Default Address Zip', 'value' => 'customer.default_address.zip'],
+                ['label' => 'Default Address Company', 'value' => 'customer.default_address.company'],
             ],
         ],
         [
@@ -146,6 +272,16 @@ return [
             'topic' => 'CUSTOMERS_UPDATE',
             'category' => 'customers',
             'icon' => 'Users',
+            'variables' => [
+                ['label' => 'First Name', 'value' => 'customer.first_name'],
+                ['label' => 'Last Name', 'value' => 'customer.last_name'],
+                ['label' => 'Email', 'value' => 'customer.email'],
+                ['label' => 'Total Spent', 'value' => 'customer.total_spent'],
+                ['label' => 'Orders Count', 'value' => 'customer.orders_count'],
+                ['label' => 'State', 'value' => 'customer.state'],
+                ['label' => 'Tags', 'value' => 'customer.tags'],
+                ['label' => 'Updated At', 'value' => 'customer.updated_at'],
+            ],
         ],
         [
             'key' => 'customers_delete',
@@ -164,6 +300,16 @@ return [
             'topic' => 'COLLECTIONS_CREATE',
             'category' => 'collections',
             'icon' => 'Grid',
+            'variables' => [
+                ['label' => 'Collection Title', 'value' => 'collection.title'],
+                ['label' => 'Collection ID', 'value' => 'collection.id'],
+                ['label' => 'Handle', 'value' => 'collection.handle'],
+                ['label' => 'Updated At', 'value' => 'collection.updated_at'],
+                ['label' => 'Published At', 'value' => 'collection.published_at'],
+                ['label' => 'Sort Order', 'value' => 'collection.sort_order'],
+                ['label' => 'Template Suffix', 'value' => 'collection.template_suffix'],
+                ['label' => 'Products Count', 'value' => 'collection.products_count'],
+            ],
         ],
         [
             'key' => 'collections_update',
@@ -172,6 +318,12 @@ return [
             'topic' => 'COLLECTIONS_UPDATE',
             'category' => 'collections',
             'icon' => 'Grid',
+            'variables' => [
+                ['label' => 'Collection Title', 'value' => 'collection.title'],
+                ['label' => 'Collection ID', 'value' => 'collection.id'],
+                ['label' => 'Handle', 'value' => 'collection.handle'],
+                ['label' => 'Updated At', 'value' => 'collection.updated_at'],
+            ],
         ],
         [
             'key' => 'collections_delete',
@@ -180,6 +332,9 @@ return [
             'topic' => 'COLLECTIONS_DELETE',
             'category' => 'collections',
             'icon' => 'Grid',
+            'variables' => [
+                 ['label' => 'Collection ID', 'value' => 'collection.id'],
+            ],
         ],
         
         // Fulfillments
@@ -190,6 +345,18 @@ return [
             'topic' => 'FULFILLMENTS_CREATE',
             'category' => 'fulfillments',
             'icon' => 'Truck',
+            'variables' => [
+                ['label' => 'Fulfillment ID', 'value' => 'fulfillment.id'],
+                ['label' => 'Order ID', 'value' => 'fulfillment.order_id'],
+                ['label' => 'Status', 'value' => 'fulfillment.status'],
+                ['label' => 'Tracking Company', 'value' => 'fulfillment.tracking_company'],
+                ['label' => 'Tracking Number', 'value' => 'fulfillment.tracking_number'],
+                ['label' => 'Tracking URL', 'value' => 'fulfillment.tracking_url'],
+                ['label' => 'Created At', 'value' => 'fulfillment.created_at'],
+                ['label' => 'Service', 'value' => 'fulfillment.service'],
+                ['label' => 'Shipment Status', 'value' => 'fulfillment.shipment_status'],
+                ['label' => 'Location ID', 'value' => 'fulfillment.location_id'],
+            ],
         ],
         [
             'key' => 'fulfillments_update',
@@ -198,6 +365,13 @@ return [
             'topic' => 'FULFILLMENTS_UPDATE',
             'category' => 'fulfillments',
             'icon' => 'Truck',
+             'variables' => [
+                ['label' => 'Fulfillment ID', 'value' => 'fulfillment.id'],
+                ['label' => 'Status', 'value' => 'fulfillment.status'],
+                ['label' => 'Tracking Number', 'value' => 'fulfillment.tracking_number'],
+                ['label' => 'Shipment Status', 'value' => 'fulfillment.shipment_status'],
+                ['label' => 'Updated At', 'value' => 'fulfillment.updated_at'],
+            ],
         ],
 
         // Draft Orders
@@ -208,6 +382,18 @@ return [
             'topic' => 'DRAFT_ORDERS_CREATE',
             'category' => 'draft_orders',
             'icon' => 'FileText',
+            'variables' => [
+                ['label' => 'Draft Order Name', 'value' => 'draft_order.name'],
+                ['label' => 'Draft Order ID', 'value' => 'draft_order.id'],
+                ['label' => 'Total Price', 'value' => 'draft_order.total_price'],
+                ['label' => 'Subtotal', 'value' => 'draft_order.subtotal_price'],
+                ['label' => 'Status', 'value' => 'draft_order.status'],
+                ['label' => 'Currency', 'value' => 'draft_order.currency'],
+                ['label' => 'Note', 'value' => 'draft_order.note'],
+                ['label' => 'Email', 'value' => 'draft_order.email'],
+                ['label' => 'Tax Exempt', 'value' => 'draft_order.tax_exempt'],
+                ['label' => 'Customer ID', 'value' => 'draft_order.customer.id'],
+            ],
         ],
         [
             'key' => 'draft_orders_updated',
@@ -216,6 +402,12 @@ return [
             'topic' => 'DRAFT_ORDERS_UPDATED',
             'category' => 'draft_orders',
             'icon' => 'FileText',
+            'variables' => [
+                ['label' => 'Draft Order Name', 'value' => 'draft_order.name'],
+                ['label' => 'Total Price', 'value' => 'draft_order.total_price'],
+                ['label' => 'Status', 'value' => 'draft_order.status'],
+                ['label' => 'Updated At', 'value' => 'draft_order.updated_at'],
+            ],
         ],
 
         // Refunds
@@ -226,6 +418,15 @@ return [
             'topic' => 'REFUNDS_CREATE',
             'category' => 'refunds',
             'icon' => 'ArrowBack',
+            'variables' => [
+                ['label' => 'Refund ID', 'value' => 'refund.id'],
+                ['label' => 'Order ID', 'value' => 'refund.order_id'],
+                ['label' => 'Created At', 'value' => 'refund.created_at'],
+                ['label' => 'Note', 'value' => 'refund.note'],
+                ['label' => 'Restock', 'value' => 'refund.restock'],
+                ['label' => 'User ID', 'value' => 'refund.user_id'],
+                ['label' => 'Processed At', 'value' => 'refund.processed_at'],
+            ],
         ],
 
         // Shop
@@ -236,6 +437,18 @@ return [
             'topic' => 'SHOP_UPDATE',
             'category' => 'shop',
             'icon' => 'Store',
+            'variables' => [
+                ['label' => 'Shop Name', 'value' => 'shop.name'],
+                ['label' => 'Shop ID', 'value' => 'shop.id'],
+                ['label' => 'Email', 'value' => 'shop.email'],
+                ['label' => 'Domain', 'value' => 'shop.domain'],
+                ['label' => 'Country', 'value' => 'shop.country'],
+                ['label' => 'Currency', 'value' => 'shop.currency'],
+                ['label' => 'Timezone', 'value' => 'shop.timezone'],
+                ['label' => 'Plan Name', 'value' => 'shop.plan_name'],
+                ['label' => 'Phone', 'value' => 'shop.phone'],
+                ['label' => 'Customer Email', 'value' => 'shop.customer_email'],
+            ],
         ],
 
         // Discounts
@@ -246,6 +459,16 @@ return [
             'topic' => 'DISCOUNTS_CREATE',
             'category' => 'discounts',
             'icon' => 'Tag',
+            'variables' => [
+                ['label' => 'Discount Code', 'value' => 'discount.code'],
+                ['label' => 'Discount ID', 'value' => 'discount.id'],
+                ['label' => 'Value', 'value' => 'discount.value'],
+                ['label' => 'Value Type', 'value' => 'discount.value_type'],
+                ['label' => 'Usage Count', 'value' => 'discount.usage_count'],
+                ['label' => 'Starts At', 'value' => 'discount.starts_at'],
+                ['label' => 'Ends At', 'value' => 'discount.ends_at'],
+                ['label' => 'Minimum Order Amount', 'value' => 'discount.minimum_order_amount'],
+            ],
         ],
         [
             'key' => 'discounts_update',
@@ -254,6 +477,11 @@ return [
             'topic' => 'DISCOUNTS_UPDATE',
             'category' => 'discounts',
             'icon' => 'Tag',
+            'variables' => [
+                ['label' => 'Discount Code', 'value' => 'discount.code'],
+                ['label' => 'Value', 'value' => 'discount.value'],
+                ['label' => 'Updated At', 'value' => 'discount.updated_at'],
+            ],
         ],
 
         // Inventory
@@ -264,6 +492,12 @@ return [
             'topic' => 'INVENTORY_LEVELS_UPDATE',
             'category' => 'inventory',
             'icon' => 'Database',
+            'variables' => [
+                ['label' => 'Inventory Item ID', 'value' => 'inventory_level.inventory_item_id'],
+                ['label' => 'Location ID', 'value' => 'inventory_level.location_id'],
+                ['label' => 'Available', 'value' => 'inventory_level.available'],
+                ['label' => 'Updated At', 'value' => 'inventory_level.updated_at'],
+            ],
         ],
 
         // Checkouts
@@ -274,6 +508,20 @@ return [
             'topic' => 'CHECKOUTS_CREATE',
             'category' => 'checkouts',
             'icon' => 'CreditCard',
+            'variables' => [
+                ['label' => 'Checkout ID', 'value' => 'checkout.id'],
+                ['label' => 'Token', 'value' => 'checkout.token'],
+                ['label' => 'Cart Token', 'value' => 'checkout.cart_token'],
+                ['label' => 'Email', 'value' => 'checkout.email'],
+                ['label' => 'Total Price', 'value' => 'checkout.total_price'],
+                ['label' => 'Subtotal', 'value' => 'checkout.subtotal_price'],
+                ['label' => 'Total Tax', 'value' => 'checkout.total_tax'],
+                ['label' => 'Currency', 'value' => 'checkout.currency'],
+                ['label' => 'Created At', 'value' => 'checkout.created_at'],
+                ['label' => 'Completed At', 'value' => 'checkout.completed_at'],
+                ['label' => 'Shipping Address City', 'value' => 'checkout.shipping_address.city'],
+                ['label' => 'Billing Address City', 'value' => 'checkout.billing_address.city'],
+            ],
         ],
         [
             'key' => 'checkouts_update',
@@ -282,6 +530,12 @@ return [
             'topic' => 'CHECKOUTS_UPDATE',
             'category' => 'checkouts',
             'icon' => 'CreditCard',
+            'variables' => [
+                ['label' => 'Checkout ID', 'value' => 'checkout.id'],
+                ['label' => 'Total Price', 'value' => 'checkout.total_price'],
+                ['label' => 'Email', 'value' => 'checkout.email'],
+                ['label' => 'Updated At', 'value' => 'checkout.updated_at'],
+            ],
         ],
 
         // Carts
@@ -298,6 +552,7 @@ return [
                 ['label' => 'Note', 'value' => 'cart.note'],
                 ['label' => 'Updated At', 'value' => 'cart.updated_at'],
                 ['label' => 'Created At', 'value' => 'cart.created_at'],
+                ['label' => 'Line Items Count', 'value' => 'cart.line_items.length'],
             ],
         ],
         [
@@ -307,6 +562,11 @@ return [
             'topic' => 'CARTS_UPDATE',
             'category' => 'carts',
             'icon' => 'ShoppingCart',
+            'variables' => [
+                ['label' => 'Cart ID', 'value' => 'cart.id'],
+                ['label' => 'Note', 'value' => 'cart.note'],
+                ['label' => 'Updated At', 'value' => 'cart.updated_at'],
+            ],
         ],
 
         // App
@@ -317,6 +577,14 @@ return [
             'topic' => 'APP_SUBSCRIPTIONS_UPDATE',
             'category' => 'app',
             'icon' => 'AppWindow',
+             'variables' => [
+                ['label' => 'Subscription ID', 'value' => 'app_subscription.id'],
+                ['label' => 'Name', 'value' => 'app_subscription.name'],
+                ['label' => 'Status', 'value' => 'app_subscription.status'],
+                ['label' => 'Test', 'value' => 'app_subscription.test'],
+                ['label' => 'Trial Days', 'value' => 'app_subscription.trial_days'],
+                ['label' => 'Price', 'value' => 'app_subscription.price'],
+            ],
         ],
     ],
 

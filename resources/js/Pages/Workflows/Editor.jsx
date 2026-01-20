@@ -36,7 +36,7 @@ export default function WorkflowEditor({
     const [isDirty, setIsDirty] = useState(false);
     const [selectedNode, setSelectedNode] = useState(null);
     const [workflowName, setWorkflowName] = useState(
-        flow?.name || "New Workflow"
+        flow?.name || "New Workflow",
     );
     const builderRef = useRef(null);
 
@@ -56,7 +56,7 @@ export default function WorkflowEditor({
                 const parentApp = definitions.apps.find(
                     (app) =>
                         app.triggers?.some((t) => t.label === n.label) ||
-                        app.actions?.some((a) => a.label === n.label)
+                        app.actions?.some((a) => a.label === n.label),
                 );
                 if (parentApp) {
                     appName = parentApp.name.toLowerCase();
@@ -97,7 +97,7 @@ export default function WorkflowEditor({
             if (!isValid) {
                 shopify.toast.show(
                     "Cannot save: Layout has errors (check red nodes)",
-                    { isError: true }
+                    { isError: true },
                 );
                 setSaving(false);
                 return;
@@ -125,7 +125,7 @@ export default function WorkflowEditor({
                                 window.location.search,
                             {
                                 replace: true,
-                            }
+                            },
                         );
                     }
                 }
@@ -162,7 +162,7 @@ export default function WorkflowEditor({
                 setIsSelectorOpen(false); // Close the selector after selection
             }
         },
-        [insertContext]
+        [insertContext],
     );
 
     const handleSidebarNodeClick = useCallback((nodeDef) => {
@@ -207,7 +207,7 @@ export default function WorkflowEditor({
                         isError: true,
                     });
                 },
-            }
+            },
         );
     };
 
@@ -317,10 +317,13 @@ export default function WorkflowEditor({
         for (const app of definitions.apps) {
             const t = app.triggers?.find(
                 (tr) =>
+                    // Check settings.topic (legacy/nested) OR root-level topic (standard)
                     (connectedTrigger.data.settings?.topic &&
-                        tr.settings?.topic ===
-                            connectedTrigger.data.settings?.topic) ||
-                    tr.label === connectedTrigger.data.label
+                        (tr.settings?.topic ===
+                            connectedTrigger.data.settings?.topic ||
+                            tr.topic ===
+                                connectedTrigger.data.settings?.topic)) ||
+                    tr.label === connectedTrigger.data.label,
             );
             if (t) {
                 setAvailableVariables(t.variables || []);
@@ -397,7 +400,7 @@ export default function WorkflowEditor({
                         <button
                             onClick={() =>
                                 router.visit(
-                                    `/workflows${window.location.search}`
+                                    `/workflows${window.location.search}`,
                                 )
                             }
                             className="p-2 -ml-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
@@ -451,8 +454,8 @@ export default function WorkflowEditor({
                             {saving
                                 ? "Saving..."
                                 : isDirty
-                                ? "Unsaved Changes"
-                                : "All changes saved"}
+                                  ? "Unsaved Changes"
+                                  : "All changes saved"}
                         </span>
 
                         <Button
