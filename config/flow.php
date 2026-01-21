@@ -90,36 +90,66 @@ return [
             'category' => 'orders',
             'icon' => 'ShoppingBag',
             'variables' => [
-                 // Identity
-                 ['label' => 'Order Name (e.g. #1001)', 'value' => 'order.name'],
-                 ['label' => 'Order ID', 'value' => 'order.id'],
-                 ['label' => 'Order Number', 'value' => 'order.order_number'],
-                 
-                 // Financials
-                 ['label' => 'Total Price', 'value' => 'order.total_price'],
-                 ['label' => 'Subtotal', 'value' => 'order.subtotal_price'],
-                 ['label' => 'Total Tax', 'value' => 'order.total_tax'],
-                 ['label' => 'Financial Status', 'value' => 'order.financial_status'],
-                 
-                 // Customer
-                 ['label' => 'Customer Email', 'value' => 'order.email'],
-                 ['label' => 'Customer First Name', 'value' => 'order.customer.first_name'],
-                 ['label' => 'Customer Last Name', 'value' => 'order.customer.last_name'],
-                 ['label' => 'Customer Tags', 'value' => 'order.customer.tags'],
- 
-                 // Addresses
-                 ['label' => 'Billing City', 'value' => 'order.billing_address.city'],
-                 ['label' => 'Billing Country Code', 'value' => 'order.billing_address.country_code'],
-                 ['label' => 'Shipping City', 'value' => 'order.shipping_address.city'],
-                 ['label' => 'Shipping Country Code', 'value' => 'order.shipping_address.country_code'],
- 
-                 // Fulfillment
-                 ['label' => 'Fulfillment Status', 'value' => 'order.fulfillment_status'],
-                 
-                 // Meta
-                 ['label' => 'Tags', 'value' => 'order.tags'],
-                 ['label' => 'Note', 'value' => 'order.note'],
-                 ['label' => 'Updated At', 'value' => 'order.updated_at'],
+                // Identity
+                ['label' => 'Order Name (e.g. #1001)', 'value' => 'order.name'],
+                ['label' => 'Order ID', 'value' => 'order.id'],
+                ['label' => 'Order Number', 'value' => 'order.order_number'],
+                ['label' => 'Processed At', 'value' => 'order.processed_at'],
+                
+                // Financials
+                ['label' => 'Total Price', 'value' => 'order.total_price'],
+                ['label' => 'Subtotal', 'value' => 'order.subtotal_price'],
+                ['label' => 'Total Tax', 'value' => 'order.total_tax'],
+                ['label' => 'Total Discounts', 'value' => 'order.total_discounts'],
+                ['label' => 'Total Line Items Price', 'value' => 'order.total_line_items_price'],
+                ['label' => 'Outstanding Balance', 'value' => 'order.total_outstanding'],
+                ['label' => 'Currency', 'value' => 'order.currency'],
+                ['label' => 'Financial Status', 'value' => 'order.financial_status'],
+                ['label' => 'Payment Gateway Names', 'value' => 'order.payment_gateway_names.0'], // First gateway
+                ['label' => 'Taxes Included', 'value' => 'order.taxes_included'],
+                
+                // Customer
+                ['label' => 'Customer Email', 'value' => 'order.email'],
+                ['label' => 'Customer Phone', 'value' => 'order.phone'],
+                ['label' => 'Customer ID', 'value' => 'order.customer.id'],
+                ['label' => 'Customer First Name', 'value' => 'order.customer.first_name'],
+                ['label' => 'Customer Last Name', 'value' => 'order.customer.last_name'],
+                ['label' => 'Customer Orders Count', 'value' => 'order.customer.orders_count'],
+                ['label' => 'Customer Total Spent', 'value' => 'order.customer.total_spent'],
+                ['label' => 'Customer Tags', 'value' => 'order.customer.tags'],
+                ['label' => 'Customer Verified Email', 'value' => 'order.customer.verified_email'],
+                ['label' => 'Customer Accepts Marketing', 'value' => 'order.customer.accepts_marketing'],
+
+                // Addresses
+                ['label' => 'Billing Name', 'value' => 'order.billing_address.name'],
+                ['label' => 'Billing City', 'value' => 'order.billing_address.city'],
+                ['label' => 'Billing Country', 'value' => 'order.billing_address.country'],
+                ['label' => 'Billing Country Code', 'value' => 'order.billing_address.country_code'],
+                ['label' => 'Billing Zip', 'value' => 'order.billing_address.zip'],
+                ['label' => 'Billing Province', 'value' => 'order.billing_address.province'],
+                
+                ['label' => 'Shipping Name', 'value' => 'order.shipping_address.name'],
+                ['label' => 'Shipping City', 'value' => 'order.shipping_address.city'],
+                ['label' => 'Shipping Country', 'value' => 'order.shipping_address.country'],
+                ['label' => 'Shipping Country Code', 'value' => 'order.shipping_address.country_code'],
+                ['label' => 'Shipping Zip', 'value' => 'order.shipping_address.zip'],
+                ['label' => 'Shipping Province', 'value' => 'order.shipping_address.province'],
+                ['label' => 'Shipping Phone', 'value' => 'order.shipping_address.phone'],
+
+                // Fulfillment
+                ['label' => 'Fulfillment Status', 'value' => 'order.fulfillment_status'],
+                ['label' => 'Shipping Lines Title', 'value' => 'order.shipping_lines.0.title'],
+                ['label' => 'Shipping Lines Price', 'value' => 'order.shipping_lines.0.price'],
+                
+                // Meta
+                ['label' => 'Tags', 'value' => 'order.tags'],
+                ['label' => 'Note', 'value' => 'order.note'],
+                ['label' => 'Referring Site', 'value' => 'order.referring_site'],
+                ['label' => 'Landing Site', 'value' => 'order.landing_site'],
+                ['label' => 'Cancel Reason', 'value' => 'order.cancel_reason'],
+                ['label' => 'Buyer Accepts Marketing', 'value' => 'order.buyer_accepts_marketing'],
+                ['label' => 'Test Order', 'value' => 'order.test'],
+                ['label' => 'Validation Link', 'value' => 'order.order_status_url'],
             ],
         ],
         [
@@ -130,9 +160,66 @@ return [
             'category' => 'orders',
             'icon' => 'ShoppingBag',
             'variables' => [
-                ['label' => 'Order Name', 'value' => 'order.name'],
+                // Identity
+                ['label' => 'Order Name (e.g. #1001)', 'value' => 'order.name'],
+                ['label' => 'Order ID', 'value' => 'order.id'],
+                ['label' => 'Order Number', 'value' => 'order.order_number'],
+                ['label' => 'Processed At', 'value' => 'order.processed_at'],
+                
+                // Financials
                 ['label' => 'Total Price', 'value' => 'order.total_price'],
+                ['label' => 'Subtotal', 'value' => 'order.subtotal_price'],
+                ['label' => 'Total Tax', 'value' => 'order.total_tax'],
+                ['label' => 'Total Discounts', 'value' => 'order.total_discounts'],
+                ['label' => 'Total Line Items Price', 'value' => 'order.total_line_items_price'],
+                ['label' => 'Outstanding Balance', 'value' => 'order.total_outstanding'],
+                ['label' => 'Currency', 'value' => 'order.currency'],
                 ['label' => 'Financial Status', 'value' => 'order.financial_status'],
+                ['label' => 'Payment Gateway Names', 'value' => 'order.payment_gateway_names.0'], // First gateway
+                ['label' => 'Taxes Included', 'value' => 'order.taxes_included'],
+                
+                // Customer
+                ['label' => 'Customer Email', 'value' => 'order.email'],
+                ['label' => 'Customer Phone', 'value' => 'order.phone'],
+                ['label' => 'Customer ID', 'value' => 'order.customer.id'],
+                ['label' => 'Customer First Name', 'value' => 'order.customer.first_name'],
+                ['label' => 'Customer Last Name', 'value' => 'order.customer.last_name'],
+                ['label' => 'Customer Orders Count', 'value' => 'order.customer.orders_count'],
+                ['label' => 'Customer Total Spent', 'value' => 'order.customer.total_spent'],
+                ['label' => 'Customer Tags', 'value' => 'order.customer.tags'],
+                ['label' => 'Customer Verified Email', 'value' => 'order.customer.verified_email'],
+                ['label' => 'Customer Accepts Marketing', 'value' => 'order.customer.accepts_marketing'],
+
+                // Addresses
+                ['label' => 'Billing Name', 'value' => 'order.billing_address.name'],
+                ['label' => 'Billing City', 'value' => 'order.billing_address.city'],
+                ['label' => 'Billing Country', 'value' => 'order.billing_address.country'],
+                ['label' => 'Billing Country Code', 'value' => 'order.billing_address.country_code'],
+                ['label' => 'Billing Zip', 'value' => 'order.billing_address.zip'],
+                ['label' => 'Billing Province', 'value' => 'order.billing_address.province'],
+                
+                ['label' => 'Shipping Name', 'value' => 'order.shipping_address.name'],
+                ['label' => 'Shipping City', 'value' => 'order.shipping_address.city'],
+                ['label' => 'Shipping Country', 'value' => 'order.shipping_address.country'],
+                ['label' => 'Shipping Country Code', 'value' => 'order.shipping_address.country_code'],
+                ['label' => 'Shipping Zip', 'value' => 'order.shipping_address.zip'],
+                ['label' => 'Shipping Province', 'value' => 'order.shipping_address.province'],
+                ['label' => 'Shipping Phone', 'value' => 'order.shipping_address.phone'],
+
+                // Fulfillment
+                ['label' => 'Fulfillment Status', 'value' => 'order.fulfillment_status'],
+                ['label' => 'Shipping Lines Title', 'value' => 'order.shipping_lines.0.title'],
+                ['label' => 'Shipping Lines Price', 'value' => 'order.shipping_lines.0.price'],
+                
+                // Meta
+                ['label' => 'Tags', 'value' => 'order.tags'],
+                ['label' => 'Note', 'value' => 'order.note'],
+                ['label' => 'Referring Site', 'value' => 'order.referring_site'],
+                ['label' => 'Landing Site', 'value' => 'order.landing_site'],
+                ['label' => 'Cancel Reason', 'value' => 'order.cancel_reason'],
+                ['label' => 'Buyer Accepts Marketing', 'value' => 'order.buyer_accepts_marketing'],
+                ['label' => 'Test Order', 'value' => 'order.test'],
+                ['label' => 'Validation Link', 'value' => 'order.order_status_url'],
             ],
         ],
         [
@@ -143,9 +230,66 @@ return [
             'category' => 'orders',
             'icon' => 'ShoppingBag',
             'variables' => [
-                ['label' => 'Order Name', 'value' => 'order.name'],
+                // Identity
+                ['label' => 'Order Name (e.g. #1001)', 'value' => 'order.name'],
+                ['label' => 'Order ID', 'value' => 'order.id'],
+                ['label' => 'Order Number', 'value' => 'order.order_number'],
+                ['label' => 'Processed At', 'value' => 'order.processed_at'],
+                
+                // Financials
+                ['label' => 'Total Price', 'value' => 'order.total_price'],
+                ['label' => 'Subtotal', 'value' => 'order.subtotal_price'],
+                ['label' => 'Total Tax', 'value' => 'order.total_tax'],
+                ['label' => 'Total Discounts', 'value' => 'order.total_discounts'],
+                ['label' => 'Total Line Items Price', 'value' => 'order.total_line_items_price'],
+                ['label' => 'Outstanding Balance', 'value' => 'order.total_outstanding'],
+                ['label' => 'Currency', 'value' => 'order.currency'],
+                ['label' => 'Financial Status', 'value' => 'order.financial_status'],
+                ['label' => 'Payment Gateway Names', 'value' => 'order.payment_gateway_names.0'], // First gateway
+                ['label' => 'Taxes Included', 'value' => 'order.taxes_included'],
+                
+                // Customer
+                ['label' => 'Customer Email', 'value' => 'order.email'],
+                ['label' => 'Customer Phone', 'value' => 'order.phone'],
+                ['label' => 'Customer ID', 'value' => 'order.customer.id'],
+                ['label' => 'Customer First Name', 'value' => 'order.customer.first_name'],
+                ['label' => 'Customer Last Name', 'value' => 'order.customer.last_name'],
+                ['label' => 'Customer Orders Count', 'value' => 'order.customer.orders_count'],
+                ['label' => 'Customer Total Spent', 'value' => 'order.customer.total_spent'],
+                ['label' => 'Customer Tags', 'value' => 'order.customer.tags'],
+                ['label' => 'Customer Verified Email', 'value' => 'order.customer.verified_email'],
+                ['label' => 'Customer Accepts Marketing', 'value' => 'order.customer.accepts_marketing'],
+
+                // Addresses
+                ['label' => 'Billing Name', 'value' => 'order.billing_address.name'],
+                ['label' => 'Billing City', 'value' => 'order.billing_address.city'],
+                ['label' => 'Billing Country', 'value' => 'order.billing_address.country'],
+                ['label' => 'Billing Country Code', 'value' => 'order.billing_address.country_code'],
+                ['label' => 'Billing Zip', 'value' => 'order.billing_address.zip'],
+                ['label' => 'Billing Province', 'value' => 'order.billing_address.province'],
+                
+                ['label' => 'Shipping Name', 'value' => 'order.shipping_address.name'],
+                ['label' => 'Shipping City', 'value' => 'order.shipping_address.city'],
+                ['label' => 'Shipping Country', 'value' => 'order.shipping_address.country'],
+                ['label' => 'Shipping Country Code', 'value' => 'order.shipping_address.country_code'],
+                ['label' => 'Shipping Zip', 'value' => 'order.shipping_address.zip'],
+                ['label' => 'Shipping Province', 'value' => 'order.shipping_address.province'],
+                ['label' => 'Shipping Phone', 'value' => 'order.shipping_address.phone'],
+
+                // Fulfillment
+                ['label' => 'Fulfillment Status', 'value' => 'order.fulfillment_status'],
+                ['label' => 'Shipping Lines Title', 'value' => 'order.shipping_lines.0.title'],
+                ['label' => 'Shipping Lines Price', 'value' => 'order.shipping_lines.0.price'],
+                
+                // Meta
+                ['label' => 'Tags', 'value' => 'order.tags'],
+                ['label' => 'Note', 'value' => 'order.note'],
+                ['label' => 'Referring Site', 'value' => 'order.referring_site'],
+                ['label' => 'Landing Site', 'value' => 'order.landing_site'],
                 ['label' => 'Cancel Reason', 'value' => 'order.cancel_reason'],
-                ['label' => 'Cancelled At', 'value' => 'order.cancelled_at'],
+                ['label' => 'Buyer Accepts Marketing', 'value' => 'order.buyer_accepts_marketing'],
+                ['label' => 'Test Order', 'value' => 'order.test'],
+                ['label' => 'Validation Link', 'value' => 'order.order_status_url'],
             ],
         ],
         [
@@ -156,8 +300,66 @@ return [
             'category' => 'orders',
             'icon' => 'ShoppingBag',
             'variables' => [
-                ['label' => 'Order Name', 'value' => 'order.name'],
+                // Identity
+                ['label' => 'Order Name (e.g. #1001)', 'value' => 'order.name'],
+                ['label' => 'Order ID', 'value' => 'order.id'],
+                ['label' => 'Order Number', 'value' => 'order.order_number'],
+                ['label' => 'Processed At', 'value' => 'order.processed_at'],
+                
+                // Financials
+                ['label' => 'Total Price', 'value' => 'order.total_price'],
+                ['label' => 'Subtotal', 'value' => 'order.subtotal_price'],
+                ['label' => 'Total Tax', 'value' => 'order.total_tax'],
+                ['label' => 'Total Discounts', 'value' => 'order.total_discounts'],
+                ['label' => 'Total Line Items Price', 'value' => 'order.total_line_items_price'],
+                ['label' => 'Outstanding Balance', 'value' => 'order.total_outstanding'],
+                ['label' => 'Currency', 'value' => 'order.currency'],
+                ['label' => 'Financial Status', 'value' => 'order.financial_status'],
+                ['label' => 'Payment Gateway Names', 'value' => 'order.payment_gateway_names.0'], // First gateway
+                ['label' => 'Taxes Included', 'value' => 'order.taxes_included'],
+                
+                // Customer
+                ['label' => 'Customer Email', 'value' => 'order.email'],
+                ['label' => 'Customer Phone', 'value' => 'order.phone'],
+                ['label' => 'Customer ID', 'value' => 'order.customer.id'],
+                ['label' => 'Customer First Name', 'value' => 'order.customer.first_name'],
+                ['label' => 'Customer Last Name', 'value' => 'order.customer.last_name'],
+                ['label' => 'Customer Orders Count', 'value' => 'order.customer.orders_count'],
+                ['label' => 'Customer Total Spent', 'value' => 'order.customer.total_spent'],
+                ['label' => 'Customer Tags', 'value' => 'order.customer.tags'],
+                ['label' => 'Customer Verified Email', 'value' => 'order.customer.verified_email'],
+                ['label' => 'Customer Accepts Marketing', 'value' => 'order.customer.accepts_marketing'],
+
+                // Addresses
+                ['label' => 'Billing Name', 'value' => 'order.billing_address.name'],
+                ['label' => 'Billing City', 'value' => 'order.billing_address.city'],
+                ['label' => 'Billing Country', 'value' => 'order.billing_address.country'],
+                ['label' => 'Billing Country Code', 'value' => 'order.billing_address.country_code'],
+                ['label' => 'Billing Zip', 'value' => 'order.billing_address.zip'],
+                ['label' => 'Billing Province', 'value' => 'order.billing_address.province'],
+                
+                ['label' => 'Shipping Name', 'value' => 'order.shipping_address.name'],
+                ['label' => 'Shipping City', 'value' => 'order.shipping_address.city'],
+                ['label' => 'Shipping Country', 'value' => 'order.shipping_address.country'],
+                ['label' => 'Shipping Country Code', 'value' => 'order.shipping_address.country_code'],
+                ['label' => 'Shipping Zip', 'value' => 'order.shipping_address.zip'],
+                ['label' => 'Shipping Province', 'value' => 'order.shipping_address.province'],
+                ['label' => 'Shipping Phone', 'value' => 'order.shipping_address.phone'],
+
+                // Fulfillment
                 ['label' => 'Fulfillment Status', 'value' => 'order.fulfillment_status'],
+                ['label' => 'Shipping Lines Title', 'value' => 'order.shipping_lines.0.title'],
+                ['label' => 'Shipping Lines Price', 'value' => 'order.shipping_lines.0.price'],
+                
+                // Meta
+                ['label' => 'Tags', 'value' => 'order.tags'],
+                ['label' => 'Note', 'value' => 'order.note'],
+                ['label' => 'Referring Site', 'value' => 'order.referring_site'],
+                ['label' => 'Landing Site', 'value' => 'order.landing_site'],
+                ['label' => 'Cancel Reason', 'value' => 'order.cancel_reason'],
+                ['label' => 'Buyer Accepts Marketing', 'value' => 'order.buyer_accepts_marketing'],
+                ['label' => 'Test Order', 'value' => 'order.test'],
+                ['label' => 'Validation Link', 'value' => 'order.order_status_url'],
             ],
         ],
         [
@@ -167,6 +369,68 @@ return [
             'topic' => 'ORDERS_PARTIALLY_FULFILLED',
             'category' => 'orders',
             'icon' => 'ShoppingBag',
+            'variables' => [
+                // Identity
+                ['label' => 'Order Name (e.g. #1001)', 'value' => 'order.name'],
+                ['label' => 'Order ID', 'value' => 'order.id'],
+                ['label' => 'Order Number', 'value' => 'order.order_number'],
+                ['label' => 'Processed At', 'value' => 'order.processed_at'],
+                
+                // Financials
+                ['label' => 'Total Price', 'value' => 'order.total_price'],
+                ['label' => 'Subtotal', 'value' => 'order.subtotal_price'],
+                ['label' => 'Total Tax', 'value' => 'order.total_tax'],
+                ['label' => 'Total Discounts', 'value' => 'order.total_discounts'],
+                ['label' => 'Total Line Items Price', 'value' => 'order.total_line_items_price'],
+                ['label' => 'Outstanding Balance', 'value' => 'order.total_outstanding'],
+                ['label' => 'Currency', 'value' => 'order.currency'],
+                ['label' => 'Financial Status', 'value' => 'order.financial_status'],
+                ['label' => 'Payment Gateway Names', 'value' => 'order.payment_gateway_names.0'], // First gateway
+                ['label' => 'Taxes Included', 'value' => 'order.taxes_included'],
+                
+                // Customer
+                ['label' => 'Customer Email', 'value' => 'order.email'],
+                ['label' => 'Customer Phone', 'value' => 'order.phone'],
+                ['label' => 'Customer ID', 'value' => 'order.customer.id'],
+                ['label' => 'Customer First Name', 'value' => 'order.customer.first_name'],
+                ['label' => 'Customer Last Name', 'value' => 'order.customer.last_name'],
+                ['label' => 'Customer Orders Count', 'value' => 'order.customer.orders_count'],
+                ['label' => 'Customer Total Spent', 'value' => 'order.customer.total_spent'],
+                ['label' => 'Customer Tags', 'value' => 'order.customer.tags'],
+                ['label' => 'Customer Verified Email', 'value' => 'order.customer.verified_email'],
+                ['label' => 'Customer Accepts Marketing', 'value' => 'order.customer.accepts_marketing'],
+
+                // Addresses
+                ['label' => 'Billing Name', 'value' => 'order.billing_address.name'],
+                ['label' => 'Billing City', 'value' => 'order.billing_address.city'],
+                ['label' => 'Billing Country', 'value' => 'order.billing_address.country'],
+                ['label' => 'Billing Country Code', 'value' => 'order.billing_address.country_code'],
+                ['label' => 'Billing Zip', 'value' => 'order.billing_address.zip'],
+                ['label' => 'Billing Province', 'value' => 'order.billing_address.province'],
+                
+                ['label' => 'Shipping Name', 'value' => 'order.shipping_address.name'],
+                ['label' => 'Shipping City', 'value' => 'order.shipping_address.city'],
+                ['label' => 'Shipping Country', 'value' => 'order.shipping_address.country'],
+                ['label' => 'Shipping Country Code', 'value' => 'order.shipping_address.country_code'],
+                ['label' => 'Shipping Zip', 'value' => 'order.shipping_address.zip'],
+                ['label' => 'Shipping Province', 'value' => 'order.shipping_address.province'],
+                ['label' => 'Shipping Phone', 'value' => 'order.shipping_address.phone'],
+
+                // Fulfillment
+                ['label' => 'Fulfillment Status', 'value' => 'order.fulfillment_status'],
+                ['label' => 'Shipping Lines Title', 'value' => 'order.shipping_lines.0.title'],
+                ['label' => 'Shipping Lines Price', 'value' => 'order.shipping_lines.0.price'],
+                
+                // Meta
+                ['label' => 'Tags', 'value' => 'order.tags'],
+                ['label' => 'Note', 'value' => 'order.note'],
+                ['label' => 'Referring Site', 'value' => 'order.referring_site'],
+                ['label' => 'Landing Site', 'value' => 'order.landing_site'],
+                ['label' => 'Cancel Reason', 'value' => 'order.cancel_reason'],
+                ['label' => 'Buyer Accepts Marketing', 'value' => 'order.buyer_accepts_marketing'],
+                ['label' => 'Test Order', 'value' => 'order.test'],
+                ['label' => 'Validation Link', 'value' => 'order.order_status_url'],
+            ],
         ],
         
         // Products
@@ -214,12 +478,18 @@ return [
                 ['label' => 'Vendor', 'value' => 'product.vendor'],
                 ['label' => 'Status', 'value' => 'product.status'],
                 ['label' => 'Tags', 'value' => 'product.tags'],
-                ['label' => 'Updated At', 'value' => 'product.updated_at'],
                 ['label' => 'Template Suffix', 'value' => 'product.template_suffix'],
-                // Variants (simplified)
-                ['label' => 'Price (Var 1)', 'value' => 'product.variants.0.price'],
-                ['label' => 'Inventory (Var 1)', 'value' => 'product.variants.0.inventory_quantity'],
-                ['label' => 'SKU (Var 1)', 'value' => 'product.variants.0.sku'],
+                ['label' => 'Published Scope', 'value' => 'product.published_scope'],
+                ['label' => 'Created At', 'value' => 'product.created_at'],
+                ['label' => 'Published At', 'value' => 'product.published_at'],
+                // Variants
+                ['label' => 'Total Variants', 'value' => 'product.variants.length'],
+                ['label' => 'First Variant Price', 'value' => 'product.variants.0.price'],
+                ['label' => 'First Variant SKU', 'value' => 'product.variants.0.sku'],
+                ['label' => 'First Variant Inventory', 'value' => 'product.variants.0.inventory_quantity'],
+                ['label' => 'First Variant Weight', 'value' => 'product.variants.0.weight'],
+                ['label' => 'First Variant Requires Shipping', 'value' => 'product.variants.0.requires_shipping'],
+                ['label' => 'First Variant Taxable', 'value' => 'product.variants.0.taxable'],
             ],
         ],
         [
@@ -276,11 +546,23 @@ return [
                 ['label' => 'First Name', 'value' => 'customer.first_name'],
                 ['label' => 'Last Name', 'value' => 'customer.last_name'],
                 ['label' => 'Email', 'value' => 'customer.email'],
+                ['label' => 'Customer ID', 'value' => 'customer.id'],
+                ['label' => 'Phone', 'value' => 'customer.phone'],
                 ['label' => 'Total Spent', 'value' => 'customer.total_spent'],
                 ['label' => 'Orders Count', 'value' => 'customer.orders_count'],
                 ['label' => 'State', 'value' => 'customer.state'],
+                ['label' => 'Verified Email', 'value' => 'customer.verified_email'],
+                ['label' => 'Accepts Marketing', 'value' => 'customer.accepts_marketing'],
+                ['label' => 'Tax Exempt', 'value' => 'customer.tax_exempt'],
+                ['label' => 'Currency', 'value' => 'customer.currency'],
                 ['label' => 'Tags', 'value' => 'customer.tags'],
-                ['label' => 'Updated At', 'value' => 'customer.updated_at'],
+                ['label' => 'Created At', 'value' => 'customer.created_at'],
+                // Default Address
+                ['label' => 'Default Address City', 'value' => 'customer.default_address.city'],
+                ['label' => 'Default Address Country', 'value' => 'customer.default_address.country_code'],
+                ['label' => 'Default Address State', 'value' => 'customer.default_address.province'],
+                ['label' => 'Default Address Zip', 'value' => 'customer.default_address.zip'],
+                ['label' => 'Default Address Company', 'value' => 'customer.default_address.company'],
             ],
         ],
         [
@@ -290,6 +572,9 @@ return [
             'topic' => 'CUSTOMERS_DELETE',
             'category' => 'customers',
             'icon' => 'Users',
+            'variables' => [
+                 ['label' => 'Customer ID', 'value' => 'customer.id'],
+            ],
         ],
         
         // Collections
