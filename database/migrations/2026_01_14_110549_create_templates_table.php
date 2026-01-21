@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('category')->nullable();
             $table->json('tags')->nullable();
+            $table->json('connectors')->nullable();
             $table->json('workflow_data')->nullable(); // contains {nodes: [], edges: []}
             $table->timestamps();
         });

@@ -16,26 +16,30 @@ class TemplateSeeder extends Seeder
         }
 
         $json = File::get($path);
-        $data = json_decode($json, true);
+        // Decode as array
+        $templates = json_decode($json, true);
 
-        $exclude = [
-            'pageTitle', 'queryPlaceholder', 'page-not-found', 'empty-state',
-            'pagination', 'footerLink', 'eye-tooltip', 'categoriesSelection',
-            'tagsSelection', 'taggedWith', 'preview', 'filters', 'resourceName'
-        ];
+        if (!is_array($templates)) {
+            return;
+        }
 
-        foreach ($data as $key => $item) {
-            if (in_array($key, $exclude)) continue;
-            if (!is_array($item)) continue;
-            if (!isset($item['title'])) continue;
+        foreach ($templates as $item) {
+            // Basic validation
+            if (!isset($item['slug']) || !isset($item['name'])) {
+                continue;
+            }
 
             Template::updateOrCreate(
-                ['slug' => $key],
+                ['slug' => $item['slug']],
                 [
-                    'name' => $item['title'],
+                    'name' => $item['name'],
                     'description' => $item['description'] ?? '',
+                    'category' => $item['category'] ?? null,
+                    'tags' => $item['tags'] ?? [],
+                    'connectors' => $item['connectors'] ?? ['shopify'],
+                    // Preserve existing workflow data if we were updating, but for seeding fresh we default to empty.
+                    // Ideally we might want to seed real nodes/edges eventually.
                     'workflow_data' => ['nodes' => [], 'edges' => []],
-                    'tags' => [],
                 ]
             );
         }

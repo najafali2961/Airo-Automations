@@ -36,7 +36,8 @@ import TemplatePreview from "./Partials/TemplatePreview";
 const LOGOS = {
     slack: "https://cdn.worldvectorlogo.com/logos/slack-new-logo.svg",
     klaviyo: "https://cdn.worldvectorlogo.com/logos/klaviyo.svg",
-    email: "https://cdn.shopify.com/s/files/1/0262/4071/2726/files/email-icon.png", // Generic email
+    email: "https://cdn.worldvectorlogo.com/logos/gmail-icon.svg", // Generic email
+    smtp: "https://cdn.worldvectorlogo.com/logos/gmail-icon.svg", // SMTP using generic email icon or specific if available
     shopify: "https://cdn.worldvectorlogo.com/logos/shopify.svg",
     google: "https://cdn.worldvectorlogo.com/logos/google-drive.svg",
 };
@@ -64,6 +65,11 @@ export default function Index({ templates = [] }) {
 
     // --- Helper to get connectors from template ---
     const getConnectors = (template) => {
+        if (template.connectors && Array.isArray(template.connectors)) {
+            return template.connectors;
+        }
+
+        // Fallback for old data without 'connectors' property
         const text = (template.name + " " + template.description).toLowerCase();
         const connectors = [];
         if (text.includes("slack")) connectors.push("slack");
@@ -249,6 +255,7 @@ export default function Index({ templates = [] }) {
         <Page
             title="Template Gallery"
             subtitle="Explore pre-built automation workflows."
+            backAction={{ content: "Dashboard", url: "/" }}
             primaryAction={{
                 content: "Create from scratch",
                 url: "/workflows/create",
@@ -411,6 +418,38 @@ export default function Index({ templates = [] }) {
                                                         </Text>
                                                     </div>
                                                 </BlockStack>
+
+                                                {template.tags &&
+                                                    template.tags.length >
+                                                        0 && (
+                                                        <InlineStack
+                                                            gap="200"
+                                                            wrap
+                                                        >
+                                                            {template.tags
+                                                                .slice(0, 3)
+                                                                .map((tag) => (
+                                                                    <Badge
+                                                                        key={
+                                                                            tag
+                                                                        }
+                                                                        tone="new"
+                                                                    >
+                                                                        {tag}
+                                                                    </Badge>
+                                                                ))}
+                                                            {template.tags
+                                                                .length > 3 && (
+                                                                <Badge tone="new">
+                                                                    +
+                                                                    {template
+                                                                        .tags
+                                                                        .length -
+                                                                        3}
+                                                                </Badge>
+                                                            )}
+                                                        </InlineStack>
+                                                    )}
 
                                                 <Button
                                                     onClick={() =>

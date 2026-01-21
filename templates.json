@@ -1,536 +1,706 @@
-{
-    "pageTitle": "Templates",
-    "queryPlaceholder": "Search templates...",
-    "page-not-found": {
-        "description": "Something went wrong. Unable to load templates at the moment.",
-        "action": "Return to the homepage"
-    },
-    "empty-state": {
-        "title": "No templates found",
-        "description": "We couldn't find any templates matching your search criteria."
-    },
-    "pagination": "{{startItem}}-{{endItem}} of {{totalItems}}",
-    "footerLink": "templates",
-    "eye-tooltip": "Click to preview the template",
-    "categoriesSelection": {
-        "title": "Categories",
-        "appliedFilters": "Selected category|Selected categories"
-    },
-    "tagsSelection": {
-        "title": "Tags",
-        "appliedFilters": "Selected tag|Selected tags"
-    },
-    "taggedWith": {
-        "appliedFilters": {
-            "label": "Tagged with",
-            "autocomplete": {
-                "label": "Tags",
-                "listTitle": "Suggested Tags"
-            }
-        }
-    },
-    "preview": {
-        "title": "Template preview",
-        "closeButton": "Close",
-        "createButton": "Create new"
-    },
-    "filters": {
-        "categories": {
-            "actions": "Actions",
-            "automated": "Automated",
-            "blacklist": "Blacklist",
-            "featured": "Featured",
-            "marketing": "Marketing",
-            "notifications": "Notifications",
-            "scheduling": "Scheduling",
-            "tags": "Tags",
-            "run-code": "Run code",
-            "post-purchase": "Post purchase",
-            "one-shot": "One-Shot",
-            "observe": "Observe",
-            "function": "Function",
-            "discount": "Discount"
-        },
-        "tabs": {
-            "all": "All"
-        },
-        "tags": {
-            "automated": "automated",
-            "add-order-tags": "add order tags",
-            "alerts": "alerts",
-            "archive-order": "archive order",
-            "auto-tag": "auto tag",
-            "back-in-stock": "back in stock",
-            "blacklist": "black list",
-            "bonus": "bonus",
-            "capture-payment": "capture payment",
-            "cancel-order": "cancel order",
-            "checkout": "checkout",
-            "checkout-condition": "checkout condition",
-            "counters": "counters",
-            "create-discount": "create discount",
-            "currency-code": "currency code",
-            "customer-email-check": "customer email check",
-            "customer-id": "customer id",
-            "customer-notes": "customer notes",
-            "customer-spent-amount": "customer spent amount",
-            "customer-tags": "customer tags",
-            "credits": "credits",
-            "delay": "delay",
-            "discount-code": "discount code",
-            "free-order": "free order",
-            "fulfillment-status": "fulfillment status",
-            "hide-product": "hide product",
-            "hold-fulfillment": "hold fulfillment",
-            "html-template": "html template",
-            "inventory-changes": "inventory changes",
-            "inventory-events": "inventory events",
-            "inventory-resupply": "inventory resupply",
-            "liquidjs": "liquidjs",
-            "low-inventory-report": "low inventory report",
-            "loyalty": "loyalty",
-            "marketing-consent": "marketing consent",
-            "new-products-notification": "new products notification",
-            "once-per-customer": "once per customer",
-            "once-per-product": "once per product",
-            "order": "order",
-            "order-attributes": "order attributes",
-            "order-condition": "order condition",
-            "order-currency": "order currency",
-            "order-financial-status": "order financial status",
-            "order-fulfillment-status": "order fulfillment status",
-            "order-line-item": "order line item",
-            "order-notes": "order notes",
-            "order-paid": "order paid",
-            "order-risk-level": "order risk level",
-            "order-tags": "order tags",
-            "order-variables": "order variables",
-            "orders-sales-report": "orders sales report",
-            "out-of-stock": "out of stock",
-            "previous-order": "previous order",
-            "product-conditions": "product conditions",
-            "product-tags": "product tags",
-            "products-sales-report": "products sales report",
-            "product-variables": "product variables",
-            "publish-product": "publish product",
-            "product": "product",
-            "products": "products",
-            "return": "return",
-            "send-email": "send email",
-            "send-order-invoice": "send order invoice",
-            "spent-by-period": "spent by period",
-            "time-of-day": "time of day",
-            "total-inventory": "total inventory",
-            "total-price": "total price",
-            "vip-customer": "vip customer",
-            "observe-order": "observe order",
-            "observe-product": "observe product",
-            "fulfillment": "fulfillment",
-            "payment": "payment",
-            "email": "email",
-            "discount": "discount",
-            "shipping": "shipping",
-            "cart-line": "cart line",
-            "company": "company",
-            "customer": "customer",
-            "deliverable-line": "deliverable line",
-            "delivery": "delivery",
-            "selling-plan": "selling plan",
-            "shop": "shop",
-            "collection": "collection",
-            "price": "price"
-        }
-    },
-    "resourceName": {
-        "singular": "template",
-        "plural": "templates"
-    },
-    "unfulfilled-order-alert": {
-        "title": "Delayed reminder of unfulfilled orders",
-        "description": "Send a reminder about unfulfilled orders to the store owner email 2 days after the order is completed."
-    },
-    "high-risk-order-alert": {
-        "title": "High risk order alert",
-        "description": "Use this template if you want to inform about the high risk order."
-    },
-    "low-product-quantity-alert": {
-        "title": "Product quantity alert",
-        "description": "Send a message with an alert about a small number of goods to the store owner's email."
-    },
-    "accept-marketing-tag": {
-        "title": "Marketing tags",
-        "description": "Use this template if you want to assign tags for users who agree to get marketing."
-    },
-    "archive-free-orders-on-fulfillment": {
-        "title": "Archive free orders on fulfillment",
-        "description": "Archive orders with zero total when them fulfilled."
-    },
-    "block-list": {
-        "title": "Block list by mail or id",
-        "description": "Use this template if you want to create a block list of customers by mail or user id."
-    },
-    "low-risk-capture-payment": {
-        "title": "Low-risk orders auto payment capture",
-        "description": "Use this template if you want to set auto payment capture for low-risk orders."
-    },
-    "review-request": {
-        "title": "Delayed request for a review",
-        "description": "Send a request for a review to users with a completed order in a week."
-    },
-    "tag-foreign-currency-code": {
-        "title": "Tags for foreign currencies",
-        "description": "Use this template if you want to assign tags for users with foreign currencies."
-    },
-    "thank-you-order-email": {
-        "title": "Thank you message",
-        "description": "Send a thank you message for ordering by mail."
-    },
-    "tag-vip-customer": {
-        "title": "Tag VIP Customers",
-        "description": "Assign a special VIP tag to customers who make the biggest number of orders."
-    },
-    "order-line-items-includes-tags": {
-        "title": "Tag the order by purchased products tags",
-        "description": "Add the tag to the order when a purchased product has some tags."
-    },
-    "tag-order-by-purchased-products-titles": {
-        "title": "Tag the order by purchased products titles",
-        "description": "Create tags from products display names (titles) and add this tags to the order."
-    },
-    "send-sales-report-every-day": {
-        "title": "Report on sales of goods and orders",
-        "description": "A sales and order report message will be sent once a day."
-    },
-    "reminder-of-unpaid-orders": {
-        "title": "Sending a reminder of unpaid orders to users",
-        "description": "Send a reminder of payment for the order if it has not been paid for several days."
-    },
-    "notificate-customers-about-new-products": {
-        "title": "New products notification",
-        "description": "Send a notification to the user about new products in the store after ordering."
-    },
-    "email-vendor": {
-        "title": "Supplier notification",
-        "description": "This message will be sent to product suppliers if their product is ordered."
-    },
-    "email-reminder-for-low-stock-products": {
-        "title": "Low stock items report",
-        "description": "Send every day report with low stock items."
-    },
-    "hide-out-of-stock-products": {
-        "title": "Hide out of stock products",
-        "description": "Hide products whose quantity is less than or equal to zero."
-    },
-    "back-in-stock-available-products": {
-        "title": "Back in stock available products",
-        "description": "Back in stock products whose quantity is greater than zero."
-    },
-    "hot-products": {
-        "title": "Tag HOT products",
-        "description": "Marks products that have been purchased with the \"HOT\" tag, if the product is not ordered within 24 hours after that, the tag will be removed."
-    },
-    "send-email-for-first-product-purchase": {
-        "title": "Send email for first product purchase",
-        "description": "Send email when some customer ordered some product for the first time."
-    },
-    "tag-new-products": {
-        "title": "Tag new products",
-        "description": "Marks products that have been added to the store with the \"NEW\" tag, then on 30 days after that, the tag will be removed."
-    },
-    "hold-fulfillment-for-orders-awaiting-payment": {
-        "title": "Hold fulfilments for orders awaiting payments",
-        "description": "Use this template if you need to pause orders that are waiting for payment."
-    },
-    "unpaid-order-reminder": {
-        "title": "Unpaid order reminder",
-        "description": "Remind the customer about his order that was not paid within 24 hours."
-    },
-    "invoice-email-for-unpaid-orders": {
-        "title": "Invoice email for unpaid orders",
-        "description": "Send order invoice for  unpaid orders."
-    },
-    "copy-purchased-product-tags-to-customer": {
-        "title": "Copy purchased product tags to the customer",
-        "description": "Copy tags of the purchased product to the customer."
-    },
-    "send-customer-activation-link": {
-        "title": "Send customer activation link",
-        "description": "Send activation link to the customer email if account not activated."
-    },
-    "tag-vip-customers-by-monthly-spent": {
-        "title": "Tag VIP customers by monthly spent",
-        "description": "Assign tags to VIP customers based on monthly expenses."
-    },
-    "coupon-for-newsletter-subscriber": {
-        "title": "Coupon for newsletter subscriber",
-        "description": "Send a discount code to the customer's email that subscribed to SMS marketing."
-    },
-    "recover-abandoned-checkouts": {
-        "title": "Recover abandoned checkouts",
-        "description": "Send a reminder and discount code to the customer email if customer left the checkout page."
-    },
-    "send-coupon-to-customer-after-first-order": {
-        "title": "Coupon after first order",
-        "description": "Send a discount code to the email of the customer who placed their first order."
-    },
-    "add-order-note-if-certain-customer-tag": {
-        "title": "Add an order note for customers with a specific tag",
-        "description": "Append order note if the customer has a certain tag."
-    },
-    "coupon-for-next-orders": {
-        "title": "Coupon for next orders",
-        "description": "Send a discount code for future orders based on the order amount."
-    },
-    "unpublish-products-have-been-out-of-stock-for-3-days": {
-        "title": "Unpublish out-of-stock products after 3 days",
-        "description": "Hide a product if it's out of stock within 3 days."
-    },
-    "add-order-tag-for-returning-customers": {
-        "title": "Add an order tag for returning customers",
-        "description": "Add tag 'Returned customer' to the order when customer makes order after 90 days from his previous order."
-    },
-    "copy-notes-from-customers-to-their-orders": {
-        "title": "Copy customer notes to their orders",
-        "description": "Copy notes about customers into their orders if they existed when the order was created."
-    },
-    "tag-new-customers": {
-        "title": "Tag new customers",
-        "description": "Add \"New customer\" tag when the customer is created."
-    },
-    "untag-orders-when-fully-paid": {
-        "title": "Untag orders when fully paid",
-        "description": "Remove the \"Unpaid order\" tag from order when it is fully paid."
-    },
-    "untag-orders-when-paid": {
-        "title": "Untag orders when paid",
-        "description": "Remove the \"Unpaid order\" tag from order when it is paid."
-    },
-    "add-default-custom-attributes-to-new-orders": {
-        "title": "Add default custom attributes to new orders",
-        "description": "Add custom attributes to the order when it created."
-    },
-    "add-note-for-new-orders-having-certain-tag": {
-        "title": "Add a note to new orders with a specific tag",
-        "description": "Add a record to the order notes if an order has a certain tag when it is created."
-    },
-    "copy-order-notes-to-customers-note": {
-        "title": "Copy order notes to customer note",
-        "description": "When order is created copy order notes to customer notes."
-    },
-    "tag-cancelled-orders": {
-        "title": "Tag cancelled orders",
-        "description": "Add and remove tags when order is cancelled."
-    },
-    "tag-orders-by-discount-code": {
-        "title": "Tag orders by discount code",
-        "description": "Add tag with discount code to the order."
-    },
-    "untag-customers-when-certain-product-is-refunded": {
-        "title": "Untag customers when a certain product is refunded",
-        "description": "Remove the tag from customer if a product with a certain title is refunded."
-    },
-    "archive-orders-when-fulfilled": {
-        "title": "Archive orders when fulfilled",
-        "description": "Archive orders when they are fully fulfilled."
-    },
-    "capture-order-payment-after-7-days": {
-        "title": "Capture order payment after a week",
-        "description": "Capture order payment after 7 days."
-    },
-    "pay-orders-from-customers-with-certain-tag": {
-        "title": "Mark as paid for customers with a specific tag",
-        "description": "Mark an order as paid by a customer with a specific tag and remove the tag from a customer when the order is created."
-    },
-    "auto-publish-new-products": {
-        "title": "Auto publish new products",
-        "description": "Publish a new product if it is active and not yet published."
-    },
-    "tag-customers-first-order": {
-        "title": "Tag the customer's first order",
-        "description": "Assign a tag to the first order made by the customer."
-    },
-    "auto-tag-orders-when-paid": {
-        "title": "Auto-tag orders when paid",
-        "description": "Assign a tag to the newly-paid order."
-    },
-    "increase-customer-credit-by-the-order-amount": {
-        "title": "Increase customer credit by the order amount",
-        "description": "When return approved, increases customer credit on a value of returned products price."
-    },
-    "decrease-customer-credit-by-the-order-amount": {
-        "title": "Decrease customer credit by the order amount",
-        "description": "When order created, decreases customer credit on an order value."
-    },
-    "get-notified-on-slack-when-a-customer-requests-a-return": {
-        "title": "Get notified on Slack when a customer requests a return",
-        "description": "Receive a customizable slack notification when a customer submits a return request from their account."
-    },
-    "release-exchange-items-once-the-return-is-closed": {
-        "title": "Release exchange items once the return is closed",
-        "description": "When a return is closed, check if there is an outstanding balance on the order. If there is no order balance, release the exchange items."
-    },
-    "cancel-inactive-returns": {
-        "title": "Cancel inactive returns",
-        "description": "Automatically cancel a return that has not been refunded or restocked within a certain period of time."
-    },
-    "issue-store-credit-customer-percentage-of-order-amount": {
-        "title": "Issue store credit to a customer a percentage of the order amount",
-        "description": "Implement a loyalty program and issue some percent of an order amount as customer credits."
-    },
-    "issue-customer-credits-when-goods-return-is-completed": {
-        "title": "Issue customer credits when a goods return is completed",
-        "description": "You can issue store credits instead of refunds during returns to save an order income and trigger customers for the next purchase on your store."
-    },
-    "post-purchase": {
-        "title": "Coupon after first Post-purchase order",
-        "description": "Send a discount code to the customer after their first post-purchase order is completed."
-    },
-    "tag-product-when-variant-stock-is-low-at-specified-location": {
-        "title": "Tag product when variant stock is low at specified location",
-        "description": "Tags a product when variant stock drops below a set level at a chosen location."
-    },
-    "tag-customer-by-spend-across-recent-orders": {
-        "title": "Tag customer by spend across the last 20 orders",
-        "description": "Tags a customer based on how much they’ve spent across their recent orders."
-    },
-    "tag-all-customers-with-high-total-spend": {
-        "title": "Add tag to all customers with high total spend",
-        "description": "This workflow adds a tag to all customers whose total spend exceeds a certain threshold."
-    },
-    "move-the-new-product-to-a-dedicated-shipping-profile": {
-        "title": "Move the new product to a dedicated shipping profile",
-        "description": "When a product is added to the store, remove its variants from the selected shipping profile and then add those variants to another chosen shipping profile."
-    },
-    "set-observe-data-for-orders": {
-        "title": "Initialize observed fields for orders",
-        "description": "Initializes fields of existing orders so future changes trigger the workflow correctly."
-    },
-    "set-observe-data-for-products": {
-        "title": "Initialize observed fields for products",
-        "description": "Initializes fields of existing products so future changes trigger the workflow correctly."
-    },
-    "auto-tag-new-orders": {
-        "title": "Auto-tag new orders",
-        "description": "Tags an order immediately after it’s created."
-    },
-    "ask-review-after-fulfillment": {
-        "title": "Ask for reviews a week after order fulfillment",
-        "description": "After 7 days upon order fulfilled, send email that gives the customer direct links to their purchases on your website, where they can leave a review using your existing review system."
-    },
-    "tag-customers-after-order-paid": {
-        "title": "Tag customers when their order is paid",
-        "description": "Tags a customer after their order is paid."
-    },
-    "tag-customers-by-discount-code": {
-        "title": "Tag customers based on discount codes used",
-        "description": "Tags a customer based on discount codes used in their orders."
-    },
-    "tag-customers-based-on-email": {
-        "title": "Tag customers based on email domain",
-        "description": "Tags a customer based on email domain, helping you target specific organizations or email groups."
-    },
-    "tag-orders-by-risk-level": {
-        "title": "Tag orders by their risk level",
-        "description": "This workflow adds a tag to incoming orders, based on the risk level determined for the order."
-    },
-    "capture-order-payment-based-on-shipping": {
-        "title": "Auto-capture order payment based on shipping method",
-        "description": "Automatically captures order payment based on the selected shipping method to speed up fulfillment for priority shipments."
-    },
-    "apply-a-percentage-off-shipping-discount": {
-        "title": "Apply a percentage-off shipping discount",
-        "description": "Apply percentage-based discounts to the cheapest shipping option using tiers, where discount rates increase as the cart subtotal increases. Merchants configure the discount percentages and cart subtotal thresholds."
-    },
-    "create-a-tiered-discount-based-on-line-subtotals": {
-        "title": "Create a tiered discount based on line subtotals",
-        "description": "Apply fixed amount discounts that increase with cart line subtotals: $10 off for lines totaling $100+, $20 off for lines totaling $200+, and $30 off for lines totaling $300+."
-    },
-    "create-a-dynamic-discount-from-discount-codes": {
-        "title": "Create a dynamic discount from discount codes",
-        "description": "Identify discount codes that are written in the format X%OFF (such as 10%OFF or 25%OFF), and apply the discount to either orders or shipping when customers enter the code."
-    },
-    "apply-a-collection-based-order-discount": {
-        "title": "Apply a collection-based order discount",
-        "description": "Apply a percentage discount when the cart contains products from a specific collection and meets a minimum order value."
-    },
-    "apply-a-discount-to-custom-products": {
-        "title": "Apply a discount to custom products",
-        "description": "Give a 20% discount to products with the isCustom metafield set to true. Shows how to check metafield values, filter eligible products, and apply percentage discounts with the ProductDiscountSelectionStrategy.All selection strategy."
-    },
-    "apply-a-discount-to-orders-with-no-sale-items": {
-        "title": "Apply a discount to orders with no sale items",
-        "description": "Provide a percentage discount on orders that contains compare-at prices. The discount percentage is configurable through an app-owned metafield and applies to the entire order subtotal."
-    },
-    "apply-tiered-discounts-based-on-order-subtotal": {
-        "title": "Apply tiered discounts based on order subtotal",
-        "description": "Provide percentage discounts at different spending thresholds (for example, 10% off at $100, 20% off at $200). The tier configuration is stored in an app-owned metafield, and the function automatically applies the highest eligible discount."
-    },
-    "apply-a-fixed-discount-for-collection-specific-purchases": {
-        "title": "Apply a fixed discount for collection-specific purchases",
-        "description": "Apply a fixed $50 discount when the cart subtotal exceeds $100 and contains products from a specific collection. Both conditions must be met for the discount to apply."
-    },
-    "apply-a-discount-to-orders-containing-only-new-collection-items": {
-        "title": "Apply a discount to orders containing only new collection items",
-        "description": "Apply a 10% discount to the entire order when all products in the cart have a specific tag. The discount is only applied when every item meets this condition."
-    },
-    "apply-a-percentage-discount-to-specific-products": {
-        "title": "Apply a percentage discount to specific products",
-        "description": "Apply a configurable percentage discount to specific products identified by their IDs. Both the discount percentage and target product list are stored in an app-owned metafield."
-    },
-    "apply-a-discount-to-the-first-delivery-group": {
-        "title": "Apply a discount to the first delivery group",
-        "description": "Apply an automatic discount that gives 100% off the first delivery group."
-    },
-    "apply-a-per-item-discount-to-a-product-with-quantity-limits": {
-        "title": "Apply a per-item discount to a product with quantity limits",
-        "description": "Apply a fixed amount discount per item to a specific product, limited to a maximum quantity (for example, $5 off each unit, up to 2 units). The discount amount, product ID, and quantity limit are stored in an app-owned metafield."
-    },
-    "apply-a-percentage-discount-to-products-with-specific-skus": {
-        "title": "Apply a percentage discount to products with specific SKUs",
-        "description": "Apply a percentage discount to cart items that match specific SKUs from a configurable list (for example, 20% off items with SKUs 'SKU123' or 'SKU456'). Both the target SKUs and discount percentage are stored in an app-owned metafield."
-    },
-    "apply-an-extra-discount-to-sale-items": {
-        "title": "Apply an extra discount to sale items",
-        "description": "Apply an additional percentage discount to products already on sale. For example, take an extra 20% off sale items. The discount percentage is stored in an app-owned metafield."
-    },
-    "apply-a-percentage-discount-for-vip-customers": {
-        "title": "Apply a percentage discount for VIP customers",
-        "description": "Apply a percentage discount on all cart items for customers with the VIP tag (for example, 20% off for VIP members). The discount percentage is stored in an app-owned metafield."
-    },
-    "apply-tiered-shipping-discounts-based-on-cart-subtotal": {
-        "title": "Apply tiered shipping discounts based on cart subtotal",
-        "description": "Apply a percentage discount to the cheapest delivery method in each delivery group. The discount percentage increases at configurable cart subtotal thresholds (for example, 10% off shipping at $50, 15% off at $100). The tier configuration is stored in an app-owned metafield."
-    },
-    "apply-a-shipping-discount-based-on-location": {
-        "title": "Apply a shipping discount based on location",
-        "description": "Apply a 50% discount to express shipping when the delivery address is in Ottawa. The function checks the customer's location and applies the discount only to the express shipping option."
-    },
-    "apply-tiered-shipping-discounts-for-loyal-customers-buying-from-a-collection": {
-        "title": "Apply tiered shipping discounts for loyal customers buying from a collection",
-        "description": "Apply shipping discounts to customers tagged as member who purchase three or more items from a specific collection. Shipping options under $5 become free, while options over $5 receive a $5 fixed discount. Combines customer loyalty and collection-based conditions."
-    },
-    "create-a-buy-x-get-y-discount": {
-        "title": "Create a Buy X get Y discount",
-        "description": "Apply a 10% discount to one product when another specified product is in the cart. The discount applies to only one item. Also offers free shipping when both products are purchased together."
-    },
-    "create-loyalty-program-discounts": {
-        "title": "Create loyalty program discounts",
-        "description": "Provide three types of discounts for customers with loyalty tags: $10 off the last cart item, 10% off the entire order, and free shipping on all delivery options."
-    },
-    "create-an-order-discount-with-exclusions": {
-        "title": "Create an order discount with exclusions",
-        "description": "Apply a 10% discount to the order while excluding the first cart item, plus a 20% discount on the highest-value item in the cart. This approach enables creating \"second item discount\" promotions or selective discounting where certain high-value or non-discountable items remain at full price while the rest of the order receives the discount."
-    },
-    "create-combined-multi-type-discounts": {
-        "title": "Create combined multi-type discounts",
-        "description": "Apply three discount types in one Function: 10% off the entire order, 20% off the most expensive item in the cart, and free shipping on all deliveries."
-    },
-    "create-a-configurable-discount-with-metafields": {
-        "title": "Create a configurable discount with metafields",
-        "description": "Read configured metafields to provide merchant-configurable discounts: product discounts for specific collections, order-wide percentage discounts, and shipping discounts."
-    },
-    "create-a-free-shipping-discount-with-currency-thresholds": {
-        "title": "Create a free shipping discount with currency thresholds",
-        "description": "Apply free shipping when cart subtotal exceeds thresholds configured in shop metafields for different currencies (for example, $100 USD, €80 EUR). The Function automatically detects the cart's currency and applies the appropriate threshold."
+[
+    {
+        "slug": "unfulfilled-order-alert",
+        "name": "Delayed reminder of unfulfilled orders",
+        "description": "Send a reminder about unfulfilled orders to the store owner email 2 days after the order is completed.",
+        "category": "Orders",
+        "tags": [
+            "fulfillment",
+            "alert"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "high-risk-order-alert",
+        "name": "High risk order alert",
+        "description": "Use this template if you want to inform about the high risk order.",
+        "category": "Orders",
+        "tags": [
+            "risk",
+            "alert"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "low-product-quantity-alert",
+        "name": "Product quantity alert",
+        "description": "Send a message with an alert about a small number of goods to the store owner's email.",
+        "category": "Inventory",
+        "tags": [
+            "inventory",
+            "low stock"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "accept-marketing-tag",
+        "name": "Marketing tags",
+        "description": "Use this template if you want to assign tags for users who agree to get marketing.",
+        "category": "Customers",
+        "tags": [
+            "marketing",
+            "tagging"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "archive-free-orders-on-fulfillment",
+        "name": "Archive free orders on fulfillment",
+        "description": "Archive orders with zero total when them fulfilled.",
+        "category": "Orders",
+        "tags": [
+            "fulfillment",
+            "archive"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "block-list",
+        "name": "Block list by mail or id",
+        "description": "Use this template if you want to create a block list of customers by mail or user id.",
+        "category": "Security",
+        "tags": [
+            "blacklist",
+            "customer"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "low-risk-capture-payment",
+        "name": "Low-risk orders auto payment capture",
+        "description": "Use this template if you want to set auto payment capture for low-risk orders.",
+        "category": "Payment",
+        "tags": [
+            "payment",
+            "automation"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "review-request",
+        "name": "Delayed request for a review",
+        "description": "Send a request for a review to users with a completed order in a week.",
+        "category": "Marketing",
+        "tags": [
+            "review",
+            "email"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "tag-foreign-currency-code",
+        "name": "Tags for foreign currencies",
+        "description": "Use this template if you want to assign tags for users with foreign currencies.",
+        "category": "Orders",
+        "tags": [
+            "currency",
+            "tagging"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "thank-you-order-email",
+        "name": "Thank you message",
+        "description": "Send a thank you message for ordering by mail.",
+        "category": "Marketing",
+        "tags": [
+            "email",
+            "retention"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "tag-vip-customer",
+        "name": "Tag VIP Customers",
+        "description": "Assign a special VIP tag to customers who make the biggest number of orders.",
+        "category": "Customers",
+        "tags": [
+            "vip",
+            "segmentation"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "order-line-items-includes-tags",
+        "name": "Tag the order by purchased products tags",
+        "description": "Add the tag to the order when a purchased product has some tags.",
+        "category": "Orders",
+        "tags": [
+            "tagging"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "tag-order-by-purchased-products-titles",
+        "name": "Tag the order by purchased products titles",
+        "description": "Create tags from products display names (titles) and add this tags to the order.",
+        "category": "Orders",
+        "tags": [
+            "tagging"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "send-sales-report-every-day",
+        "name": "Report on sales of goods and orders",
+        "description": "A sales and order report message will be sent once a day.",
+        "category": "Reporting",
+        "tags": [
+            "report",
+            "daily"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "reminder-of-unpaid-orders",
+        "name": "Sending a reminder of unpaid orders to users",
+        "description": "Send a reminder of payment for the order if it has not been paid for several days.",
+        "category": "Orders",
+        "tags": [
+            "payment",
+            "reminder"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "notificate-customers-about-new-products",
+        "name": "New products notification",
+        "description": "Send a notification to the user about new products in the store after ordering.",
+        "category": "Marketing",
+        "tags": [
+            "notification",
+            "products"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "email-vendor",
+        "name": "Supplier notification",
+        "description": "This message will be sent to product suppliers if their product is ordered.",
+        "category": "Fulfillment",
+        "tags": [
+            "vendor",
+            "email"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "email-reminder-for-low-stock-products",
+        "name": "Low stock items report",
+        "description": "Send every day report with low stock items.",
+        "category": "Inventory",
+        "tags": [
+            "inventory",
+            "report"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "hide-out-of-stock-products",
+        "name": "Hide out of stock products",
+        "description": "Hide products whose quantity is less than or equal to zero.",
+        "category": "Inventory",
+        "tags": [
+            "automation",
+            "inventory"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "back-in-stock-available-products",
+        "name": "Back in stock available products",
+        "description": "Back in stock products whose quantity is greater than zero.",
+        "category": "Inventory",
+        "tags": [
+            "automation",
+            "inventory"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "hot-products",
+        "name": "Tag HOT products",
+        "description": "Marks products that have been purchased with the \"HOT\" tag, if the product is not ordered within 24 hours after that, the tag will be removed.",
+        "category": "Products",
+        "tags": [
+            "marketing",
+            "tagging"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "send-email-for-first-product-purchase",
+        "name": "Send email for first product purchase",
+        "description": "Send email when some customer ordered some product for the first time.",
+        "category": "Marketing",
+        "tags": [
+            "email",
+            "onboarding"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "tag-new-products",
+        "name": "Tag new products",
+        "description": "Marks products that have been added to the store with the \"NEW\" tag, then on 30 days after that, the tag will be removed.",
+        "category": "Products",
+        "tags": [
+            "tagging"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "hold-fulfillment-for-orders-awaiting-payment",
+        "name": "Hold fulfilments for orders awaiting payments",
+        "description": "Use this template if you need to pause orders that are waiting for payment.",
+        "category": "Fulfillment",
+        "tags": [
+            "payment",
+            "hold"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "unpaid-order-reminder",
+        "name": "Unpaid order reminder",
+        "description": "Remind the customer about his order that was not paid within 24 hours.",
+        "category": "Orders",
+        "tags": [
+            "payment",
+            "email"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "invoice-email-for-unpaid-orders",
+        "name": "Invoice email for unpaid orders",
+        "description": "Send order invoice for unpaid orders.",
+        "category": "Orders",
+        "tags": [
+            "invoice",
+            "payment"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "copy-purchased-product-tags-to-customer",
+        "name": "Copy purchased product tags to the customer",
+        "description": "Copy tags of the purchased product to the customer.",
+        "category": "Customers",
+        "tags": [
+            "tagging",
+            "segmentation"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "send-customer-activation-link",
+        "name": "Send customer activation link",
+        "description": "Send activation link to the customer email if account not activated.",
+        "category": "Customers",
+        "tags": [
+            "email",
+            "account"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "tag-vip-customers-by-monthly-spent",
+        "name": "Tag VIP customers by monthly spent",
+        "description": "Assign tags to VIP customers based on monthly expenses.",
+        "category": "Customers",
+        "tags": [
+            "vip",
+            "tagging"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "coupon-for-newsletter-subscriber",
+        "name": "Coupon for newsletter subscriber",
+        "description": "Send a discount code to the customer's email that subscribed to SMS marketing.",
+        "category": "Marketing",
+        "tags": [
+            "discount",
+            "email"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "recover-abandoned-checkouts",
+        "name": "Recover abandoned checkouts",
+        "description": "Send a reminder and discount code to the customer email if customer left the checkout page.",
+        "category": "Marketing",
+        "tags": [
+            "abandoned cart",
+            "recovery"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "send-coupon-to-customer-after-first-order",
+        "name": "Coupon after first order",
+        "description": "Send a discount code to the email of the customer who placed their first order.",
+        "category": "Marketing",
+        "tags": [
+            "retention",
+            "discount"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "add-order-note-if-certain-customer-tag",
+        "name": "Add an order note for customers with a specific tag",
+        "description": "Append order note if the customer has a certain tag.",
+        "category": "Orders",
+        "tags": [
+            "note",
+            "automation"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "coupon-for-next-orders",
+        "name": "Coupon for next orders",
+        "description": "Send a discount code for future orders based on the order amount.",
+        "category": "Marketing",
+        "tags": [
+            "retention",
+            "discount"
+        ],
+        "connectors": [
+            "shopify",
+            "email"
+        ]
+    },
+    {
+        "slug": "unpublish-products-have-been-out-of-stock-for-3-days",
+        "name": "Unpublish out-of-stock products after 3 days",
+        "description": "Hide a product if it's out of stock within 3 days.",
+        "category": "Inventory",
+        "tags": [
+            "cleanup",
+            "inventory"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "add-order-tag-for-returning-customers",
+        "name": "Add an order tag for returning customers",
+        "description": "Add tag 'Returned customer' to the order when customer makes order after 90 days from his previous order.",
+        "category": "Orders",
+        "tags": [
+            "tagging",
+            "retention"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "copy-notes-from-customers-to-their-orders",
+        "name": "Copy customer notes to their orders",
+        "description": "Copy notes about customers into their orders if they existed when the order was created.",
+        "category": "Orders",
+        "tags": [
+            "note",
+            "data sync"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "tag-new-customers",
+        "name": "Tag new customers",
+        "description": "Add \"New customer\" tag when the customer is created.",
+        "category": "Customers",
+        "tags": [
+            "tagging",
+            "onboarding"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "untag-orders-when-fully-paid",
+        "name": "Untag orders when fully paid",
+        "description": "Remove the \"Unpaid order\" tag from order when it is fully paid.",
+        "category": "Orders",
+        "tags": [
+            "tagging",
+            "payment"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "untag-orders-when-paid",
+        "name": "Untag orders when paid",
+        "description": "Remove the \"Unpaid order\" tag from order when it is paid.",
+        "category": "Orders",
+        "tags": [
+            "tagging",
+            "payment"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "add-default-custom-attributes-to-new-orders",
+        "name": "Add default custom attributes to new orders",
+        "description": "Add custom attributes to the order when it created.",
+        "category": "Orders",
+        "tags": [
+            "attributes",
+            "automation"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "add-note-for-new-orders-having-certain-tag",
+        "name": "Add a note to new orders with a specific tag",
+        "description": "Add a record to the order notes if an order has a certain tag when it is created.",
+        "category": "Orders",
+        "tags": [
+            "note",
+            "automation"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "copy-order-notes-to-customers-note",
+        "name": "Copy order notes to customer note",
+        "description": "When order is created copy order notes to customer notes.",
+        "category": "Customers",
+        "tags": [
+            "note",
+            "data sync"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "tag-cancelled-orders",
+        "name": "Tag cancelled orders",
+        "description": "Add and remove tags when order is cancelled.",
+        "category": "Orders",
+        "tags": [
+            "tagging",
+            "cancellation"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "tag-orders-by-discount-code",
+        "name": "Tag orders by discount code",
+        "description": "Add tag with discount code to the order.",
+        "category": "Orders",
+        "tags": [
+            "tagging",
+            "discount"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "untag-customers-when-certain-product-is-refunded",
+        "name": "Untag customers when a certain product is refunded",
+        "description": "Remove the tag from customer if a product with a certain title is refunded.",
+        "category": "Customers",
+        "tags": [
+            "tagging",
+            "refund"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "archive-orders-when-fulfilled",
+        "name": "Archive orders when fulfilled",
+        "description": "Archive orders when they are fully fulfilled.",
+        "category": "Orders",
+        "tags": [
+            "archive",
+            "fulfillment"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "capture-order-payment-after-7-days",
+        "name": "Capture order payment after a week",
+        "description": "Capture order payment after 7 days.",
+        "category": "Payment",
+        "tags": [
+            "payment",
+            "delayed"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "pay-orders-from-customers-with-certain-tag",
+        "name": "Mark as paid for customers with a specific tag",
+        "description": "Mark an order as paid by a customer with a specific tag and remove the tag from a customer when the order is created.",
+        "category": "Orders",
+        "tags": [
+            "payment",
+            "automation"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "auto-publish-new-products",
+        "name": "Auto publish new products",
+        "description": "Publish a new product if it is active and not yet published.",
+        "category": "Products",
+        "tags": [
+            "automation",
+            "publishing"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "tag-customers-first-order",
+        "name": "Tag the customer's first order",
+        "description": "Assign a tag to the first order made by the customer.",
+        "category": "Orders",
+        "tags": [
+            "tagging"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "auto-tag-orders-when-paid",
+        "name": "Auto-tag orders when paid",
+        "description": "Assign a tag to the newly-paid order.",
+        "category": "Orders",
+        "tags": [
+            "tagging",
+            "payment"
+        ],
+        "connectors": [
+            "shopify"
+        ]
+    },
+    {
+        "slug": "get-notified-on-slack-when-a-customer-requests-a-return",
+        "name": "Get notified on Slack when a customer requests a return",
+        "description": "Receive a customizable slack notification when a customer submits a return request from their account.",
+        "category": "Returns",
+        "tags": [
+            "slack",
+            "notification"
+        ],
+        "connectors": [
+            "shopify",
+            "slack"
+        ]
     }
-}
+]
