@@ -397,10 +397,6 @@
         "title": "Add tag to all customers with high total spend",
         "description": "This workflow adds a tag to all customers whose total spend exceeds a certain threshold."
     },
-    "run-code-trigger-template": {
-        "title": "",
-        "description": "Run code trigger template"
-    },
     "move-the-new-product-to-a-dedicated-shipping-profile": {
         "title": "Move the new product to a dedicated shipping profile",
         "description": "When a product is added to the store, remove its variants from the selected shipping profile and then add those variants to another chosen shipping profile."
