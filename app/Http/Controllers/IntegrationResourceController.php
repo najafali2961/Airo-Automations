@@ -39,6 +39,8 @@ class IntegrationResourceController extends Controller
                     return $this->handleKlaviyo($user, $resource);
                 case 'google':
                     return $this->handleGoogle($user, $resource);
+                case 'shopify':
+                    return $this->handleShopify($user, $resource);
                 default:
                     \Illuminate\Support\Facades\Log::warning("IntegrationResourceController: Unknown service: $service");
                     return response()->json(['error' => 'Unknown service: ' . $service], 400);
@@ -116,5 +118,71 @@ class IntegrationResourceController extends Controller
         }
 
         return response()->json(['error' => 'Unknown Google resource'], 400);
+    }
+
+    protected function handleShopify($user, $resource)
+    {
+        if ($resource === 'collections') {
+            $custom = [];
+            $smart = [];
+
+            // Fetch Custom Collections
+            try {
+                $response = $user->api()->rest('GET', '/admin/api/2025-01/custom_collections.json', ['limit' => 250]);
+                if ($response['errors']) {
+                    \Illuminate\Support\Facades\Log::error('Shopify Custom Collections Error', ['errors' => $response['errors']]);
+                } else {
+                    $custom = $response['body']['custom_collections'] ?? [];
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Shopify Custom Collections Exception: ' . $e->getMessage());
+            }
+
+            // Fetch Smart Collections
+            try {
+                $response2 = $user->api()->rest('GET', '/admin/api/2025-01/smart_collections.json', ['limit' => 250]);
+                if ($response2['errors']) {
+                    \Illuminate\Support\Facades\Log::error('Shopify Smart Collections Error', ['errors' => $response2['errors']]);
+                } else {
+                    $smart = $response2['body']['smart_collections'] ?? [];
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Shopify Smart Collections Exception: ' . $e->getMessage());
+            }
+
+            $all = collect($custom)->merge($smart);
+
+            return $all->map(function ($c) {
+                return [
+                    'label' => $c['title'],
+                    'value' => (string)$c['id']
+                ];
+            })->values();
+        }
+
+        if ($resource === 'locations') {
+            $response = $user->api()->rest('GET', '/admin/api/2025-01/locations.json');
+            $locations = $response['body']['locations'] ?? [];
+
+            return collect($locations)->map(function ($l) {
+                return [
+                    'label' => $l['name'],
+                    'value' => (string)$l['id']
+                ];
+            })->values();
+        }
+        
+        if ($resource === 'inventory_items') {
+             // Inventory Items are hard to pick directly. Usually we pick Products. 
+             // But if user requested inventory picker, maybe they mean Locations? 
+             // Or maybe they want to pick a product to adjust?
+             // "Adjust Inventory" action asks for "Inventory Item ID". 
+             // This is an advanced field. For now, let's just support Locations as requested
+             // and perhaps return empty list or error for inventory items to encourage ID entry if needed,
+             // or maybe fetch Products and return their first variant's inventory_item_id?
+             // Let's stick to what was explicitly asked: Collections and Locations.
+        }
+
+        return response()->json(['error' => 'Unknown Shopify resource'], 400);
     }
 }

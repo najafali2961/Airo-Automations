@@ -1030,7 +1030,8 @@ return [
             'description' => 'Add product to a collection',
             'category' => 'collections',
             'icon' => 'PlusSquare',
-            'fields' => [['name' => 'collection_id', 'label' => 'Collection ID', 'type' => 'text', 'required' => true]],
+            'app' => 'shopify', 
+            'fields' => [['name' => 'collection_id', 'label' => 'Collection', 'type' => 'resource_select', 'resource' => 'collections', 'required' => true, 'placeholder' => 'Select a collection...']],
         ],
 
         // System Actions
@@ -1092,9 +1093,10 @@ return [
             'description' => 'Adjust inventory quantity for a variant',
             'category' => 'inventory',
             'icon' => 'PlusCircle',
+            'app' => 'shopify',
             'fields' => [
                 ['name' => 'inventory_item_id', 'label' => 'Inventory Item ID', 'type' => 'text', 'required' => true],
-                ['name' => 'location_id', 'label' => 'Location ID', 'type' => 'text', 'required' => true],
+                ['name' => 'location_id', 'label' => 'Location', 'type' => 'resource_select', 'resource' => 'locations', 'required' => true, 'placeholder' => 'Select a location...'],
                 ['name' => 'delta', 'label' => 'Adjustment Amount', 'type' => 'number', 'required' => true, 'placeholder' => 'e.g. -1 or 5'],
             ],
         ],

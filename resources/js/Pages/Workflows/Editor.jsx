@@ -394,70 +394,100 @@ export default function WorkflowEditor({
                 onSelect={handleNodeSelect}
             />
 
-            <div className="flex-none border-b border-gray-200 bg-white/80 backdrop-blur-md z-20 px-6 py-4">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() =>
-                                router.visit(
-                                    `/workflows${window.location.search}`,
-                                )
-                            }
-                            className="p-2 -ml-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
-                        >
+            <div className="flex-none h-16 px-6 border-b border-gray-200 bg-white/90 backdrop-blur-xl z-30 flex items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+                <div className="flex items-center gap-5">
+                    <button
+                        onClick={() =>
+                            router.visit(`/workflows${window.location.search}`)
+                        }
+                        className="group flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-500 shadow-sm hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 hover:shadow transition-all duration-200 active:scale-95"
+                    >
+                        <span className="transform transition-transform group-hover:-translate-x-0.5">
                             <Icon source={ArrowLeftIcon} />
-                        </button>
+                        </span>
+                    </button>
 
-                        <div className="h-6 w-px bg-gray-200 mx-2" />
-
-                        <div className="flex flex-col">
-                            <div className="flex items-center gap-2">
-                                {isEditingName ? (
-                                    <input
-                                        ref={nameInputRef}
-                                        type="text"
-                                        value={workflowName}
-                                        onChange={(e) =>
-                                            setWorkflowName(e.target.value)
-                                        }
-                                        onBlur={() => setIsEditingName(false)}
-                                        onKeyDown={(e) =>
-                                            e.key === "Enter" &&
-                                            setIsEditingName(false)
-                                        }
-                                        className="text-lg font-bold bg-transparent border-none p-0 focus:ring-0 text-gray-900 placeholder-gray-400"
-                                    />
-                                ) : (
-                                    <h1
-                                        onClick={() => setIsEditingName(true)}
-                                        className="text-lg font-bold text-gray-900 cursor-pointer hover:text-gray-600 transition-colors flex items-center gap-2 group"
-                                    >
-                                        {workflowName}
-                                        <span className="opacity-0 group-hover:opacity-100 text-gray-400 text-xs font-normal">
-                                            Edit
-                                        </span>
-                                    </h1>
-                                )}
-                                <Badge
-                                    tone={
-                                        flow?.active ? "success" : "attention"
-                                    }
-                                >
-                                    {flow?.active ? "Active" : "Draft"}
-                                </Badge>
-                            </div>
-                        </div>
-                    </div>
+                    <div className="h-6 w-px bg-gray-200/80" />
 
                     <div className="flex items-center gap-3">
-                        <span className="text-xs text-gray-500 font-medium mr-2">
-                            {saving
-                                ? "Saving..."
-                                : isDirty
-                                  ? "Unsaved Changes"
-                                  : "All changes saved"}
-                        </span>
+                        {isEditingName ? (
+                            <input
+                                ref={nameInputRef}
+                                type="text"
+                                value={workflowName}
+                                onChange={(e) =>
+                                    setWorkflowName(e.target.value)
+                                }
+                                onBlur={() => setIsEditingName(false)}
+                                onKeyDown={(e) =>
+                                    e.key === "Enter" && setIsEditingName(false)
+                                }
+                                className="text-lg font-bold bg-transparent border-b-2 border-blue-500 rounded-none px-0 py-0.5 focus:outline-none focus:ring-0 text-gray-900 placeholder-gray-400 w-64 transition-all"
+                            />
+                        ) : (
+                            <h1
+                                onClick={() => setIsEditingName(true)}
+                                className="text-lg font-bold text-gray-900 cursor-pointer hover:text-gray-600 transition-colors flex items-center gap-2 group selectable-none"
+                            >
+                                {workflowName}
+                                <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-gray-100 p-1 rounded-md text-gray-500">
+                                    <svg
+                                        className="w-3 h-3"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                        />
+                                    </svg>
+                                </div>
+                            </h1>
+                        )}
 
+                        <div
+                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border shadow-sm ${
+                                flow?.active
+                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                    : "bg-amber-50 text-amber-700 border-amber-200"
+                            }`}
+                        >
+                            {flow?.active ? "Active" : "Draft"}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-gray-200 shadow-sm mr-2">
+                        {saving ? (
+                            <>
+                                <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                                <span className="text-xs font-medium text-gray-600">
+                                    Saving...
+                                </span>
+                            </>
+                        ) : isDirty ? (
+                            <>
+                                <div className="w-2 h-2 rounded-full bg-amber-500" />
+                                <span className="text-xs font-medium text-gray-600">
+                                    Unsaved changes
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                                <span className="text-xs font-medium text-gray-600">
+                                    Saved
+                                </span>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        {/* Using standard Polaris buttons for functionality, but wrapped for layout */}
                         <Button
                             size="slim"
                             onClick={handleToggleActive}
@@ -469,6 +499,7 @@ export default function WorkflowEditor({
 
                         <Button
                             size="slim"
+                            variant="tertiary"
                             onClick={() => builderRef.current?.autoLayout()}
                         >
                             Format Flow
