@@ -574,9 +574,9 @@ return [
      * @deprecated This will be removed in the next major version.
      * @see
      */
-    'after_authenticate_job' => [
-        // 'job' =>  null,
-        // 'inline' => true,
+   'after_authenticate_job' => [
+        'job' => \App\Jobs\AfterAuthenticateJob::class,
+        'inline' => true,
     ],
 
 
