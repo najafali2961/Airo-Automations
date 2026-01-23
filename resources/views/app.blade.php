@@ -1,19 +1,47 @@
-<!DOCTYPE html>
-<html>
+@extends('shopify-app::layouts.default')
 
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="shopify-api-key" content="{{ env('SHOPIFY_API_KEY') }}" />
-    <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js" data-api-key="{{ env('SHOPIFY_API_KEY') }}"></script>
+@section('styles')
+    @routes
+
+    {{-- {{ vite_assets() }} --}}
+
     @viteReactRefresh
-    @vite(['resources/css/app.css', 'resources/js/app.jsx'])
+    @vite(['resources/css/app.css', 'resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
+
+
     @inertiaHead
-</head>
+@endsection
 
-<body>
+@section('content')
     @inertia
-</body>
+@endsection
 
-</html>
+
+{{-- @section('scripts')
+    @parent
+    <script type="text/javascript" defer>
+        window.$crisp = [];
+        window.CRISP_WEBSITE_ID = "8305e843-f408-4c73-8b4d-c65666845987";
+        window.$crisp.push(["config", "position:reverse", [false]]);
+        window.$crisp.push(["set", "user:avatar",
+            "https://cdn.shopify.com/app-store/listing_images/7d4945412c07915efc0b23fd85ee1d69/icon/CIeDzY3Xv5EDEAE=.png"
+        ]);
+        window.$crisp.push(["set", "session:data", [
+            [
+                ["store_id", "{{ Auth::user()->id ?? null }}"],
+                ["store_name", "{{ Auth::user()->name ?? null }}"],
+                ["store_domain", "{{ Auth::user()->storeDetails->primary_domain ?? null }}"],
+                ["store_plan", "{{ Auth::user()->storeDetails->plan_name ?? null }}"],
+                ["app_name", "AiroSKU"],
+                ["app_plan", "{{ Auth::user()->plan->name ?? null }}"],
+            ]
+        ]]);
+        (function() {
+            d = document;
+            s = d.createElement("script");
+            s.src = "https://client.crisp.chat/l.js";
+            s.async = 1;
+            d.getElementsByTagName("head")[0].appendChild(s);
+        })();
+    </script>
+@endsection --}}
