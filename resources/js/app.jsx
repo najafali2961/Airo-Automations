@@ -1,3 +1,5 @@
+import "../css/app.css";
+import "./bootstrap";
 import { createInertiaApp } from "@inertiajs/react";
 import { createRoot } from "react-dom/client";
 import { router } from "@inertiajs/react";
@@ -56,9 +58,9 @@ createInertiaApp({
                             Home
                         </a>
                         <a href="/workflows">Workflows</a>
-                        <a href="/templates">Templates</a>
+                        {/* <a href="/templates">Templates</a> */}
                         <a href="/executions">Executions</a>
-                        <a href="/connectors">Connectors</a>
+                        {/*   <a href="/connectors">Connectors</a>*/}
                     </NavMenu>
                 )}
                 <ErrorBoundary>

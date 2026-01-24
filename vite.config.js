@@ -7,12 +7,13 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, process.cwd(), '');
     return {
         plugins: [
+            tailwindcss(),
             laravel({
-                input: ['resources/css/app.css', 'resources/js/app.jsx'],
+                input: ['resources/js/app.jsx'], // Remove resources/css/app.css from here
                 refresh: true,
             }),
-            react(),
-            tailwindcss(),
+            react()
+
         ],
         server: {
             cors: {
