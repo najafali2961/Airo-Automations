@@ -3,10 +3,10 @@
 @section('styles')
     @routes
 
-    {{ vite_assets() }}
+    {{-- {{ vite_assets() }} --}}
 
-    {{-- @viteReactRefresh
-    @vite(['resources/css/app.css', 'resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"]) --}}
+    @viteReactRefresh
+    @vite(['resources/css/app.css', 'resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
 
 
     @inertiaHead
