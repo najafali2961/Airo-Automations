@@ -53,6 +53,7 @@ class OrdersUpdatedJob implements ShouldQueue
         // Convert domain
         $this->shopDomain = ShopDomain::fromNative($this->shopDomain);
         $topic = 'orders/updated';
+        $normalizedTopic = 'ORDERS_UPDATED';
         $domain = $this->shopDomain->toNative();
 
         Log::info("Webhook received: {$topic} for {$domain}");
@@ -69,14 +70,17 @@ class OrdersUpdatedJob implements ShouldQueue
         // Find active flows with matching trigger
         $flows = Flow::where('shop_id', $shop->id)
             ->where('active', true)
-            ->whereHas('nodes', function ($query) use ($topic) {
+            ->whereHas('nodes', function ($query) use ($topic, $normalizedTopic) {
                 $query->where('type', 'trigger')
-                      ->where('settings->topic', $topic);
+                      ->where(function ($q) use ($topic, $normalizedTopic) {
+                           $q->where('settings->topic', $topic)
+                             ->orWhere('settings->topic', $normalizedTopic);
+                      });
             })
             ->get();
 
         if ($flows->isEmpty()) {
-            Log::info("No active flows found for topic: {$topic}");
+            Log::info("No active flows found for topic: {$topic} or {$normalizedTopic}");
             return;
         }
 
